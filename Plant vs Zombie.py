@@ -1,12 +1,22 @@
 # coding: utf-8
 
+import os
+
+# Get the directory of the current script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the file path relative to the current script
+file_path = os.path.join(current_dir, 'Data/user.txt')
+
+print(file_path)
+
 def sign_up(username, password):
-    with open('/Users/Ewen/Documents/GitHub/PSP0101-TL9L-02/user.txt', mode='a') as f:
+    with open(file_path, mode='a') as f:
         f.write(f'{username}----{password}\n')
 
 
 def check_username_taken(input_username):
-    with open('/Users/Ewen/Documents/GitHub/PSP0101-TL9L-02/user.txt', mode='rt', encoding='utf-8') as f:
+    with open(file_path, mode='rt', encoding='utf-8') as f:
         for line in f:
             username, password = line.strip().split('----')
             if input_username == username:
@@ -17,7 +27,7 @@ def check_username_taken(input_username):
 
 
 def check_user_pass(input_username, input_password):
-    with open('/Users/Ewen/Documents/GitHub/PSP0101-TL9L-02/user.txt', mode='rt', encoding='utf-8') as f:
+    with open(file_path, mode='rt', encoding='utf-8') as f:
         for line in f:
             username, password = line.strip().split('----')
             if input_username == username and input_password == password:
