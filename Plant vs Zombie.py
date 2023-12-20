@@ -97,7 +97,7 @@ pygame.display.set_caption('Plant vs Zombie')  # title name
 clock = pygame.time.Clock()
 game_active = True
 bg_music = pygame.mixer.Sound('audio/Plants vs. Zombies (Main Theme).mp3')
-bg_music.play(loops= -1)
+bg_music.play(loops=-1)
 
 welcome_fp = create_file_path('Picture/welcome.webp')
 welcome_surface = pygame.image.load(welcome_fp).convert()
@@ -115,6 +115,11 @@ username_rectangle = username_surface.get_rect(center=(210, 100))
 background_fp = create_file_path('Picture/background 1.webp')
 background_surface = pygame.image.load(background_fp).convert()
 background_surface = pygame.transform.scale(background_surface, (1000, 600))
+
+zombie_naruto_fp = create_file_path('Picture/zombie_naruto.png')
+zombie_naruto_surface = pygame.image.load(zombie_naruto_fp).convert_alpha()
+zombie_naruto_surface = pygame.transform.scale(zombie_naruto_surface, (30, 30))
+zombie_naruto_rectangle = zombie_naruto_surface.get_rect(center=(100, 200))
 
 game_start = False
 
@@ -134,6 +139,6 @@ while True:
         if game_start:
             time.sleep(1)
             screen.blit(background_surface, (0, 0))
-
+            screen.blit(zombie_naruto_surface,zombie_naruto_rectangle)
     pygame.display.update()
     clock.tick(60)
