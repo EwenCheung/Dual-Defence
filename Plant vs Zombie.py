@@ -1,24 +1,29 @@
 # coding: utf-8
 
-# block 4 to 82 is on log_in_method chosen , user can signup , signin or log in as guest
+# block 3 to 12 is on creating file path
 import os
 
-# Get the directory of the current script
-current_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Construct the file path relative to the current script
-file_path = os.path.join(current_dir, 'Data/user.txt')
+def create_file_path(file):
+    # Get the directory of the current script
+    current_dir = os.path.dirname(os.path.abspath(__file__))
 
-print(file_path)
+    # Construct the file path relative to the current script
+    file_path = os.path.join(current_dir, file)
+    return file_path
+
+
+# block 14 to 85 is on log_in_method chosen , user can signup , signin or log in as guest
+data_user = create_file_path('Data/user.txt')
 
 
 def sign_up(username, password):
-    with open(file_path, mode='a') as f:
+    with open(data_user, mode='a') as f:
         f.write(f'{username}----{password}\n')
 
 
 def check_username_taken(input_username):
-    with open(file_path, mode='rt', encoding='utf-8') as f:
+    with open(data_user, mode='rt', encoding='utf-8') as f:
         for line in f:
             username, password = line.strip().split('----')
             if input_username == username:
@@ -29,7 +34,7 @@ def check_username_taken(input_username):
 
 
 def check_user_pass(input_username, input_password):
-    with open(file_path, mode='rt', encoding='utf-8') as f:
+    with open(data_user, mode='rt', encoding='utf-8') as f:
         for line in f:
             username, password = line.strip().split('----')
             if input_username == username and input_password == password:
@@ -80,10 +85,7 @@ while asking_log_in_method:
     else:
         print('Please key in the correct symbol')
 
-
-
-
-
+# game
 import pygame
 from sys import exit
 import time
@@ -95,10 +97,12 @@ pygame.display.set_caption('Plant vs Zombie')  # title name
 clock = pygame.time.Clock()
 game_active = True
 
-welcome_surface = pygame.image.load('Picture/welcome.webp').convert()
+welcome_fp = create_file_path('Picture/welcome.webp')
+welcome_surface = pygame.image.load(welcome_fp).convert()
 welcome_surface = pygame.transform.scale(welcome_surface, (1000, 600))
 
-white_surface = pygame.image.load('Picture/white_screen.jpeg').convert()
+white_fp = create_file_path('Picture/white_screen.jpeg')
+white_surface = pygame.image.load(white_fp).convert()
 white_surface = pygame.transform.scale(white_surface, (400, 100))
 white_rectangle = white_surface.get_rect(topleft=(500, 90))
 
@@ -106,9 +110,8 @@ username_font = pygame.font.Font(None, 30)
 username_surface = username_font.render(log_in_as, None, 'White')
 username_rectangle = username_surface.get_rect(center=(210, 100))
 
-# game_start_rectangle =
-
-background_surface = pygame.image.load('Picture/background.webp').convert()
+background_fp = create_file_path('Picture/background.webp')
+background_surface = pygame.image.load(background_fp).convert()
 background_surface = pygame.transform.scale(background_surface, (1000, 600))
 
 game_start = False
@@ -120,15 +123,13 @@ while True:
             exit()
 
         if event.type == pygame.MOUSEBUTTONDOWN and white_rectangle.collidepoint(event.pos):
-            game_start =True
-
-
+            game_start = True
 
     if game_active:
-        screen.blit(white_surface,white_rectangle)
+        screen.blit(white_surface, white_rectangle)
         screen.blit(welcome_surface, (0, 0))
         screen.blit(username_surface, username_rectangle)
-        if game_start :
+        if game_start:
             time.sleep(1)
             screen.blit(background_surface, (0, 0))
 
