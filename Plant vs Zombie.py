@@ -112,7 +112,7 @@ username_font = pygame.font.Font(None, 30)
 username_surface = username_font.render(log_in_as, None, 'White')
 username_rectangle = username_surface.get_rect(center=(210, 100))
 
-background_fp = create_file_path('Picture/background.webp')
+background_fp = create_file_path('Picture/background 1.webp')
 background_surface = pygame.image.load(background_fp).convert()
 background_surface = pygame.transform.scale(background_surface, (1000, 600))
 
