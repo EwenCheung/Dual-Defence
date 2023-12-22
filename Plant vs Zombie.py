@@ -44,15 +44,15 @@ def check_user_pass(input_username, input_password):
             print('No account found. Check your username and password. You have to register an account to sign in')
 
 
-log_in_method = input('Sign up an account enter "U" \n'
-                      'Sign in an account enter "I"\n'
-                      'Log in as guest enter "G"\n\n'
-                      'Please enter your choice here :  ').strip().upper()
-
 asking_log_in_method = True
 log_in_as = ''
 
 while asking_log_in_method:
+    log_in_method = input('Sign up an account enter "U" \n'
+                          'Sign in an account enter "I"\n'
+                          'Log in as guest enter "G"\n\n'
+                          'Please enter your choice here :  ').strip().upper()
+
     if log_in_method == 'G':  # log in as guest
         print('Logged in as guest')
         log_in_as = 'Guest'
@@ -64,7 +64,7 @@ while asking_log_in_method:
             res = check_username_taken(input_username)
             if res == 'y':
                 input_password = input('Enter your password: ').strip()
-                print('Successfully registered')
+                print('Successfully registered\n')
                 break
 
         sign_up(input_username, input_password)
