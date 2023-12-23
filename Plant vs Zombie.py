@@ -141,8 +141,8 @@ screen = pygame.display.set_mode((1000, 600))  # screen size
 pygame.display.set_caption('Plant vs Zombie')  # title name
 clock = pygame.time.Clock()
 game_active = True
-# bg_music = pygame.mixer.Sound('audio/Plants vs. Zombies (Main Theme).mp3')
-# bg_music.play(loops=-1)
+bg_music = pygame.mixer.Sound('audio/Plants vs. Zombies (Main Theme).mp3')
+bg_music.play(loops=-1)
 
 #Groups 
 zombie_groups = pygame.sprite.Group()
