@@ -4,7 +4,6 @@
 import os
 
 
-
 def create_file_path(file):
     # Get the directory of the current script
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -91,38 +90,40 @@ import pygame
 from sys import exit
 import time
 from random import randint, choice
+
+
 class Zombie(pygame.sprite.Sprite):
-    def __init__(self, type,position_list_y):
+    def __init__(self, type, position_list_y):
         super().__init__()
 
         if type == 'naruto':
             naruto_1 = pygame.image.load('Picture/naruto/naruto_walk_1.png').convert_alpha()
             naruto_2 = pygame.image.load('Picture/naruto/naruto_walk_2.png').convert_alpha()
             naruto_3 = pygame.image.load('Picture/naruto/naruto_walk_3.png').convert_alpha()
-            self.frames = [naruto_1,naruto_2,naruto_3]
+            self.frames = [naruto_1, naruto_2, naruto_3]
         elif type == 'sasuke':
             sasuke_1 = pygame.image.load('Picture/sasuke/sasuke_walk_1.png').convert_alpha()
-            sasuke_2 =  pygame.image.load('Picture/sasuke/sasuke_walk_2.png').convert_alpha()
-            sasuke_3 =  pygame.image.load('Picture/sasuke/sasuke_walk_3.png').convert_alpha()
-            self.frames = [sasuke_1,sasuke_2,sasuke_3]
+            sasuke_2 = pygame.image.load('Picture/sasuke/sasuke_walk_2.png').convert_alpha()
+            sasuke_3 = pygame.image.load('Picture/sasuke/sasuke_walk_3.png').convert_alpha()
+            self.frames = [sasuke_1, sasuke_2, sasuke_3]
         else:
             kakashi_1 = pygame.image.load('Picture/kakashi/kakashi_run_1.png').convert_alpha()
             kakashi_2 = pygame.image.load('Picture/kakashi/kakashi_run_2.png').convert_alpha()
             kakashi_3 = pygame.image.load('Picture/kakashi/kakashi_run_3.png').convert_alpha()
-            self.frames = [kakashi_1,kakashi_2,kakashi_3]
-        
-        if type =='kakashi':
+            self.frames = [kakashi_1, kakashi_2, kakashi_3]
+
+        if type == 'kakashi':
             self.speed = 5
         else:
             self.speed = 2
 
         self.position_list_y = position_list_y
-        
+
         self.frames = [pygame.transform.scale(frame, (84, 40)) for frame in self.frames]
 
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center = (randint(1100,1300), choice(position_list_y)))
+        self.rect = self.image.get_rect(center=(randint(1100, 1300), choice(position_list_y)))
 
     def animation_state(self):
         self.animation_index += 0.1
@@ -144,10 +145,12 @@ game_active = True
 bg_music = pygame.mixer.Sound('audio/Plants vs. Zombies (Main Theme).mp3')
 bg_music.play(loops=-1)
 
-#Groups 
+
+# Groups
 zombie_groups = pygame.sprite.Group()
 
-welcome_fp = create_file_path('Picture/welcome.webp')
+welcome_fp = create_file_path('Picture/welcome.png')
+
 welcome_surface = pygame.image.load(welcome_fp).convert()
 welcome_surface = pygame.transform.scale(welcome_surface, (1000, 600))
 
@@ -160,13 +163,13 @@ username_font = pygame.font.Font(None, 30)
 username_surface = username_font.render(log_in_as, None, 'White')
 username_rectangle = username_surface.get_rect(center=(210, 100))
 
-background_fp = create_file_path('Picture/background 1.webp')
+background_fp = create_file_path('Picture/game_background_pokemon.png')
 background_surface = pygame.image.load(background_fp).convert()
 background_surface = pygame.transform.scale(background_surface, (1000, 600))
 
-#Zombie timer
-zombie_timer = pygame.USEREVENT +1
-pygame.time.set_timer(zombie_timer,1500)
+# Zombie timer
+zombie_timer = pygame.USEREVENT + 1
+pygame.time.set_timer(zombie_timer, 1500)
 
 game_start = False
 
@@ -189,10 +192,30 @@ while True:
 
             for event in pygame.event.get():
                 if event.type == zombie_timer:
-                    zombie_groups.add(Zombie(choice(['naruto','naruto','sasuke','sasuke','kakashi']),
-                                             position_list_y=[150,230,310,395,480]))
+                    zombie_groups.add(Zombie(choice(['naruto', 'naruto', 'sasuke', 'sasuke', 'kakashi']),
+                                             position_list_y=[150, 230, 310, 395, 480]))
             zombie_groups.draw(screen)
             zombie_groups.update()
 
+            screen.blit(zombie_naruto_surface, zombie_naruto_rectangle)
+
     pygame.display.update()
     clock.tick(60)
+
+# both
+# line (x,y)
+# zombie
+# xueliang
+# yidong shudu
+
+# sound effect (last)
+
+# pokemon
+# pikachu(pen dian)
+# shui wa (pen shui )
+# machine ( tai yang hua) (create ball)
+
+
+# def zombie( ):
+
+# zombie ( xuelieang  , mibgzi , zhao pian,shudu)
