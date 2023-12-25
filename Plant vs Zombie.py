@@ -171,11 +171,33 @@ background_fp = create_file_path('Picture/game_background_pokemon.png')
 background_surface = pygame.image.load(background_fp).convert()
 background_surface = pygame.transform.scale(background_surface, (1000, 600))
 
+machine_card_fp = create_file_path('Picture/machine_card.png')
+machine_card_surface = pygame.image.load(machine_card_fp).convert()
+machine_card_surface = pygame.transform.scale(machine_card_surface, (68, 83))
+machine_card_rectangle = machine_card_surface.get_rect(topleft=(120, 8))
+
+pikachu_card_fp = create_file_path('Picture/pikachu_card.png')
+pikachu_card_surface = pygame.image.load(pikachu_card_fp).convert()
+pikachu_card_surface = pygame.transform.scale(pikachu_card_surface, (68, 83))
+pikachu_card_rectangle = pikachu_card_surface.get_rect(topleft=(191, 8))
+
+squirtle_card_fp = create_file_path('Picture/squirtle_card.png')
+squirtle_card_surface = pygame.image.load(squirtle_card_fp).convert()
+squirtle_card_surface = pygame.transform.scale(squirtle_card_surface, (68, 83))
+squirtle_card_rectangle = squirtle_card_surface.get_rect(topleft=(262, 8))
+
+num_ball = 10000
+num_ball_font = pygame.font.Font(None, 30)
+num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
+num_ball_rectangle = num_ball_surface.get_rect(center=(65, 85))
+
+
 # set up Zombie timer
 zombie_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(zombie_timer, 1500)
 
 game_start = False
+active_pokemon = None
 
 while True:
     # Event handling
@@ -187,9 +209,44 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN and white_rectangle.collidepoint(event.pos):
             game_start = True
 
+        #zombie
         if event.type == zombie_timer and game_start:
             zombie_groups.add(Zombie(choice(['naruto', 'naruto', 'sasuke', 'sasuke', 'kakashi']),
                                      position_list_y=[150, 230, 310, 395, 480]))
+
+        #drag pokemon
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if machine_card_rectangle.collidepoint(event.pos):
+                active_pokemon = 'machine'
+            elif pikachu_card_rectangle.collidepoint(event.pos):
+                active_pokemon = 'pikachu'
+            elif squirtle_card_rectangle.collidepoint(event.pos):
+                active_pokemon = 'squirtle'
+
+        if event.type == pygame.MOUSEBUTTONUP:
+            if active_pokemon is not None:
+                if active_pokemon == 'machine':
+                    num_ball -= 50
+                elif active_pokemon == 'pikachu':
+                    num_ball -= 150
+                elif active_pokemon == 'squirtle':
+                    num_ball -= 100
+
+                active_pokemon = None
+
+        if active_pokemon == 'machine' and event.type == pygame.MOUSEMOTION:
+            # Move the card by the mouse motion offset
+            machine_card_rectangle.move_ip(event.rel)
+
+        elif active_pokemon == 'pikachu' and event.type == pygame.MOUSEMOTION:
+            # Move the card by the mouse motion offset
+            pikachu_card_rectangle.move_ip(event.rel)
+
+        elif active_pokemon == 'squirtle' and event.type == pygame.MOUSEMOTION:
+            # Move the card by the mouse motion offset
+            squirtle_card_rectangle.move_ip(event.rel)
+
+
 
     if game_active:
         screen.blit(white_surface, white_rectangle)
@@ -198,6 +255,10 @@ while True:
 
         if game_start:
             screen.blit(background_surface, (0, 0))
+            screen.blit(machine_card_surface, machine_card_rectangle)
+            screen.blit(pikachu_card_surface, pikachu_card_rectangle)
+            screen.blit(squirtle_card_surface, squirtle_card_rectangle)
+            screen.blit(num_ball_surface, num_ball_rectangle)
 
             zombie_groups.draw(screen)
             zombie_groups.update()
