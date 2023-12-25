@@ -212,7 +212,7 @@ while True:
         #zombie
         if event.type == zombie_timer and game_start:
             zombie_groups.add(Zombie(choice(['naruto', 'naruto', 'sasuke', 'sasuke', 'kakashi']),
-                                     position_list_y=[150, 230, 310, 395, 480]))
+                                     position_list_y=[180, 280, 370, 445, 540]))
 
         #drag pokemon
         if event.type == pygame.MOUSEBUTTONDOWN:
