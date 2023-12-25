@@ -142,8 +142,8 @@ screen = pygame.display.set_mode((1000, 600))  # screen size
 pygame.display.set_caption('Plant vs Zombie')  # title name
 clock = pygame.time.Clock()
 game_active = True
-bg_music = pygame.mixer.Sound('audio/Plants vs. Zombies (Main Theme).mp3')
-bg_music.play(loops=-1)
+# bg_music = pygame.mixer.Sound('audio/Plants vs. Zombies (Main Theme).mp3')
+# bg_music.play(loops=-1)
 
 
 # Groups
@@ -196,8 +196,6 @@ while True:
                                              position_list_y=[150, 230, 310, 395, 480]))
             zombie_groups.draw(screen)
             zombie_groups.update()
-
-            screen.blit(zombie_naruto_surface, zombie_naruto_rectangle)
 
     pygame.display.update()
     clock.tick(60)
