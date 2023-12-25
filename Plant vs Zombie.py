@@ -232,6 +232,7 @@ while True:
                 elif active_pokemon == 'squirtle':
                     num_ball -= 100
 
+
                 active_pokemon = None
 
         if active_pokemon == 'machine' and event.type == pygame.MOUSEMOTION:
@@ -259,6 +260,7 @@ while True:
             screen.blit(pikachu_card_surface, pikachu_card_rectangle)
             screen.blit(squirtle_card_surface, squirtle_card_rectangle)
             screen.blit(num_ball_surface, num_ball_rectangle)
+            num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
 
             zombie_groups.draw(screen)
             zombie_groups.update()
