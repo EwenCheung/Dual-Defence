@@ -87,7 +87,6 @@ while asking_log_in_method:
 
 # game
 import pygame
-import time
 from sys import exit
 from random import randint, choice
 
@@ -99,48 +98,6 @@ clock = pygame.time.Clock()
 game_active = True
 bg_music = pygame.mixer.Sound('audio/Plants vs. Zombies (Main Theme).mp3')
 bg_music.play(loops=-1)
-
-class Game:
-    def __init__(self):
-         # Set up a custom event for the timer
-        self.timer_event = pygame.USEREVENT + 1
-
-        # Set the timer to generate the custom event every 1000 milliseconds (1 second)
-        pygame.time.set_timer(self.timer_event, 1000)
-
-        # Limit for the number of timer events (5 minutes)
-        self.timer_limit_minutes = 15
-        self.timer_limit_seconds = self.timer_limit_minutes * 60
-        self.timer_limit_milliseconds = self.timer_limit_seconds * 1000
-
-        # Variables for tracking game state
-        self.timer_limit_reached = False
-        self.timer_count = 0
-
-        # Font for displaying text on the screen
-        self.font = pygame.font.Font(None, 36)
-
-    def handle_events(self):
-        for event in pygame.event.get():
-            # Handle the custom timer event
-            if event.type == self.timer_event and not self.timer_limit_reached:
-                self.timer_count += 1
-                print("Tik")
-
-                # Check if the limit is reached
-                if pygame.time.get_ticks() >= self.timer_limit_milliseconds:
-                    pygame.time.set_timer(self.timer_event, 0)  # Stop the timer
-                    self.timer_limit_reached = True
-                    print("Time's Up.")
-
-    def display_message(self, message):
-        text_surface = self.font.render(message, True, (255, 255, 255))
-        text_rect = text_surface.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2))
-        self.screen.blit(text_surface, text_rect)
-
-    def run(self):
-        clock = pygame.time.Clock()
-
 
 # load images
 naruto_frames = [pygame.image.load('Picture/naruto/naruto_walk_1.png').convert_alpha(),
@@ -242,17 +199,6 @@ pygame.time.set_timer(zombie_timer, 1500)
 game_start = False
 active_pokemon = None
 
-# set a time limit for game
-game_timer = pygame.USEREVENT + 1
-timer_minutes = 1 
-timer_seconds = timer_minutes * 60
-timer_milliseconds = timer_seconds * 1000
-pygame.time.set_timer(game_timer, timer_milliseconds )
-timer_count = 0
-game_over = False
-font = pygame.font.Font(None, 48)
-
-
 while True:
     # Event handling
     for event in pygame.event.get():
@@ -319,39 +265,8 @@ while True:
             zombie_groups.draw(screen)
             zombie_groups.update()
 
-        if event.type == game_timer and not game_over:
-            timer_count += 1
-            print(int(timer_count))
-
-        if timer_count >= timer_seconds:
-            pygame.time.set_timer(game_timer, 0)  
-            game_over = True
-            print("You've finished the course!.")
-
-    def display_message(self, message):
-        text_surface = self.font.render(message, True, (255, 255, 255))
-        text_rect = text_surface.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2))
-        self.screen.blit(text_surface, text_rect)
-        return "You've Won"
-        
-
-    def run(self):
-        clock = pygame.time.Clock()
-
-        while not self.game_over:
-            self.handle_events()
-
-
-
     pygame.display.update()
     clock.tick(60)
-
-    display_message()
-    pygame.display.flip()
-    pygame.time.delay(3000)
-
-
-
 
 # both
 # line (x,y)
