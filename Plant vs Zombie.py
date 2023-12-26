@@ -255,12 +255,12 @@ while True:
         screen.blit(username_surface, username_rectangle)
 
         if game_start:
+            num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
             screen.blit(background_surface, (0, 0))
             screen.blit(machine_card_surface, machine_card_rectangle)
             screen.blit(pikachu_card_surface, pikachu_card_rectangle)
             screen.blit(squirtle_card_surface, squirtle_card_rectangle)
             screen.blit(num_ball_surface, num_ball_rectangle)
-            num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
 
             zombie_groups.draw(screen)
             zombie_groups.update()
