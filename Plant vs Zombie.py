@@ -96,8 +96,8 @@ screen = pygame.display.set_mode((1000, 600))  # screen size
 pygame.display.set_caption('Pokemon vs Naruto')  # title name
 clock = pygame.time.Clock()
 game_active = True
-bg_music = pygame.mixer.Sound('audio/Plants vs. Zombies (Main Theme).mp3')
-bg_music.play(loops=-1)
+# bg_music = pygame.mixer.Sound('audio/Plants vs. Zombies (Main Theme).mp3')
+# bg_music.play(loops=-1)
 
 # load images
 naruto_frames = [pygame.image.load('Picture/naruto/naruto_walk_1.png').convert_alpha(),
@@ -191,6 +191,8 @@ num_ball_font = pygame.font.Font(None, 30)
 num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
 num_ball_rectangle = num_ball_surface.get_rect(center=(65, 85))
 
+#coordinate
+y_coordinate =[175, 260, 355, 444, 528]
 
 # set up Zombie timer
 zombie_timer = pygame.USEREVENT + 1
@@ -212,7 +214,7 @@ while True:
         #zombie
         if event.type == zombie_timer and game_start:
             zombie_groups.add(Zombie(choice(['naruto', 'naruto', 'sasuke', 'sasuke', 'kakashi']),
-                                     position_list_y=[180, 280, 370, 445, 540]))
+                                     position_list_y=y_coordinate))
 
         #drag pokemon
         if event.type == pygame.MOUSEBUTTONDOWN:
