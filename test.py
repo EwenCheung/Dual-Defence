@@ -100,7 +100,7 @@ game_active = True
 font = pygame.font.Font(None, 36) 
 black = (0, 0, 0)  
 wood_color = (156, 102, 31)  
-countdown_duration = 1000  
+countdown_duration = 960000  
 start_time = pygame.time.get_ticks()
 
 # load images
@@ -195,6 +195,10 @@ num_ball_font = pygame.font.Font(None, 30)
 num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
 num_ball_rectangle = num_ball_surface.get_rect(center=(65, 85))
 
+wood_box_rectangle = pygame.Rect(700, 0, 325, 60) # (x,y,width,height)
+text_timer = font.render( None, True, 'white')
+wood_box = pygame.draw.rect(screen, wood_color, wood_box_rectangle)
+text_timer_rectangle = text_timer.get_rect(center=wood_box_rectangle.center)
 
 # set up Zombie timer
 zombie_timer = pygame.USEREVENT + 1
@@ -260,11 +264,13 @@ while True:
 
         if game_start:
             num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
+            text_timer = font.render(f"{minutes:02}:{seconds:02}", True, black)
             screen.blit(background_surface, (0, 0))
             screen.blit(machine_card_surface, machine_card_rectangle)
             screen.blit(pikachu_card_surface, pikachu_card_rectangle)
             screen.blit(squirtle_card_surface, squirtle_card_rectangle)
             screen.blit(num_ball_surface, num_ball_rectangle)
+            screen.blit(text_timer, text_timer_rectangle.topleft)
 
             zombie_groups.draw(screen)
             zombie_groups.update()
@@ -274,11 +280,7 @@ while True:
     remaining_time = max(0, countdown_duration - elapsed_time)
     minutes = remaining_time // 60000
     seconds = (remaining_time % 60000) // 1000
-    wood_box_rect = pygame.Rect(400, 0, 325, 60) # (x,y,width,height)
-    pygame.draw.rect(screen, wood_color, wood_box_rect)
-    text_timer = font.render(f"{minutes:02}:{seconds:02}", True, black)
-    text_timer_rect = text_timer.get_rect(center=wood_box_rect.center)
-    screen.blit(text_timer, text_timer_rect)
+
  
     pygame.display.flip()
     pygame.display.update()
