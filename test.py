@@ -275,13 +275,13 @@ while True:
             zombie_groups.draw(screen)
             zombie_groups.update()
 
+    num_ball = max(0, num_ball)
     current_time = pygame.time.get_ticks()
     elapsed_time = current_time - start_time
     remaining_time = max(0, countdown_duration - elapsed_time)
     minutes = remaining_time // 60000
     seconds = (remaining_time % 60000) // 1000
 
- 
     pygame.display.flip()
     pygame.display.update()
 
