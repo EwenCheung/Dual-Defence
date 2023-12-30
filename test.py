@@ -103,6 +103,10 @@ wood_color = (156, 102, 31)
 countdown_duration = 960000  
 start_time = pygame.time.get_ticks()
 
+machine_card_movable = True
+pikachu_card_movable = True
+squirtle_card_movable = True
+
 # load images
 naruto_frames = [pygame.image.load('Picture/naruto/naruto_walk_1.png').convert_alpha(),
                  pygame.image.load('Picture/naruto/naruto_walk_2.png').convert_alpha(),
@@ -200,6 +204,22 @@ text_timer = font.render( None, True, 'white')
 wood_box = pygame.draw.rect(screen, wood_color, wood_box_rectangle)
 text_timer_rectangle = text_timer.get_rect(center=wood_box_rectangle.center)
 
+machine_card_initial_position = (120, 8)
+pikachu_card_initial_position = (191, 8)
+squirtle_card_initial_position = (262, 8)
+
+# keep a copy of the original positions of the cards when the program starts
+initial_machine_position = list(machine_card_initial_position)
+initial_pikachu_position = list(pikachu_card_initial_position)
+initial_squirtle_position = list(squirtle_card_initial_position)
+
+machine_card_rectangle.topleft = machine_card_initial_position
+pikachu_card_rectangle.topleft = pikachu_card_initial_position
+squirtle_card_rectangle.topleft = squirtle_card_initial_position
+
+#coordinate
+y_coordinate =[175, 260, 355, 444, 528]     
+
 # set up Zombie timer
 zombie_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(zombie_timer, 1500)
@@ -220,8 +240,7 @@ while True:
         #zombie
         if event.type == zombie_timer and game_start:
             zombie_groups.add(Zombie(choice(['naruto', 'naruto', 'sasuke', 'sasuke', 'kakashi']),
-                                     position_list_y=[180, 280, 370, 445, 540]))
-
+                                     position_list_y=y_coordinate))
         #drag pokemon
         if event.type == pygame.MOUSEBUTTONDOWN:
             if machine_card_rectangle.collidepoint(event.pos):
@@ -235,23 +254,32 @@ while True:
             if active_pokemon is not None:
                 if active_pokemon == 'machine':
                     num_ball -= 50
+                    machine_card_movable = False
+                    if not machine_card_rectangle.colliderect(machine_card_initial_position + (68, 83)):
+                        machine_card_rectangle.topleft = initial_machine_position  # Snap back to initial position
                 elif active_pokemon == 'pikachu':
                     num_ball -= 150
+                    pikachu_card_movable = False
+                    if not pikachu_card_rectangle.colliderect(pikachu_card_initial_position + (68, 83)):
+                        pikachu_card_rectangle.topleft = initial_pikachu_position  # Snap back to initial position
                 elif active_pokemon == 'squirtle':
                     num_ball -= 100
+                    squirtle_card_movable = False
+                    if not squirtle_card_rectangle.colliderect(squirtle_card_initial_position + (68, 83)):
+                        squirtle_card_rectangle.topleft = initial_squirtle_position  # Snap back to initial position
 
 
                 active_pokemon = None
 
-        if active_pokemon == 'machine' and event.type == pygame.MOUSEMOTION:
+        if active_pokemon == 'machine' and event.type == pygame.MOUSEMOTION and machine_card_movable:
             # Move the card by the mouse motion offset
             machine_card_rectangle.move_ip(event.rel)
 
-        elif active_pokemon == 'pikachu' and event.type == pygame.MOUSEMOTION:
+        elif active_pokemon == 'pikachu' and event.type == pygame.MOUSEMOTION and pikachu_card_movable:
             # Move the card by the mouse motion offset
             pikachu_card_rectangle.move_ip(event.rel)
 
-        elif active_pokemon == 'squirtle' and event.type == pygame.MOUSEMOTION:
+        elif active_pokemon == 'squirtle' and event.type == pygame.MOUSEMOTION and squirtle_card_movable:
             # Move the card by the mouse motion offset
             squirtle_card_rectangle.move_ip(event.rel)
 

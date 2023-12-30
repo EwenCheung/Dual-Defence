@@ -267,6 +267,8 @@ while True:
             zombie_groups.draw(screen)
             zombie_groups.update()
 
+        num_ball = max(0, num_ball)
+
     pygame.display.update()
     clock.tick(60)
 
