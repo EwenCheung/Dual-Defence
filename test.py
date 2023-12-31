@@ -103,9 +103,6 @@ wood_color = (156, 102, 31)
 countdown_duration = 960000  
 start_time = pygame.time.get_ticks()
 
-machine_card_movable = True
-pikachu_card_movable = True
-squirtle_card_movable = True
 
 # load images
 naruto_frames = [pygame.image.load('Picture/naruto/naruto_walk_1.png').convert_alpha(),
@@ -254,32 +251,29 @@ while True:
             if active_pokemon is not None:
                 if active_pokemon == 'machine':
                     num_ball -= 50
-                    machine_card_movable = False
                     if not machine_card_rectangle.colliderect(machine_card_initial_position + (68, 83)):
                         machine_card_rectangle.topleft = initial_machine_position  # Snap back to initial position
                 elif active_pokemon == 'pikachu':
                     num_ball -= 150
-                    pikachu_card_movable = False
                     if not pikachu_card_rectangle.colliderect(pikachu_card_initial_position + (68, 83)):
                         pikachu_card_rectangle.topleft = initial_pikachu_position  # Snap back to initial position
                 elif active_pokemon == 'squirtle':
                     num_ball -= 100
-                    squirtle_card_movable = False
                     if not squirtle_card_rectangle.colliderect(squirtle_card_initial_position + (68, 83)):
                         squirtle_card_rectangle.topleft = initial_squirtle_position  # Snap back to initial position
 
 
                 active_pokemon = None
 
-        if active_pokemon == 'machine' and event.type == pygame.MOUSEMOTION and machine_card_movable:
+        if active_pokemon == 'machine' and event.type == pygame.MOUSEMOTION:
             # Move the card by the mouse motion offset
             machine_card_rectangle.move_ip(event.rel)
 
-        elif active_pokemon == 'pikachu' and event.type == pygame.MOUSEMOTION and pikachu_card_movable:
+        elif active_pokemon == 'pikachu' and event.type == pygame.MOUSEMOTION:
             # Move the card by the mouse motion offset
             pikachu_card_rectangle.move_ip(event.rel)
 
-        elif active_pokemon == 'squirtle' and event.type == pygame.MOUSEMOTION and squirtle_card_movable:
+        elif active_pokemon == 'squirtle' and event.type == pygame.MOUSEMOTION:
             # Move the card by the mouse motion offset
             squirtle_card_rectangle.move_ip(event.rel)
 
