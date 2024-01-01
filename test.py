@@ -277,8 +277,6 @@ while True:
             # Move the card by the mouse motion offset
             squirtle_card_rectangle.move_ip(event.rel)
 
-
-
     if game_active:
         screen.blit(white_surface, white_rectangle)
         screen.blit(welcome_surface, (0, 0))
@@ -309,20 +307,5 @@ while True:
 
     clock.tick(60)
 
-# both
-# line (x,y)
-# zombie
-# xueliang
-# yidong shudu
 
-# sound effect (last)
-
-# pokemon
-# pikachu(pen dian)
-# shui wa (pen shui )
-# machine ( tai yang hua) (create ball)
-
-
-# def zombie( ):
-
-# zombie ( xuelieang  , mibgzi , zhao pian,shudu)
+ 
