@@ -121,7 +121,6 @@ naruto_frames = [pygame.transform.scale(frame, (84, 40)) for frame in naruto_fra
 sasuke_frame = [pygame.transform.scale(frame, (84, 40)) for frame in sasuke_frame]
 kakashi_frame = [pygame.transform.scale(frame, (84, 40)) for frame in kakashi_frame]
 
-
 class Zombie(pygame.sprite.Sprite):
     def __init__(self, type, position_list_y):
         super().__init__()
@@ -154,11 +153,14 @@ class Zombie(pygame.sprite.Sprite):
         self.animation_state()
         self.rect.x -= self.speed
 
-
 # Groups
 zombie_groups = pygame.sprite.Group()
 
 # Set up surface and rectangle
+machine_card_initial_position = (120, 8)
+pikachu_card_initial_position = (191, 8)
+squirtle_card_initial_position = (262, 8) 
+
 welcome_fp = create_file_path('Picture/welcome.png')
 welcome_surface = pygame.image.load(welcome_fp).convert()
 welcome_surface = pygame.transform.scale(welcome_surface, (1000, 600))
@@ -179,17 +181,17 @@ background_surface = pygame.transform.scale(background_surface, (1000, 600))
 machine_card_fp = create_file_path('Picture/machine_card.png')
 machine_card_surface = pygame.image.load(machine_card_fp).convert()
 machine_card_surface = pygame.transform.scale(machine_card_surface, (68, 83))
-machine_card_rectangle = machine_card_surface.get_rect(topleft=(120, 8))
+machine_card_rectangle = machine_card_surface.get_rect(topleft=machine_card_initial_position)
 
 pikachu_card_fp = create_file_path('Picture/pikachu_card.png')
 pikachu_card_surface = pygame.image.load(pikachu_card_fp).convert()
 pikachu_card_surface = pygame.transform.scale(pikachu_card_surface, (68, 83))
-pikachu_card_rectangle = pikachu_card_surface.get_rect(topleft=(191, 8))
+pikachu_card_rectangle = pikachu_card_surface.get_rect(topleft=pikachu_card_initial_position)
 
 squirtle_card_fp = create_file_path('Picture/squirtle_card.png')
 squirtle_card_surface = pygame.image.load(squirtle_card_fp).convert()
 squirtle_card_surface = pygame.transform.scale(squirtle_card_surface, (68, 83))
-squirtle_card_rectangle = squirtle_card_surface.get_rect(topleft=(262, 8))
+squirtle_card_rectangle = squirtle_card_surface.get_rect(topleft=squirtle_card_initial_position)
 
 num_ball = 10000
 num_ball_font = pygame.font.Font(None, 30)
@@ -201,11 +203,6 @@ text_timer = font.render( None, True, 'white')
 wood_box = pygame.draw.rect(screen, wood_color, wood_box_rectangle)
 text_timer_rectangle = text_timer.get_rect(center=wood_box_rectangle.center)
 
-machine_card_initial_position = (120, 8)
-pikachu_card_initial_position = (191, 8)
-squirtle_card_initial_position = (262, 8)
-
-# keep a copy of the original positions of the cards when the program starts
 initial_machine_position = list(machine_card_initial_position)
 initial_pikachu_position = list(pikachu_card_initial_position)
 initial_squirtle_position = list(squirtle_card_initial_position)
@@ -223,6 +220,45 @@ pygame.time.set_timer(zombie_timer, 1500)
 
 game_start = False
 active_pokemon = None
+
+collumn = [320, 411, 495, 573, 657]  # x
+row = [166, 267, 357, 429, 547]      # y
+grid_list = [
+    {collumn[0], row[0], "one"},
+    {collumn[1], row[1], "two"},
+    {collumn[2], row[2], "three"},
+    {collumn[3], row[3], "four"},
+    {collumn[4], row[4], "five"}
+]
+
+
+def check_grid(event_pos):
+    if columm > 657:
+        columm = columm[4]
+    elif columm > 573:
+        columm = columm[3]    
+    elif columm > 495:
+        columm = columm[2] 
+    elif columm > 411:
+        columm = columm[1] 
+    else:
+        columm = columm[0] 
+
+    if row > 657:
+        row = row[4]
+    elif row > 573:
+        row = row[3]    
+    elif row > 495:
+        row = row[2] 
+    elif row > 411:
+        row = row[1] 
+    else:
+        row = row[0] 
+
+
+# result_1, result_2 = check_grid(event_pos) 
+# plant_at result_1, result_2
+
 
 while True:
     # Event handling
@@ -252,16 +288,19 @@ while True:
                 if active_pokemon == 'machine':
                     num_ball -= 50
                     if not machine_card_rectangle.colliderect(machine_card_initial_position + (68, 83)):
+                        check_grid(event.pos)
+                        
                         machine_card_rectangle.topleft = initial_machine_position  # Snap back to initial position
                 elif active_pokemon == 'pikachu':
                     num_ball -= 150
                     if not pikachu_card_rectangle.colliderect(pikachu_card_initial_position + (68, 83)):
+                        check_grid(event.pos)
                         pikachu_card_rectangle.topleft = initial_pikachu_position  # Snap back to initial position
                 elif active_pokemon == 'squirtle':
                     num_ball -= 100
                     if not squirtle_card_rectangle.colliderect(squirtle_card_initial_position + (68, 83)):
+                        check_grid(event.pos)
                         squirtle_card_rectangle.topleft = initial_squirtle_position  # Snap back to initial position
-
 
                 active_pokemon = None
 
@@ -306,6 +345,7 @@ while True:
     pygame.display.update()
 
     clock.tick(60)
+
 
 
  
