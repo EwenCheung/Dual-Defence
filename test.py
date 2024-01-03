@@ -3,7 +3,6 @@
 # block 3 to 12 is on creating file path
 import os
 
-
 def create_file_path(file):
     # Get the directory of the current script
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -97,12 +96,11 @@ pygame.display.set_caption('Pokemon vs Naruto')  # title name
 clock = pygame.time.Clock()
 game_active = True
 
-font = pygame.font.Font(None, 36) 
-black = (0, 0, 0)  
-wood_color = (156, 102, 31)  
-countdown_duration = 960000  
+font = pygame.font.Font(None, 36)
+black = (0, 0, 0)
+wood_color = (156, 102, 31)
+countdown_duration = 960000
 start_time = pygame.time.get_ticks()
-
 
 # load images
 naruto_frames = [pygame.image.load('Picture/naruto/naruto_walk_1.png').convert_alpha(),
@@ -120,6 +118,7 @@ kakashi_frame = [pygame.image.load('Picture/kakashi/kakashi_run_1.png').convert_
 naruto_frames = [pygame.transform.scale(frame, (84, 40)) for frame in naruto_frames]
 sasuke_frame = [pygame.transform.scale(frame, (84, 40)) for frame in sasuke_frame]
 kakashi_frame = [pygame.transform.scale(frame, (84, 40)) for frame in kakashi_frame]
+
 
 class Zombie(pygame.sprite.Sprite):
     def __init__(self, type, position_list_y):
@@ -153,13 +152,14 @@ class Zombie(pygame.sprite.Sprite):
         self.animation_state()
         self.rect.x -= self.speed
 
+
 # Groups
 zombie_groups = pygame.sprite.Group()
 
 # Set up surface and rectangle
 machine_card_initial_position = (120, 8)
 pikachu_card_initial_position = (191, 8)
-squirtle_card_initial_position = (262, 8) 
+squirtle_card_initial_position = (262, 8)
 
 welcome_fp = create_file_path('Picture/welcome.png')
 welcome_surface = pygame.image.load(welcome_fp).convert()
@@ -198,8 +198,8 @@ num_ball_font = pygame.font.Font(None, 30)
 num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
 num_ball_rectangle = num_ball_surface.get_rect(center=(65, 85))
 
-wood_box_rectangle = pygame.Rect(700, 0, 325, 60) # (x,y,width,height)
-text_timer = font.render( None, True, 'white')
+wood_box_rectangle = pygame.Rect(700, 0, 325, 60)  # (x,y,width,height)
+text_timer = font.render(None, True, 'white')
 wood_box = pygame.draw.rect(screen, wood_color, wood_box_rectangle)
 text_timer_rectangle = text_timer.get_rect(center=wood_box_rectangle.center)
 
@@ -211,8 +211,11 @@ machine_card_rectangle.topleft = machine_card_initial_position
 pikachu_card_rectangle.topleft = pikachu_card_initial_position
 squirtle_card_rectangle.topleft = squirtle_card_initial_position
 
-#coordinate
-y_coordinate =[175, 260, 355, 444, 528]     
+# coordinate
+y_coordinate = [175, 260, 355, 444, 528]
+
+# choice of zombie
+zombie_choice = ['naruto', 'naruto', 'sasuke', 'sasuke', 'kakashi']
 
 # set up Zombie timer
 zombie_timer = pygame.USEREVENT + 1
@@ -221,39 +224,39 @@ pygame.time.set_timer(zombie_timer, 1500)
 game_start = False
 active_pokemon = None
 
-collumn = [320, 411, 495, 573, 657]  # x
-row = [166, 267, 357, 429, 547]      # y
-grid_list = [
-    {collumn[0], row[0], "one"},
-    {collumn[1], row[1], "two"},
-    {collumn[2], row[2], "three"},
-    {collumn[3], row[3], "four"},
-    {collumn[4], row[4], "five"}
-]
-
-
-def check_grid(event_pos):
-    if columm > 657:
-        columm = columm[4]
-    elif columm > 573:
-        columm = columm[3]    
-    elif columm > 495:
-        columm = columm[2] 
-    elif columm > 411:
-        columm = columm[1] 
-    else:
-        columm = columm[0] 
-
-    if row > 657:
-        row = row[4]
-    elif row > 573:
-        row = row[3]    
-    elif row > 495:
-        row = row[2] 
-    elif row > 411:
-        row = row[1] 
-    else:
-        row = row[0] 
+# collumn = [320, 411, 495, 573, 657]  # x
+# row = [166, 267, 357, 429, 547]      # y
+# grid_list = [
+#     {collumn[0], row[0], "one"},
+#     {collumn[1], row[1], "two"},
+#     {collumn[2], row[2], "three"},
+#     {collumn[3], row[3], "four"},
+#     {collumn[4], row[4], "five"}
+# ]
+#
+#
+# def check_grid(event_pos):
+#     if columm > 657:
+#         columm = columm[4]
+#     elif columm > 573:
+#         columm = columm[3]
+#     elif columm > 495:
+#         columm = columm[2]
+#     elif columm > 411:
+#         columm = columm[1]
+#     else:
+#         columm = columm[0]
+#
+#     if row > 657:
+#         row = row[4]
+#     elif row > 573:
+#         row = row[3]
+#     elif row > 495:
+#         row = row[2]
+#     elif row > 411:
+#         row = row[1]
+#     else:
+#         row = row[0]
 
 
 # result_1, result_2 = check_grid(event_pos) 
@@ -270,11 +273,11 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN and white_rectangle.collidepoint(event.pos):
             game_start = True
 
-        #zombie
+        # zombie
         if event.type == zombie_timer and game_start:
-            zombie_groups.add(Zombie(choice(['naruto', 'naruto', 'sasuke', 'sasuke', 'kakashi']),
-                                     position_list_y=y_coordinate))
-        #drag pokemon
+            zombie_groups.add(Zombie((choice(zombie_choice)), y_coordinate))
+
+        # drag pokemon
         if event.type == pygame.MOUSEBUTTONDOWN:
             if machine_card_rectangle.collidepoint(event.pos):
                 active_pokemon = 'machine'
@@ -288,18 +291,18 @@ while True:
                 if active_pokemon == 'machine':
                     num_ball -= 50
                     if not machine_card_rectangle.colliderect(machine_card_initial_position + (68, 83)):
-                        check_grid(event.pos)
-                        
+                        # check_grid(event.pos)
+
                         machine_card_rectangle.topleft = initial_machine_position  # Snap back to initial position
                 elif active_pokemon == 'pikachu':
                     num_ball -= 150
                     if not pikachu_card_rectangle.colliderect(pikachu_card_initial_position + (68, 83)):
-                        check_grid(event.pos)
+                        # check_grid(event.pos)
                         pikachu_card_rectangle.topleft = initial_pikachu_position  # Snap back to initial position
                 elif active_pokemon == 'squirtle':
                     num_ball -= 100
                     if not squirtle_card_rectangle.colliderect(squirtle_card_initial_position + (68, 83)):
-                        check_grid(event.pos)
+                        # check_grid(event.pos)
                         squirtle_card_rectangle.topleft = initial_squirtle_position  # Snap back to initial position
 
                 active_pokemon = None
@@ -341,11 +344,7 @@ while True:
     minutes = remaining_time // 60000
     seconds = (remaining_time % 60000) // 1000
 
-    pygame.display.flip()
     pygame.display.update()
+    pygame.display.flip() #redraw the screen
 
     clock.tick(60)
-
-
-
- 

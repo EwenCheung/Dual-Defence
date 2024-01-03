@@ -95,9 +95,7 @@ pygame.init()  # starting code
 screen = pygame.display.set_mode((1000, 600))  # screen size
 pygame.display.set_caption('Pokemon vs Naruto')  # title name
 clock = pygame.time.Clock()
-game_active = True
-# bg_music = pygame.mixer.Sound('audio/Plants vs. Zombies (Main Theme).mp3')
-# bg_music.play(loops=-1)
+
 
 # load images
 naruto_frames = [pygame.image.load('Picture/naruto/naruto_walk_1.png').convert_alpha(),
@@ -171,33 +169,48 @@ background_fp = create_file_path('Picture/game_background_pokemon.png')
 background_surface = pygame.image.load(background_fp).convert()
 background_surface = pygame.transform.scale(background_surface, (1000, 600))
 
+machine_card_initial_position = (120, 8)
+pikachu_card_initial_position = (191, 8)
+squirtle_card_initial_position = (262, 8)
+
 machine_card_fp = create_file_path('Picture/machine_card.png')
 machine_card_surface = pygame.image.load(machine_card_fp).convert()
 machine_card_surface = pygame.transform.scale(machine_card_surface, (68, 83))
-machine_card_rectangle = machine_card_surface.get_rect(topleft=(120, 8))
+machine_card_rectangle = machine_card_surface.get_rect(topleft=machine_card_initial_position)
 
 pikachu_card_fp = create_file_path('Picture/pikachu_card.png')
 pikachu_card_surface = pygame.image.load(pikachu_card_fp).convert()
 pikachu_card_surface = pygame.transform.scale(pikachu_card_surface, (68, 83))
-pikachu_card_rectangle = pikachu_card_surface.get_rect(topleft=(191, 8))
+pikachu_card_rectangle = pikachu_card_surface.get_rect(topleft=pikachu_card_initial_position)
 
 squirtle_card_fp = create_file_path('Picture/squirtle_card.png')
 squirtle_card_surface = pygame.image.load(squirtle_card_fp).convert()
 squirtle_card_surface = pygame.transform.scale(squirtle_card_surface, (68, 83))
-squirtle_card_rectangle = squirtle_card_surface.get_rect(topleft=(262, 8))
+squirtle_card_rectangle = squirtle_card_surface.get_rect(topleft=squirtle_card_initial_position)
+
+# wood_box_rectangle = pygame.Rect(700, 0, 325, 60)  # (x,y,width,height)
+# text_timer = font.render(None, True, 'white')
+# wood_box = pygame.draw.rect(screen, wood_color, wood_box_rectangle)
+# text_timer_rectangle = text_timer.get_rect(center=wood_box_rectangle.center)
 
 num_ball = 10000
 num_ball_font = pygame.font.Font(None, 30)
 num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
 num_ball_rectangle = num_ball_surface.get_rect(center=(65, 85))
 
-#coordinate
-y_coordinate =[175, 260, 355, 444, 528]
+# coordinate
+y_coordinate = [175, 260, 355, 444, 528]
+
+# choice of zombie
+zombie_choice = ['naruto', 'naruto', 'sasuke', 'sasuke', 'kakashi']
 
 # set up Zombie timer
 zombie_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(zombie_timer, 1500)
 
+# bg_music = pygame.mixer.Sound('audio/Plants vs. Zombies (Main Theme).mp3')
+# bg_music.play(loops=-1)
+game_active = True
 game_start = False
 active_pokemon = None
 
@@ -211,12 +224,11 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN and white_rectangle.collidepoint(event.pos):
             game_start = True
 
-        #zombie
+        # zombie
         if event.type == zombie_timer and game_start:
-            zombie_groups.add(Zombie(choice(['naruto', 'naruto', 'sasuke', 'sasuke', 'kakashi']),
-                                     position_list_y=y_coordinate))
+            zombie_groups.add(Zombie((choice(zombie_choice)), y_coordinate))
 
-        #drag pokemon
+        # choose pokemon
         if event.type == pygame.MOUSEBUTTONDOWN:
             if machine_card_rectangle.collidepoint(event.pos):
                 active_pokemon = 'machine'
@@ -225,18 +237,7 @@ while True:
             elif squirtle_card_rectangle.collidepoint(event.pos):
                 active_pokemon = 'squirtle'
 
-        if event.type == pygame.MOUSEBUTTONUP:
-            if active_pokemon is not None:
-                if active_pokemon == 'machine':
-                    num_ball -= 50
-                elif active_pokemon == 'pikachu':
-                    num_ball -= 150
-                elif active_pokemon == 'squirtle':
-                    num_ball -= 100
-
-
-                active_pokemon = None
-
+        # drag pokemon
         if active_pokemon == 'machine' and event.type == pygame.MOUSEMOTION:
             # Move the card by the mouse motion offset
             machine_card_rectangle.move_ip(event.rel)
@@ -249,7 +250,25 @@ while True:
             # Move the card by the mouse motion offset
             squirtle_card_rectangle.move_ip(event.rel)
 
+        # pokemon released and back to the initial position
+        if event.type == pygame.MOUSEBUTTONUP:
+            if active_pokemon is not None:
+                if active_pokemon == 'machine':
+                    num_ball -= 50
+                    if not machine_card_rectangle.colliderect(machine_card_initial_position + (1, 1)):
+                        machine_card_rectangle.topleft = machine_card_initial_position  # Snap back to initial position
 
+                elif active_pokemon == 'pikachu':
+                    num_ball -= 150
+                    if not pikachu_card_rectangle.colliderect(pikachu_card_initial_position + (1, 1)):
+                        pikachu_card_rectangle.topleft = pikachu_card_initial_position  # Snap back to initial position
+
+                elif active_pokemon == 'squirtle':
+                    num_ball -= 100
+                    if not squirtle_card_rectangle.colliderect(squirtle_card_initial_position + (1, 1)):
+                        squirtle_card_rectangle.topleft = squirtle_card_initial_position  # Snap back to initial position
+
+                active_pokemon = None
 
     if game_active:
         screen.blit(white_surface, white_rectangle)
@@ -270,22 +289,6 @@ while True:
         num_ball = max(0, num_ball)
 
     pygame.display.update()
-    clock.tick(60)
+    pygame.display.flip() #redraw the screen
 
-# both
-# line (x,y)
-# zombie
-# xueliang
-# yidong shudu
-
-# sound effect (last)
-
-# pokemon
-# pikachu(pen dian)
-# shui wa (pen shui )
-# machine ( tai yang hua) (create ball)
-
-
-# def zombie( ):
-
-# zombie ( xuelieang  , mibgzi , zhao pian,shudu)
+    clock.tick(50)
