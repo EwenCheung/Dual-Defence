@@ -188,11 +188,6 @@ squirtle_card_surface = pygame.image.load(squirtle_card_fp).convert()
 squirtle_card_surface = pygame.transform.scale(squirtle_card_surface, (68, 83))
 squirtle_card_rectangle = squirtle_card_surface.get_rect(topleft=squirtle_card_initial_position)
 
-# wood_box_rectangle = pygame.Rect(700, 0, 325, 60)  # (x,y,width,height)
-# text_timer = font.render(None, True, 'white')
-# wood_box = pygame.draw.rect(screen, wood_color, wood_box_rectangle)
-# text_timer_rectangle = text_timer.get_rect(center=wood_box_rectangle.center)
-
 num_ball = 10000
 num_ball_font = pygame.font.Font(None, 30)
 num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
