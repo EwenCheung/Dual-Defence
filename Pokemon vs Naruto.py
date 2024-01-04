@@ -93,6 +93,67 @@ pygame.init()
 pygame.display.set_caption('Pokemon vs Naruto')  # title name
 pygame.display.set_mode((1000, 600))
 
+class Plant(pygame.sprite.Sprite):
+    # center coordinate for each box
+    # x = [325, 410, 495, 586, 670]
+    # y = [172, 260, 355, 445, 532]
+    grid_coor = [(325, 172), (325, 260), (325, 355), (325, 445), (325, 532),
+                 (410, 172), (410, 260), (410, 355), (410, 445), (410, 532),
+                 (495, 172), (495, 260), (495, 355), (495, 445), (495, 532),
+                 (586, 172), (586, 260), (586, 355), (586, 445), (586, 532),
+                 (670, 172), (670, 260), (670, 355), (670, 445), (670, 532)]
+
+    # plant
+    MACHINE_FRAMES = [pygame.image.load('Picture/machine/machine_1.jpeg').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_2.jpeg').convert_alpha()]
+
+    SQUIRTLE_FRAMES = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
+                       pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha(),
+                       pygame.image.load('Picture/squirtle/squirtle_3.png').convert_alpha(),
+                       pygame.image.load('Picture/squirtle/squirtle_4.png').convert_alpha()]
+
+    PIKACHU_FRAMES = [pygame.image.load('Picture/pikachu/pikachu_1.png').convert_alpha(),
+                      pygame.image.load('Picture/pikachu/pikachu_2.png').convert_alpha(),
+                      pygame.image.load('Picture/pikachu/pikachu_3.png').convert_alpha(),
+                      pygame.image.load('Picture/pikachu/pikachu_4.png').convert_alpha()]
+
+    def __init__(self, plant_type):
+        super().__init__()
+
+        self.plant_type = plant_type
+
+        if plant_type == 'machine':
+            self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.MACHINE_FRAMES]
+            self.health = 100
+            self.damage = 0
+        elif plant_type == 'pikachu':
+            self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.PIKACHU_FRAMES]
+            self.health = 200
+            self.damage = 25
+        elif plant_type == 'squirtle':
+            self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.SQUIRTLE_FRAMES]
+            self.health = 150
+            self.damage = 20
+        else:
+            print('No plant found')
+
+        self.animation_index = 0
+        self.image = self.frames[self.animation_index]
+        self.rect = self.image.get_rect(center=(choice(self.grid_coor)))
+
+    def update_animation_state(self):
+        self.animation_index += 0.1
+        if self.animation_index >= len(self.frames):
+            self.animation_index = 0
+        self.image = self.frames[int(self.animation_index)]
+
+    def update(self):
+        self.update_animation_state()
+
+    def being_attack(self, damage):
+        self.health -= damage
+        if self.health == 0:
+            self.kill()
 
 class Ninja(pygame.sprite.Sprite):
     # load images
@@ -111,20 +172,21 @@ class Ninja(pygame.sprite.Sprite):
     def __init__(self, ninja_type):
         super().__init__()
         # speed cannot be lower than 0.6 , if not ninja will not spawn
+        self.ninja_type = ninja_type
         self.speed = 1
 
         if ninja_type == 'naruto':
-            self.frames = [pygame.transform.scale(frame, (84, 40)) for frame in self.NARUTO_FRAMES]
+            self.frames = [pygame.transform.scale(frame, (84, 45)) for frame in self.NARUTO_FRAMES]
         elif ninja_type == 'sasuke':
-            self.frames = [pygame.transform.scale(frame, (84, 40)) for frame in self.SASUKE_FRAMES]
+            self.frames = [pygame.transform.scale(frame, (75, 55)) for frame in self.SASUKE_FRAMES]
         elif ninja_type == 'kakashi':
-            self.frames = [pygame.transform.scale(frame, (84, 40)) for frame in self.KAKASHI_FRAMES]
+            self.frames = [pygame.transform.scale(frame, (90, 60)) for frame in self.KAKASHI_FRAMES]
             self.speed = 2
         else:
             print('No ninja found')
 
         # spawn at these position
-        self.position_list_y = [175, 260, 355, 444, 528]
+        self.position_list_y = [172, 260, 355, 445, 532]
 
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
@@ -152,12 +214,16 @@ class Game():
         self.set_up()  # set up surface and rectangle etc
         self.before_press_start = True
         self.after_press_start = False
-        self.active_pokemon = None
+        self.chosen_pokemon = None
+
         # Groups
         self.ninja_groups = pygame.sprite.Group()
+        self.plant_groups = pygame.sprite.Group()
+
         # set up Ninja timer
         self.ninja_timer = pygame.USEREVENT + 1
         pygame.time.set_timer(self.ninja_timer, 1500)
+
         # choice of ninja
         self.ninja_choice = ['naruto', 'sasuke', 'kakashi', 'naruto', 'sasuke']
 
@@ -215,41 +281,42 @@ class Game():
             # choose pokemon
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.machine_card_rectangle.collidepoint(event.pos):
-                    self.active_pokemon = 'machine'
+                    self.chosen_pokemon = 'machine'
                 elif self.pikachu_card_rectangle.collidepoint(event.pos):
-                    self.active_pokemon = 'pikachu'
+                    self.chosen_pokemon = 'pikachu'
                 elif self.squirtle_card_rectangle.collidepoint(event.pos):
-                    self.active_pokemon = 'squirtle'
+                    self.chosen_pokemon = 'squirtle'
 
             # drag pokemon
-            if self.active_pokemon and event.type == pygame.MOUSEMOTION:
+            if self.chosen_pokemon and event.type == pygame.MOUSEMOTION:
                 # card follow the mouse pos
-                if self.active_pokemon == 'machine':
+                if self.chosen_pokemon == 'machine':
                     self.machine_card_rectangle.move_ip(event.rel)
-                elif self.active_pokemon == 'pikachu':
+                elif self.chosen_pokemon == 'pikachu':
                     self.pikachu_card_rectangle.move_ip(event.rel)
-                elif self.active_pokemon == 'squirtle':
+                elif self.chosen_pokemon == 'squirtle':
                     self.squirtle_card_rectangle.move_ip(event.rel)
 
             # pokemon released and back to the initial position
             if event.type == pygame.MOUSEBUTTONUP:
-                if self.active_pokemon is not None:
-                    if self.active_pokemon == 'machine':
+                if self.chosen_pokemon is not None:
+                    if self.chosen_pokemon == 'machine':
                         self.num_ball -= 50
                         if not self.machine_card_rectangle.colliderect(self.machine_card_initial_position + (1, 1)):
                             self.machine_card_rectangle.topleft = self.machine_card_initial_position  # Snap back to initial position
 
-                    elif self.active_pokemon == 'pikachu':
+                    elif self.chosen_pokemon == 'pikachu':
                         self.num_ball -= 150
                         if not self.pikachu_card_rectangle.colliderect(self.pikachu_card_initial_position + (1, 1)):
                             self.pikachu_card_rectangle.topleft = self.pikachu_card_initial_position  # Snap back to initial position
 
-                    elif self.active_pokemon == 'squirtle':
+                    elif self.chosen_pokemon == 'squirtle':
                         self.num_ball -= 100
                         if not self.squirtle_card_rectangle.colliderect(self.squirtle_card_initial_position + (1, 1)):
                             self.squirtle_card_rectangle.topleft = self.squirtle_card_initial_position  # Snap back to initial position
 
-                    self.active_pokemon = None
+                    self.plant_groups.add(Plant(self.chosen_pokemon))
+                    self.chosen_pokemon = None
 
     def game_start(self):
         if self.before_press_start:
@@ -268,6 +335,9 @@ class Game():
             self.ninja_groups.draw(self.screen)
             self.ninja_groups.update()
 
+            self.plant_groups.draw(self.screen)
+            self.plant_groups.update()
+
     def run(self):
         while True:
             # CLear screen
@@ -283,7 +353,6 @@ class Game():
             pygame.display.flip()  # redraw the screen
 
             self.clock.tick(60)
-
 
 if __name__ == "__main__":
     Game().run()
