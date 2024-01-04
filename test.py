@@ -117,22 +117,18 @@ kakashi_frames = [pygame.transform.scale(frame, (84, 40)) for frame in kakashi_f
 
 class Plant(pygame.sprite.Sprite):
     #plant
-    machine_frames = [pygame.image.load('Picture/machine/machine_1.png').convert_alpha(),
+    MACHINE_FRAMES = [pygame.image.load('Picture/machine/machine_1.png').convert_alpha(),
                     pygame.image.load('Picture/machine/machine_2.png').convert_alpha()]
 
-    pikachu_frames = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
+    PIKACHU_FRAMES = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
                     pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha(),
                     pygame.image.load('Picture/squirtle/squirtle_3.png').convert_alpha(),
                     pygame.image.load('Picture/squirtle/squirtle_4.png').convert_alpha()]
 
-    squirtle_frames = [pygame.image.load('Picture/pikachu/pikachu_1.png').convert_alpha(),
+    SQUIRTLE_FRAMES = [pygame.image.load('Picture/pikachu/pikachu_1.png').convert_alpha(),
                     pygame.image.load('Picture/pikachu/pikachu_2.png').convert_alpha(),
                     pygame.image.load('Picture/pikachu/pikachu_3.png').convert_alpha(),
                     pygame.image.load('Picture/pikachu/pikachu_4.png').convert_alpha()]
-
-    machine_frames = [pygame.transform.scale(frame, (84, 40)) for frame in machine_frames]
-    pikachu_frames = [pygame.transform.scale(frame, (84, 40)) for frame in pikachu_frames]
-    squirtle_frames = [pygame.transform.scale(frame, (84, 40)) for frame in squirtle_frames]
 
     def __init__(self, health, damage, plant_type):
          
@@ -141,19 +137,28 @@ class Plant(pygame.sprite.Sprite):
         self.plant_type = plant_type
          
         if plant_type == 'machine':
-            self.frames = self.machine_frames
-
+            self.frames = [pygame.transform.scale(frame, (84, 40)) for frame in self.MACHINE_FRAMES]
         elif plant_type == 'pikachu':
-            self.frames = self.pikachu_frames
-
+            self.frames = [pygame.transform.scale(frame, (84, 40)) for frame in self.PIKACHU_FRAMES]
+        elif plant_type == 'squirtle':
+            self.frames = [pygame.transform.scale(frame, (84, 40)) for frame in self.SQUIRTLE_FRAMES]
         else:
-            self.frames = self.squirtle_frames
+            print('No plant found')
 
         self.frames = [pygame.transform.scale(frame, (84, 40)) for frame in self.frames]
 
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
         self.rect = self.image.get_rect()
+
+    def update_animation_state(self):
+        self.animation_index += 0.1
+        if self.animation_index >= len(self.frames):
+            self.animation_index = 0
+        self.image = self.frames[int(self.animation_index)]
+
+    def update(self):
+        self.update_animation_state()
 
     def being_attack(self, damage):
         self.health -= damage
@@ -163,9 +168,9 @@ class Plant(pygame.sprite.Sprite):
     def dead(self):
         self.kill()
 
-    machine_frames = Plant(100, None, 'machine')
-    pikachu_frames = Plant(200, 25, 'pikachu')
-    squirtle_frames = Plant(150, 20, 'squirtle')
+MACHINE_FRAMES = Plant(100, None, 'machine')
+PIKACHU_FRAMES = Plant(200, 25, 'pikachu')
+SQUIRTLE_FRAMES = Plant(150, 20, 'squirtle')
     
 class Zombie(pygame.sprite.Sprite):
     def __init__(self, type, position_list_y):
