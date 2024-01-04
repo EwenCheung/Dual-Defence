@@ -3,7 +3,6 @@
 # block 3 to 12 is on creating file path
 import os
 
-
 def create_file_path(file):
     # Get the directory of the current script
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -147,9 +146,46 @@ class Zombie(pygame.sprite.Sprite):
         self.animation_state()
         self.rect.x -= self.speed
 
+class Ball(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        pokemon_ball_surf = pygame.image.load('Picture/pokemon/poke_ball.png').convert_alpha()
+        self.image = pygame.transform.scale(pokemon_ball_surf,(50,38))
+        self.rect = self.image.get_rect(midbottom=(randint(265, 800), randint(-150,-50)))
+
+        self.x_speed = 7
+        self.y_speed = 2.5
+        self.is_killed = False
+
+    def apply_speed(self):
+        if self.rect.y < 550 :
+            self.rect.x += choice([-1, 1,0,0,0,0,0,0]) * self.x_speed
+            self.rect.y += choice([self.y_speed, 0, 0,0,0,0,0])
+
+
+    def player_input(self):
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):
+                self.is_killed = True
+                global num_ball
+                num_ball += 50
+
+    def update(self):
+        self.apply_speed()
+        self.player_input()
+        if self.is_killed:
+            self.reset_position()
+
+    def reset_position(self):
+        self.rect.x = randint(250,800)
+        self.rect.y = randint(-150,-50)
+        self.is_killed = False
 
 # Groups
 zombie_groups = pygame.sprite.Group()
+
+ball = pygame.sprite.Group()
+ball.add(Ball())
 
 # Set up surface and rectangle
 welcome_fp = create_file_path('Picture/welcome.png')
@@ -192,8 +228,7 @@ num_ball = 10000
 num_ball_font = pygame.font.Font(None, 30)
 num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
 num_ball_rectangle = num_ball_surface.get_rect(center=(65, 85))
-
-# coordinate
+ 
 y_coordinate = [175, 260, 355, 444, 528]
 
 # choice of zombie
@@ -202,6 +237,9 @@ zombie_choice = ['naruto', 'naruto', 'sasuke', 'sasuke', 'kakashi']
 # set up Zombie timer
 zombie_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(zombie_timer, 1500)
+
+ball_timer = pygame.USEREVENT + 2
+pygame.time.set_timer(ball_timer,15,000)
 
 # bg_music = pygame.mixer.Sound('audio/Plants vs. Zombies (Main Theme).mp3')
 # bg_music.play(loops=-1)
@@ -271,17 +309,21 @@ while True:
         screen.blit(username_surface, username_rectangle)
 
         if game_start:
+            num_ball = max(0, num_ball)
             num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
             screen.blit(background_surface, (0, 0))
             screen.blit(machine_card_surface, machine_card_rectangle)
             screen.blit(pikachu_card_surface, pikachu_card_rectangle)
             screen.blit(squirtle_card_surface, squirtle_card_rectangle)
+
+            #move the pokemon ball
             screen.blit(num_ball_surface, num_ball_rectangle)
+
+            ball.draw(screen)
+            ball.update()
 
             zombie_groups.draw(screen)
             zombie_groups.update()
-
-        num_ball = max(0, num_ball)
 
     pygame.display.update()
     pygame.display.flip() #redraw the screen
