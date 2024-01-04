@@ -3,6 +3,7 @@
 # block 3 to 12 is on creating file path
 import os
 
+
 def create_file_path(file):
     # Get the directory of the current script
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -94,32 +95,78 @@ pygame.init()  # starting code
 screen = pygame.display.set_mode((1000, 600))  # screen size
 pygame.display.set_caption('Pokemon vs Naruto')  # title name
 clock = pygame.time.Clock()
-game_active = True
 
-font = pygame.font.Font(None, 36)
-black = (0, 0, 0)
-wood_color = (156, 102, 31)
-countdown_duration = 960000
-start_time = pygame.time.get_ticks()
 
 # load images
+#zombie
 naruto_frames = [pygame.image.load('Picture/naruto/naruto_walk_1.png').convert_alpha(),
                  pygame.image.load('Picture/naruto/naruto_walk_2.png').convert_alpha(),
                  pygame.image.load('Picture/naruto/naruto_walk_3.png').convert_alpha()]
 
-sasuke_frame = [pygame.image.load('Picture/sasuke/sasuke_walk_1.png').convert_alpha(),
+sasuke_frames = [pygame.image.load('Picture/sasuke/sasuke_walk_1.png').convert_alpha(),
                 pygame.image.load('Picture/sasuke/sasuke_walk_2.png').convert_alpha(),
                 pygame.image.load('Picture/sasuke/sasuke_walk_3.png').convert_alpha()]
 
-kakashi_frame = [pygame.image.load('Picture/kakashi/kakashi_run_1.png').convert_alpha(),
+kakashi_frames = [pygame.image.load('Picture/kakashi/kakashi_run_1.png').convert_alpha(),
                  pygame.image.load('Picture/kakashi/kakashi_run_2.png').convert_alpha(),
                  pygame.image.load('Picture/kakashi/kakashi_run_3.png').convert_alpha()]
 
 naruto_frames = [pygame.transform.scale(frame, (84, 40)) for frame in naruto_frames]
-sasuke_frame = [pygame.transform.scale(frame, (84, 40)) for frame in sasuke_frame]
-kakashi_frame = [pygame.transform.scale(frame, (84, 40)) for frame in kakashi_frame]
+sasuke_frames = [pygame.transform.scale(frame, (84, 40)) for frame in sasuke_frames]
+kakashi_frames = [pygame.transform.scale(frame, (84, 40)) for frame in kakashi_frames]
 
+class Plant(pygame.sprite.Sprite):
+    #plant
+    machine_frames = [pygame.image.load('Picture/machine/machine_1.png').convert_alpha(),
+                    pygame.image.load('Picture/machine/machine_2.png').convert_alpha()]
 
+    pikachu_frames = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
+                    pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha(),
+                    pygame.image.load('Picture/squirtle/squirtle_3.png').convert_alpha(),
+                    pygame.image.load('Picture/squirtle/squirtle_4.png').convert_alpha()]
+
+    squirtle_frames = [pygame.image.load('Picture/pikachu/pikachu_1.png').convert_alpha(),
+                    pygame.image.load('Picture/pikachu/pikachu_2.png').convert_alpha(),
+                    pygame.image.load('Picture/pikachu/pikachu_3.png').convert_alpha(),
+                    pygame.image.load('Picture/pikachu/pikachu_4.png').convert_alpha()]
+
+    machine_frames = [pygame.transform.scale(frame, (84, 40)) for frame in machine_frames]
+    pikachu_frames = [pygame.transform.scale(frame, (84, 40)) for frame in pikachu_frames]
+    squirtle_frames = [pygame.transform.scale(frame, (84, 40)) for frame in squirtle_frames]
+
+    def __init__(self, health, damage, plant_type):
+         
+        self.health = health
+        self.damage = damage
+        self.plant_type = plant_type
+         
+        if plant_type == 'machine':
+            self.frames = self.machine_frames
+
+        elif plant_type == 'pikachu':
+            self.frames = self.pikachu_frames
+
+        else:
+            self.frames = self.squirtle_frames
+
+        self.frames = [pygame.transform.scale(frame, (84, 40)) for frame in self.frames]
+
+        self.animation_index = 0
+        self.image = self.frames[self.animation_index]
+        self.rect = self.image.get_rect()
+
+    def being_attack(self, damage):
+        self.health -= damage
+        if self.health == 0:
+            self.dead()
+
+    def dead(self):
+        self.kill()
+
+    machine_frames = Plant(100, None, 'machine')
+    pikachu_frames = Plant(200, 25, 'pikachu')
+    squirtle_frames = Plant(150, 20, 'squirtle')
+    
 class Zombie(pygame.sprite.Sprite):
     def __init__(self, type, position_list_y):
         super().__init__()
@@ -130,10 +177,10 @@ class Zombie(pygame.sprite.Sprite):
             self.frames = naruto_frames
 
         elif type == 'sasuke':
-            self.frames = sasuke_frame
+            self.frames = sasuke_frames
 
         else:
-            self.frames = kakashi_frame
+            self.frames = kakashi_frames
             self.speed = 2
 
         self.position_list_y = position_list_y
@@ -157,10 +204,6 @@ class Zombie(pygame.sprite.Sprite):
 zombie_groups = pygame.sprite.Group()
 
 # Set up surface and rectangle
-machine_card_initial_position = (120, 8)
-pikachu_card_initial_position = (191, 8)
-squirtle_card_initial_position = (262, 8)
-
 welcome_fp = create_file_path('Picture/welcome.png')
 welcome_surface = pygame.image.load(welcome_fp).convert()
 welcome_surface = pygame.transform.scale(welcome_surface, (1000, 600))
@@ -178,6 +221,10 @@ background_fp = create_file_path('Picture/game_background_pokemon.png')
 background_surface = pygame.image.load(background_fp).convert()
 background_surface = pygame.transform.scale(background_surface, (1000, 600))
 
+machine_card_initial_position = (120, 8)
+pikachu_card_initial_position = (191, 8)
+squirtle_card_initial_position = (262, 8)
+
 machine_card_fp = create_file_path('Picture/machine_card.png')
 machine_card_surface = pygame.image.load(machine_card_fp).convert()
 machine_card_surface = pygame.transform.scale(machine_card_surface, (68, 83))
@@ -193,23 +240,17 @@ squirtle_card_surface = pygame.image.load(squirtle_card_fp).convert()
 squirtle_card_surface = pygame.transform.scale(squirtle_card_surface, (68, 83))
 squirtle_card_rectangle = squirtle_card_surface.get_rect(topleft=squirtle_card_initial_position)
 
+
+
+# wood_box_rectangle = pygame.Rect(700, 0, 325, 60)  # (x,y,width,height)
+# text_timer = font.render(None, True, 'white')
+# wood_box = pygame.draw.rect(screen, wood_color, wood_box_rectangle)
+# text_timer_rectangle = text_timer.get_rect(center=wood_box_rectangle.center)
+
 num_ball = 10000
 num_ball_font = pygame.font.Font(None, 30)
 num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
 num_ball_rectangle = num_ball_surface.get_rect(center=(65, 85))
-
-wood_box_rectangle = pygame.Rect(700, 0, 325, 60)  # (x,y,width,height)
-text_timer = font.render(None, True, 'white')
-wood_box = pygame.draw.rect(screen, wood_color, wood_box_rectangle)
-text_timer_rectangle = text_timer.get_rect(center=wood_box_rectangle.center)
-
-initial_machine_position = list(machine_card_initial_position)
-initial_pikachu_position = list(pikachu_card_initial_position)
-initial_squirtle_position = list(squirtle_card_initial_position)
-
-machine_card_rectangle.topleft = machine_card_initial_position
-pikachu_card_rectangle.topleft = pikachu_card_initial_position
-squirtle_card_rectangle.topleft = squirtle_card_initial_position
 
 # coordinate
 y_coordinate = [175, 260, 355, 444, 528]
@@ -221,47 +262,11 @@ zombie_choice = ['naruto', 'naruto', 'sasuke', 'sasuke', 'kakashi']
 zombie_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(zombie_timer, 1500)
 
+# bg_music = pygame.mixer.Sound('audio/Plants vs. Zombies (Main Theme).mp3')
+# bg_music.play(loops=-1)
+game_active = True
 game_start = False
 active_pokemon = None
-
-# collumn = [320, 411, 495, 573, 657]  # x
-# row = [166, 267, 357, 429, 547]      # y
-# grid_list = [
-#     {collumn[0], row[0], "one"},
-#     {collumn[1], row[1], "two"},
-#     {collumn[2], row[2], "three"},
-#     {collumn[3], row[3], "four"},
-#     {collumn[4], row[4], "five"}
-# ]
-#
-#
-# def check_grid(event_pos):
-#     if columm > 657:
-#         columm = columm[4]
-#     elif columm > 573:
-#         columm = columm[3]
-#     elif columm > 495:
-#         columm = columm[2]
-#     elif columm > 411:
-#         columm = columm[1]
-#     else:
-#         columm = columm[0]
-#
-#     if row > 657:
-#         row = row[4]
-#     elif row > 573:
-#         row = row[3]
-#     elif row > 495:
-#         row = row[2]
-#     elif row > 411:
-#         row = row[1]
-#     else:
-#         row = row[0]
-
-
-# result_1, result_2 = check_grid(event_pos) 
-# plant_at result_1, result_2
-
 
 while True:
     # Event handling
@@ -277,7 +282,7 @@ while True:
         if event.type == zombie_timer and game_start:
             zombie_groups.add(Zombie((choice(zombie_choice)), y_coordinate))
 
-        # drag pokemon
+        # choose pokemon
         if event.type == pygame.MOUSEBUTTONDOWN:
             if machine_card_rectangle.collidepoint(event.pos):
                 active_pokemon = 'machine'
@@ -286,27 +291,7 @@ while True:
             elif squirtle_card_rectangle.collidepoint(event.pos):
                 active_pokemon = 'squirtle'
 
-        if event.type == pygame.MOUSEBUTTONUP:
-            if active_pokemon is not None:
-                if active_pokemon == 'machine':
-                    num_ball -= 50
-                    if not machine_card_rectangle.colliderect(machine_card_initial_position + (68, 83)):
-                        # check_grid(event.pos)
-
-                        machine_card_rectangle.topleft = initial_machine_position  # Snap back to initial position
-                elif active_pokemon == 'pikachu':
-                    num_ball -= 150
-                    if not pikachu_card_rectangle.colliderect(pikachu_card_initial_position + (68, 83)):
-                        # check_grid(event.pos)
-                        pikachu_card_rectangle.topleft = initial_pikachu_position  # Snap back to initial position
-                elif active_pokemon == 'squirtle':
-                    num_ball -= 100
-                    if not squirtle_card_rectangle.colliderect(squirtle_card_initial_position + (68, 83)):
-                        # check_grid(event.pos)
-                        squirtle_card_rectangle.topleft = initial_squirtle_position  # Snap back to initial position
-
-                active_pokemon = None
-
+        # drag pokemon
         if active_pokemon == 'machine' and event.type == pygame.MOUSEMOTION:
             # Move the card by the mouse motion offset
             machine_card_rectangle.move_ip(event.rel)
@@ -319,6 +304,26 @@ while True:
             # Move the card by the mouse motion offset
             squirtle_card_rectangle.move_ip(event.rel)
 
+        # pokemon released and back to the initial position
+        if event.type == pygame.MOUSEBUTTONUP:
+            if active_pokemon is not None:
+                if active_pokemon == 'machine':
+                    num_ball -= 50
+                    if not machine_card_rectangle.colliderect(machine_card_initial_position + (1, 1)):
+                        machine_card_rectangle.topleft = machine_card_initial_position  # Snap back to initial position
+
+                elif active_pokemon == 'pikachu':
+                    num_ball -= 150
+                    if not pikachu_card_rectangle.colliderect(pikachu_card_initial_position + (1, 1)):
+                        pikachu_card_rectangle.topleft = pikachu_card_initial_position  # Snap back to initial position
+
+                elif active_pokemon == 'squirtle':
+                    num_ball -= 100
+                    if not squirtle_card_rectangle.colliderect(squirtle_card_initial_position + (1, 1)):
+                        squirtle_card_rectangle.topleft = squirtle_card_initial_position  # Snap back to initial position
+
+                active_pokemon = None
+
     if game_active:
         screen.blit(white_surface, white_rectangle)
         screen.blit(welcome_surface, (0, 0))
@@ -326,25 +331,19 @@ while True:
 
         if game_start:
             num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
-            text_timer = font.render(f"{minutes:02}:{seconds:02}", True, black)
             screen.blit(background_surface, (0, 0))
             screen.blit(machine_card_surface, machine_card_rectangle)
             screen.blit(pikachu_card_surface, pikachu_card_rectangle)
             screen.blit(squirtle_card_surface, squirtle_card_rectangle)
             screen.blit(num_ball_surface, num_ball_rectangle)
-            screen.blit(text_timer, text_timer_rectangle.topleft)
 
             zombie_groups.draw(screen)
             zombie_groups.update()
 
-    num_ball = max(0, num_ball)
-    current_time = pygame.time.get_ticks()
-    elapsed_time = current_time - start_time
-    remaining_time = max(0, countdown_duration - elapsed_time)
-    minutes = remaining_time // 60000
-    seconds = (remaining_time % 60000) // 1000
+        num_ball = max(0, num_ball)
 
     pygame.display.update()
     pygame.display.flip() #redraw the screen
 
-    clock.tick(60)
+    clock.tick(50)
+
