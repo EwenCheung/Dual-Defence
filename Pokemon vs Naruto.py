@@ -4,6 +4,7 @@ import pygame
 from sys import exit
 from random import randint, choice
 
+
 def create_file_path(file):
     # Get the directory of the current script
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -11,6 +12,7 @@ def create_file_path(file):
     # Construct the file path relative to the current script
     file_path = os.path.join(current_dir, file)
     return file_path
+
 
 class LogInMethod():
     def __init__(self):
@@ -86,6 +88,7 @@ class LogInMethod():
             else:
                 print('Please enter the correct symbol\n')
 
+
 logged_in_user = LogInMethod().run()
 
 # have to initialise the pygame first because of loading image in class Ninja
@@ -93,16 +96,38 @@ pygame.init()
 pygame.display.set_caption('Pokemon vs Naruto')  # title name
 pygame.display.set_mode((1000, 600))
 
-class Plant(pygame.sprite.Sprite):
-    # center coordinate for each box
-    # x = [325, 410, 495, 586, 670]
-    # y = [172, 260, 355, 445, 532]
-    grid_coor = [(325, 172), (325, 260), (325, 355), (325, 445), (325, 532),
-                 (410, 172), (410, 260), (410, 355), (410, 445), (410, 532),
-                 (495, 172), (495, 260), (495, 355), (495, 445), (495, 532),
-                 (586, 172), (586, 260), (586, 355), (586, 445), (586, 532),
-                 (670, 172), (670, 260), (670, 355), (670, 445), (670, 532)]
 
+class Tools:
+    def __init__(self):
+        # center coordinate for each box
+        # x = [325, 410, 495, 586, 670, 755, 840]
+        # y = [172, 262, 352, 442, 532]
+        self.grid_coor = [[(325, 172), (325, 262), (325, 352), (325, 442), (325, 532)],
+                          [(410, 172), (410, 262), (410, 352), (410, 442), (410, 532)],
+                          [(495, 172), (495, 262), (495, 352), (495, 442), (495, 532)],
+                          [(586, 172), (586, 262), (586, 352), (586, 442), (586, 532)],
+                          [(670, 172), (670, 262), (670, 352), (670, 442), (670, 532)],
+                          [(755, 172), (755, 262), (755, 352), (755, 442), (755, 532)],
+                          [(840, 172), (840, 262), (840, 352), (840, 442), (840, 532)],
+                          [(925, 172), (925, 262), (925, 352), (925, 442), (925, 532)]]
+
+    def find_grid_coor(self, pos):
+        # check whether out of map
+        # 325 - 42 = 283 ( least x ) , 925 + 42 = 967 ( max x )
+        # 172 - 45 = 127 ( least y ) , 532 + 45 = 577 ( max x )
+        if pos[0] < 283 or pos[0] > 967 or pos[1] < 127 or pos[1] > 577:
+            return None
+        # check at which column (finding coordinate x)
+        for i, column in enumerate(self.grid_coor):
+            # cause our grid_coor is center so use + and - to get the max result
+            if self.grid_coor[i][0][0] - 42 <= pos[0] and self.grid_coor[i][0][0] + 42 >= pos[0]:
+                # check at which row (finding coordinate y), will output the coor for x and y
+                for coor in column:
+                    if coor[1] - 45 <= pos[1] and coor[1] + 45 >= pos[1]:
+                        return coor
+
+
+class Plant(pygame.sprite.Sprite):
     # plant
     MACHINE_FRAMES = [pygame.image.load('Picture/machine/machine_1.jpeg').convert_alpha(),
                       pygame.image.load('Picture/machine/machine_2.jpeg').convert_alpha()]
@@ -117,7 +142,7 @@ class Plant(pygame.sprite.Sprite):
                       pygame.image.load('Picture/pikachu/pikachu_3.png').convert_alpha(),
                       pygame.image.load('Picture/pikachu/pikachu_4.png').convert_alpha()]
 
-    def __init__(self, plant_type):
+    def __init__(self, plant_type, planting_coordinate):
         super().__init__()
 
         self.plant_type = plant_type
@@ -139,7 +164,7 @@ class Plant(pygame.sprite.Sprite):
 
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(choice(self.grid_coor)))
+        self.rect = self.image.get_rect(center=(planting_coordinate))
 
     def update_animation_state(self):
         self.animation_index += 0.1
@@ -154,6 +179,7 @@ class Plant(pygame.sprite.Sprite):
         self.health -= damage
         if self.health == 0:
             self.kill()
+
 
 class Ninja(pygame.sprite.Sprite):
     # load images
@@ -202,6 +228,7 @@ class Ninja(pygame.sprite.Sprite):
         self.update_animation_state()
         self.rect.x -= self.speed
 
+
 class Game():
     def __init__(self):
         pygame.display.set_caption('Pokemon vs Naruto')  # title name
@@ -215,6 +242,7 @@ class Game():
         self.before_press_start = True
         self.after_press_start = False
         self.chosen_pokemon = None
+        self.coordinate = None
 
         # Groups
         self.ninja_groups = pygame.sprite.Group()
@@ -298,8 +326,9 @@ class Game():
                     self.squirtle_card_rectangle.move_ip(event.rel)
 
             # pokemon released and back to the initial position
-            if event.type == pygame.MOUSEBUTTONUP:
-                if self.chosen_pokemon is not None:
+            if event.type == pygame.MOUSEBUTTONUP and self.chosen_pokemon is not None:
+                self.coordinate = Tools().find_grid_coor(event.pos)  # to plant at which coordinate
+                if self.coordinate is not None:
                     if self.chosen_pokemon == 'machine':
                         self.num_ball -= 50
                         if not self.machine_card_rectangle.colliderect(self.machine_card_initial_position + (1, 1)):
@@ -315,8 +344,24 @@ class Game():
                         if not self.squirtle_card_rectangle.colliderect(self.squirtle_card_initial_position + (1, 1)):
                             self.squirtle_card_rectangle.topleft = self.squirtle_card_initial_position  # Snap back to initial position
 
-                    self.plant_groups.add(Plant(self.chosen_pokemon))
-                    self.chosen_pokemon = None
+                    self.plant_groups.add(Plant(self.chosen_pokemon, self.coordinate))
+
+                # card snap back without deducting num_balls
+                if self.coordinate is None:
+                    if self.chosen_pokemon == 'machine':
+                        if not self.machine_card_rectangle.colliderect(self.machine_card_initial_position + (1, 1)):
+                            self.machine_card_rectangle.topleft = self.machine_card_initial_position
+
+                    elif self.chosen_pokemon == 'pikachu':
+                        if not self.pikachu_card_rectangle.colliderect(self.pikachu_card_initial_position + (1, 1)):
+                            self.pikachu_card_rectangle.topleft = self.pikachu_card_initial_position
+
+                    elif self.chosen_pokemon == 'squirtle':
+                        if not self.squirtle_card_rectangle.colliderect(self.squirtle_card_initial_position + (1, 1)):
+                            self.squirtle_card_rectangle.topleft = self.squirtle_card_initial_position
+
+                self.chosen_pokemon = None
+                self.coordinate = None
 
     def game_start(self):
         if self.before_press_start:
@@ -353,6 +398,7 @@ class Game():
             pygame.display.flip()  # redraw the screen
 
             self.clock.tick(60)
+
 
 if __name__ == "__main__":
     Game().run()
