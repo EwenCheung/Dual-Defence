@@ -96,6 +96,7 @@ screen = pygame.display.set_mode((1000, 600))  # screen size
 pygame.display.set_caption('Pokemon vs Naruto')  # title name
 clock = pygame.time.Clock()
 
+Timer_duration = 3000 #milisec
 
 # load images
 #zombie
@@ -117,8 +118,8 @@ kakashi_frames = [pygame.transform.scale(frame, (84, 40)) for frame in kakashi_f
 
 class Plant(pygame.sprite.Sprite):
     #plant
-    MACHINE_FRAMES = [pygame.image.load('Picture/machine/machine_1.png').convert_alpha(),
-                    pygame.image.load('Picture/machine/machine_2.png').convert_alpha()]
+    MACHINE_FRAMES = [pygame.image.load('Picture/machine/machine_1.jpeg').convert_alpha(),
+                     pygame.image.load('Picture/machine/machine_2.jpeg').convert_alpha()]
 
     PIKACHU_FRAMES = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
                     pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha(),
@@ -245,12 +246,12 @@ squirtle_card_surface = pygame.image.load(squirtle_card_fp).convert()
 squirtle_card_surface = pygame.transform.scale(squirtle_card_surface, (68, 83))
 squirtle_card_rectangle = squirtle_card_surface.get_rect(topleft=squirtle_card_initial_position)
 
-
-
-# wood_box_rectangle = pygame.Rect(700, 0, 325, 60)  # (x,y,width,height)
-# text_timer = font.render(None, True, 'white')
-# wood_box = pygame.draw.rect(screen, wood_color, wood_box_rectangle)
-# text_timer_rectangle = text_timer.get_rect(center=wood_box_rectangle.center)
+wood_plank = create_file_path('Picture/wood.png')
+wood_plank_surface = pygame.image.load(wood_plank).convert()
+wood_plank_surface = pygame.transform.scale(wood_plank_surface, (140, 50))
+wood_plank_rectangle = wood_plank_surface.get_rect(topleft=(850, 10))
+timer = pygame.font.Font(None, 36).render(None, True, (255, 255, 255))
+timer_rectangle = timer.get_rect(center=(890, 35))
 
 num_ball = 10000
 num_ball_font = pygame.font.Font(None, 30)
@@ -282,7 +283,8 @@ while True:
 
         if event.type == pygame.MOUSEBUTTONDOWN and white_rectangle.collidepoint(event.pos):
             game_start = True
-
+            begin_time = pygame.time.get_ticks() #this record the initial countdown and i put here coz to only program the time when user move to next page
+            
         # zombie
         if event.type == zombie_timer and game_start:
             zombie_groups.add(Zombie((choice(zombie_choice)), y_coordinate))
@@ -336,16 +338,30 @@ while True:
 
         if game_start:
             num_ball_surface = num_ball_font.render(str(num_ball), None, 'Black')
+            exact_time = pygame.time.get_ticks()
+            time_pass = exact_time - begin_time
+            remaining_time = max(0, Timer_duration - time_pass)
+            minutes = remaining_time // 60000
+            seconds = (remaining_time % 60000) // 1000
+            Timer = pygame.font.Font(None, 36).render(f"{minutes:02}:{seconds:02}", True, (255, 255, 255))
             screen.blit(background_surface, (0, 0))
             screen.blit(machine_card_surface, machine_card_rectangle)
             screen.blit(pikachu_card_surface, pikachu_card_rectangle)
             screen.blit(squirtle_card_surface, squirtle_card_rectangle)
             screen.blit(num_ball_surface, num_ball_rectangle)
+            screen.blit(wood_plank_surface, wood_plank_rectangle)
+            screen.blit(Timer, timer_rectangle)
 
             zombie_groups.draw(screen)
             zombie_groups.update()
 
-        num_ball = max(0, num_ball)
+            if remaining_time == 0:
+                screen.fill((0, 0, 0))
+                win_message = pygame.font.Font(None, 72).render("You've Won", True, (255, 255, 255))
+                win_message_rect = win_message.get_rect(center=(500, 300))
+                screen.blit(win_message, win_message_rect)
+
+        num_ball = max(0, num_ball) #dont forget this ewen
 
     pygame.display.update()
     pygame.display.flip() #redraw the screen
