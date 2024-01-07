@@ -129,8 +129,8 @@ class Tools:
 
 class Plant(pygame.sprite.Sprite):
     # plant
-    MACHINE_FRAMES = [pygame.image.load('Picture/machine/machine_1.jpeg').convert_alpha(),
-                      pygame.image.load('Picture/machine/machine_2.jpeg').convert_alpha()]
+    MACHINE_FRAMES = [pygame.image.load('Picture/machine/machine_1.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_2.png').convert_alpha()]
 
     SQUIRTLE_FRAMES = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
                        pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha(),

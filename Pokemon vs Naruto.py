@@ -72,7 +72,6 @@ class LogInMethod():
 
                 self.sign_up(input_username, input_password)
 
-
             elif log_in_method == 'I':
                 while True:
                     input_username = input('Enter your username: ').strip()
@@ -95,7 +94,6 @@ logged_in_user = LogInMethod().run()
 pygame.init()
 pygame.display.set_caption('Pokemon vs Naruto')  # title name
 pygame.display.set_mode((1000, 600))
-
 
 class Tools:
     def __init__(self):
@@ -124,8 +122,8 @@ class Tools:
                 # check at which row (finding coordinate y), will output the coor for x and y
                 for coor in column:
                     if coor[1] - 45 <= pos[1] and coor[1] + 45 >= pos[1]:
+                        # return coordinate where pokemon have to stay
                         return coor
-
 
 class Plant(pygame.sprite.Sprite):
     # plant
@@ -146,6 +144,7 @@ class Plant(pygame.sprite.Sprite):
         super().__init__()
 
         self.plant_type = plant_type
+        self.planting_coordinate = planting_coordinate
 
         if plant_type == 'machine':
             self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.MACHINE_FRAMES]
@@ -164,7 +163,7 @@ class Plant(pygame.sprite.Sprite):
 
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(planting_coordinate))
+        self.rect = self.image.get_rect(center=(self.planting_coordinate))
 
     def update_animation_state(self):
         self.animation_index += 0.1
@@ -244,6 +243,7 @@ class Game():
         self.ninja_groups = pygame.sprite.Group()
         self.plant_groups = pygame.sprite.Group()
 
+        # reset game state for play again
         self.reset_game_state()
 
         # set up Ninja timer
@@ -258,11 +258,10 @@ class Game():
         self.chosen_pokemon = None
         self.coordinate = None
         self.remaining_time = None
-        self.timer_duration = 900000  # milisec
+        self.timer_duration = 3000  # milisec
         self.ninja_groups.empty()
         self.plant_groups.empty()
         self.set_up()  # set up surface and rectangle etc
-
 
     def set_up(self):  # set up surface and rectangle etc
         welcome_fp = create_file_path('Picture/welcome.png')
@@ -459,7 +458,7 @@ class Game():
             pygame.display.update()
             pygame.display.flip()  # redraw the screen
 
-            self.clock.tick(60)
+            self.clock.tick(60) # 60 fps
 
 
 if __name__ == "__main__":
