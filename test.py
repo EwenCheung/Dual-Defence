@@ -124,6 +124,30 @@ class Tools:
                     if coor[1] - 45 <= pos[1] and coor[1] + 45 >= pos[1]:
                         # return coordinate where pokemon have to stay
                         return coor
+                    
+class PikachuPower(pygame.sprite.Sprite):
+    # Pikachu power frames
+    PIKACHU_POWER_FRAMES = [pygame.image.load('Picture/pikachu_attack.png').convert_alpha()]
+
+    def __init__(self, position):
+        super().__init__()
+
+        self.frames = [pygame.transform.scale(frame, (60, 60)) for frame in self.PIKACHU_POWER_FRAMES]
+        self.animation_index = 0
+        self.image = self.frames[self.animation_index]
+        self.rect = self.image.get_rect(center=position)
+        self.speed = 0.5  # Adjust the speed as needed
+
+    def update(self):
+        self.update_animation_state()
+        self.rect.x += self.speed  # Move the Pikachu power to the right
+
+    def update_animation_state(self):
+        self.animation_index += 0.1
+        if self.animation_index >= len(self.frames):
+            self.animation_index = 0
+        self.image = self.frames[int(self.animation_index)]
+
 
 class Plant(pygame.sprite.Sprite):
     # plant
@@ -147,12 +171,15 @@ class Plant(pygame.sprite.Sprite):
                       pygame.image.load('Picture/pikachu/pikachu_2.png').convert_alpha(),
                       pygame.image.load('Picture/pikachu/pikachu_3.png').convert_alpha(),
                       pygame.image.load('Picture/pikachu/pikachu_4.png').convert_alpha()]
+    
+    PIKACHU_POWER_FRAMES = [pygame.image.load('Picture/pikachu_attack.png').convert_alpha()]
 
     def __init__(self, plant_type, planting_coordinate):
         super().__init__()
 
         self.plant_type = plant_type
         self.planting_coordinate = planting_coordinate
+        self.pikachu_power = None
 
         if plant_type == 'machine':
             self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.MACHINE_FRAMES]
@@ -173,27 +200,29 @@ class Plant(pygame.sprite.Sprite):
         self.image = self.frames[self.animation_index]
         self.rect = self.image.get_rect(center=(self.planting_coordinate))
 
-        self.produced_item = 0
-
     def update_animation_state(self):
         self.animation_index += 0.1
         if self.animation_index >= len(self.frames):
             self.animation_index = 0
         self.image = self.frames[int(self.animation_index)]
-        
-    def produce_ball(self):
-    # Define the logic for producing a ball
-        if self.plant_type == 'machine' and int(self.animation_index) == 9 and self.produced_item is None:
-            ball_surface = pygame.Surface((20, 20), pygame.SRCALPHA)
-            pygame.draw.circle(ball_surface, (255, 0, 0), (20 // 2, 20 // 2), 10)
-            self.produced_item = ball_surface  # Set the ball surface
 
     def update(self):
         self.update_animation_state()
+        if self.plant_type == 'pikachu' and self.animation_index == len(self.frames) - 1:
+            # Create Pikachu power when at the last animation frame
+            if self.pikachu_power is None:
+                self.pikachu_power = PikachuPower(self.rect.center)
+            else:
+                # Update Pikachu power's position
+                self.pikachu_power.update()
 
-        if 0 < self.animation_index < 1 and self.produced_item is None:
-            self.produce_ball()
-        
+    def draw(self, screen):
+        # ... (your existing code)
+
+        # Draw Pikachu power
+        if self.pikachu_power is not None:
+            self.pikachu_power.draw(screen)
+
     def being_attack(self, damage):
         self.health -= damage
         if self.health == 0:
@@ -231,7 +260,7 @@ class Ninja(pygame.sprite.Sprite):
             print('No ninja found')
 
         # spawn at these position
-        self.position_list_y = [172, 260, 355, 445, 532]
+        self.position_list_y = [172, 262, 352, 442, 532]
 
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
@@ -441,9 +470,6 @@ class Game():
             self.plant_groups.draw(self.screen)
             self.plant_groups.update()
 
-            if self.plant_groups and self.plant_groups.sprites()[0].produced_item:
-                self.screen.blit(self.plant_groups.sprites()[0].produced_item,
-                                self.plant_groups.sprites()[0].rect)
 
         if self.remaining_time == 0:
             self.after_press_start = False
