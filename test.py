@@ -72,7 +72,6 @@ class LogInMethod():
 
                 self.sign_up(input_username, input_password)
 
-
             elif log_in_method == 'I':
                 while True:
                     input_username = input('Enter your username: ').strip()
@@ -96,11 +95,10 @@ pygame.init()
 pygame.display.set_caption('Pokemon vs Naruto')  # title name
 pygame.display.set_mode((1000, 600))
 
-
 class Tools:
     def __init__(self):
         # center coordinate for each box
-        # x = [325, 410, 495, 586, 670, 755, 840]
+        # x = [325, 410, 495, 586, 670, 755, 840, 925]
         # y = [172, 262, 352, 442, 532]
         self.grid_coor = [[(325, 172), (325, 262), (325, 352), (325, 442), (325, 532)],
                           [(410, 172), (410, 262), (410, 352), (410, 442), (410, 532)],
@@ -124,13 +122,21 @@ class Tools:
                 # check at which row (finding coordinate y), will output the coor for x and y
                 for coor in column:
                     if coor[1] - 45 <= pos[1] and coor[1] + 45 >= pos[1]:
+                        # return coordinate where pokemon have to stay
                         return coor
-
 
 class Plant(pygame.sprite.Sprite):
     # plant
     MACHINE_FRAMES = [pygame.image.load('Picture/machine/machine_1.png').convert_alpha(),
-                      pygame.image.load('Picture/machine/machine_2.png').convert_alpha()]
+                      pygame.image.load('Picture/machine/machine_2.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_3.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_4.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_5.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_6.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_7.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_8.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_9.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_10.png').convert_alpha()]
 
     SQUIRTLE_FRAMES = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
                        pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha(),
@@ -146,6 +152,7 @@ class Plant(pygame.sprite.Sprite):
         super().__init__()
 
         self.plant_type = plant_type
+        self.planting_coordinate = planting_coordinate
 
         if plant_type == 'machine':
             self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.MACHINE_FRAMES]
@@ -164,17 +171,29 @@ class Plant(pygame.sprite.Sprite):
 
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(planting_coordinate))
+        self.rect = self.image.get_rect(center=(self.planting_coordinate))
+
+        self.produced_item = 0
 
     def update_animation_state(self):
         self.animation_index += 0.1
         if self.animation_index >= len(self.frames):
             self.animation_index = 0
         self.image = self.frames[int(self.animation_index)]
+        
+    def produce_ball(self):
+    # Define the logic for producing a ball
+        if self.plant_type == 'machine' and int(self.animation_index) == 9 and self.produced_item is None:
+            ball_surface = pygame.Surface((20, 20), pygame.SRCALPHA)
+            pygame.draw.circle(ball_surface, (255, 0, 0), (20 // 2, 20 // 2), 10)
+            self.produced_item = ball_surface  # Set the ball surface
 
     def update(self):
         self.update_animation_state()
 
+        if 0 < self.animation_index < 1 and self.produced_item is None:
+            self.produce_ball()
+        
     def being_attack(self, damage):
         self.health -= damage
         if self.health == 0:
@@ -244,6 +263,7 @@ class Game():
         self.ninja_groups = pygame.sprite.Group()
         self.plant_groups = pygame.sprite.Group()
 
+        # reset game state for play again
         self.reset_game_state()
 
         # set up Ninja timer
@@ -262,7 +282,6 @@ class Game():
         self.ninja_groups.empty()
         self.plant_groups.empty()
         self.set_up()  # set up surface and rectangle etc
-
 
     def set_up(self):  # set up surface and rectangle etc
         welcome_fp = create_file_path('Picture/welcome.png')
@@ -422,6 +441,10 @@ class Game():
             self.plant_groups.draw(self.screen)
             self.plant_groups.update()
 
+            if self.plant_groups and self.plant_groups.sprites()[0].produced_item:
+                self.screen.blit(self.plant_groups.sprites()[0].produced_item,
+                                self.plant_groups.sprites()[0].rect)
+
         if self.remaining_time == 0:
             self.after_press_start = False
             self.screen.fill((0, 0, 0))
@@ -459,9 +482,8 @@ class Game():
             pygame.display.update()
             pygame.display.flip()  # redraw the screen
 
-            self.clock.tick(60)
+            self.clock.tick(60) # 60 fps
 
 
 if __name__ == "__main__":
     Game().run()
-
