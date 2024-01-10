@@ -9,7 +9,7 @@ def create_file_path(file):
     # Get the directory of the current script
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Construct the file path relative to the current script
+    # Construct the file path relative to the current scripgt
     file_path = os.path.join(current_dir, file)
     return file_path
 
@@ -98,7 +98,7 @@ pygame.display.set_mode((1000, 600))
 class Tools:
     def __init__(self):
         # center coordinate for each box
-        # x = [325, 410, 495, 586, 670, 755, 840, 925]
+        # x = [325, 410, 495, 586, 670, 755, 840]
         # y = [172, 262, 352, 442, 532]
         self.grid_coor = [[(325, 172), (325, 262), (325, 352), (325, 442), (325, 532)],
                           [(410, 172), (410, 262), (410, 352), (410, 442), (410, 532)],
@@ -108,6 +108,7 @@ class Tools:
                           [(755, 172), (755, 262), (755, 352), (755, 442), (755, 532)],
                           [(840, 172), (840, 262), (840, 352), (840, 442), (840, 532)],
                           [(925, 172), (925, 262), (925, 352), (925, 442), (925, 532)]]
+        self.position_list_y = [172, 260, 355, 445, 532]
 
     def find_grid_coor(self, pos):
         # check whether out of map
@@ -124,32 +125,11 @@ class Tools:
                     if coor[1] - 45 <= pos[1] and coor[1] + 45 >= pos[1]:
                         # return coordinate where pokemon have to stay
                         return coor
-                    
-class PikachuPower(pygame.sprite.Sprite):
-    # Pikachu power frames
-    PIKACHU_POWER_FRAMES = [pygame.image.load('Picture/pikachu_attack.png').convert_alpha()]
-
-    def __init__(self, position):
-        super().__init__()
-
-        self.frames = [pygame.transform.scale(frame, (60, 60)) for frame in self.PIKACHU_POWER_FRAMES]
-        self.animation_index = 0
-        self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=position)
-        self.speed = 0.5  # Adjust the speed as needed
-
-    def update(self):
-        self.update_animation_state()
-        self.rect.x += self.speed  # Move the Pikachu power to the right
-
-    def update_animation_state(self):
-        self.animation_index += 0.1
-        if self.animation_index >= len(self.frames):
-            self.animation_index = 0
-        self.image = self.frames[int(self.animation_index)]
-
 
 class Plant(pygame.sprite.Sprite):
+    #plant'power
+    PIKACHU_ATTACK_FRAMES = [pygame.image.load('Picture/pikachu_attack.png').convert_alpha()]
+
     # plant
     MACHINE_FRAMES = [pygame.image.load('Picture/machine/machine_1.png').convert_alpha(),
                       pygame.image.load('Picture/machine/machine_2.png').convert_alpha(),
@@ -171,28 +151,37 @@ class Plant(pygame.sprite.Sprite):
                       pygame.image.load('Picture/pikachu/pikachu_2.png').convert_alpha(),
                       pygame.image.load('Picture/pikachu/pikachu_3.png').convert_alpha(),
                       pygame.image.load('Picture/pikachu/pikachu_4.png').convert_alpha()]
-    
-    PIKACHU_POWER_FRAMES = [pygame.image.load('Picture/pikachu_attack.png').convert_alpha()]
 
-    def __init__(self, plant_type, planting_coordinate):
+    def __init__(self, plant_type, planting_coordinate, attack_type):
         super().__init__()
 
         self.plant_type = plant_type
         self.planting_coordinate = planting_coordinate
-        self.pikachu_power = None
+        self.attack_type = attack_type
+        planting_coordinate = [172, 262, 352, 442, 532]
 
         if plant_type == 'machine':
             self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.MACHINE_FRAMES]
             self.health = 100
-            self.damage = 0
+            self.cooldown = 0
+
         elif plant_type == 'pikachu':
             self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.PIKACHU_FRAMES]
             self.health = 200
-            self.damage = 25
+            self.cooldown = 0
+            if planting_coordinate == self.ninja_choice:
+                attack_type = 'pikachu_attack'
+                self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.PIKACHU_ATTACK_FRAMES]
+                self.attack = 25
+                self.speed = 5
+
+
+
         elif plant_type == 'squirtle':
             self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.SQUIRTLE_FRAMES]
             self.health = 150
-            self.damage = 20
+            self.attack = 20
+            self.cooldown = 0
         else:
             print('No plant found')
 
@@ -208,20 +197,35 @@ class Plant(pygame.sprite.Sprite):
 
     def update(self):
         self.update_animation_state()
-        if self.plant_type == 'pikachu' and self.animation_index == len(self.frames) - 1:
-            # Create Pikachu power when at the last animation frame
-            if self.pikachu_power is None:
-                self.pikachu_power = PikachuPower(self.rect.center)
-            else:
-                # Update Pikachu power's position
-                self.pikachu_power.update()
 
-    def draw(self, screen):
-        # ... (your existing code)
+        if self.cooldown > 0 :
+            self.cooldown -= 1
 
-        # Draw Pikachu power
-        if self.pikachu_power is not None:
-            self.pikachu_power.draw(screen)
+        collisions = pygame.sprite.spritecollide(self, self.ninja_type, False)
+        if collisions and self.cooldown == 0:
+            for ninja in collisions:
+                if ninja.rect.y == self.rect.y:  # Check if ninja is on the same Y-axis
+                    # Shoot something (you can replace this with your own shooting logic)
+                    self.shoot(ninja)
+
+                    # Optionally, you can reduce ninja's health or perform other actions
+                    ninja.health -= self.attack
+                    if ninja.health <= 0:
+                        ninja.kill()
+
+                    self.cooldown = 60  # Cooldown in frames before the plant can attack again
+
+        self.rect.x -= self.speed
+
+    def shoot(self, target):
+        # Implement your shooting logic here
+        # For example, you can create a projectile sprite on the right side of the plant
+        # and add it to the sprite group that handles projectiles
+        projectile = pygame.sprite.Sprite()
+        projectile.image = pygame.Surface((10, 5))
+        projectile.image.fill((255, 0, 0))  # Red rectangle (you can replace this with your own projectile image)
+        projectile.rect = projectile.image.get_rect(midleft=self.rect.midright)
+        self.projectile_group.add(projectile)
 
     def being_attack(self, damage):
         self.health -= damage
@@ -260,7 +264,7 @@ class Ninja(pygame.sprite.Sprite):
             print('No ninja found')
 
         # spawn at these position
-        self.position_list_y = [172, 262, 352, 442, 532]
+        self.position_list_y = [172, 260, 355, 445, 532]
 
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
@@ -409,7 +413,7 @@ class Game():
                         if not self.squirtle_card_rectangle.colliderect(self.squirtle_card_initial_position + (1, 1)):
                             self.squirtle_card_rectangle.topleft = self.squirtle_card_initial_position  # Snap back to initial position
 
-                    self.plant_groups.add(Plant(self.chosen_pokemon, self.coordinate))
+                    self.plant_groups.add(Plant(self.chosen_pokemon, self.coordinate, attack_type = 'pikachu_attack'))
 
                 # card snap back without deducting num_balls
                 if self.coordinate is None:
@@ -469,7 +473,6 @@ class Game():
 
             self.plant_groups.draw(self.screen)
             self.plant_groups.update()
-
 
         if self.remaining_time == 0:
             self.after_press_start = False

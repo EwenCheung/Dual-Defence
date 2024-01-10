@@ -211,7 +211,7 @@ class Ninja(pygame.sprite.Sprite):
         elif ninja_type == 'sasuke':
             self.frames = [pygame.transform.scale(frame, (75, 55)) for frame in self.SASUKE_FRAMES]
             self.health = 120
-            self.attacl = 18
+            self.attack = 18
             self.cooldown = 0
         elif ninja_type == 'kakashi':
             self.frames = [pygame.transform.scale(frame, (90, 60)) for frame in self.KAKASHI_FRAMES]

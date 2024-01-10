@@ -9,7 +9,7 @@ def create_file_path(file):
     # Get the directory of the current script
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Construct the file path relative to the current script
+    # Construct the file path relative to the current scripgt
     file_path = os.path.join(current_dir, file)
     return file_path
 
