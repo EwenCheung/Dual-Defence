@@ -72,7 +72,6 @@ class LogInMethod():
 
                 self.sign_up(input_username, input_password)
 
-
             elif log_in_method == 'I':
                 while True:
                     input_username = input('Enter your username: ').strip()
@@ -95,7 +94,6 @@ logged_in_user = LogInMethod().run()
 pygame.init()
 pygame.display.set_caption('Pokemon vs Naruto')  # title name
 pygame.display.set_mode((1000, 600))
-
 
 class Tools:
     def __init__(self):
@@ -124,13 +122,41 @@ class Tools:
                 # check at which row (finding coordinate y), will output the coor for x and y
                 for coor in column:
                     if coor[1] - 45 <= pos[1] and coor[1] + 45 >= pos[1]:
+                        # return coordinate where pokemon have to stay
                         return coor
+
+    # if zombie in row, plants will shoot
+    def check_zombie_in_row(self,zombie_coor_y):
+        row1 = []
+        row2 = []
+        row3 = []
+        row4 = []
+        row5 = []
+        if zombie_coor_y == 172:
+            row1.append('x')
+        elif zombie_coor_y == 262:
+            row2.append('x')
+        elif zombie_coor_y == 352:
+            row2.append('x')
+        elif zombie_coor_y == 442:
+            row2.append('x')
+        elif zombie_coor_y == 532:
+            row2.append('x')
+        return [row1,row2,row3,row4,row5]
 
 
 class Plant(pygame.sprite.Sprite):
     # plant
-    MACHINE_FRAMES = [pygame.image.load('Picture/machine/machine_1.jpeg').convert_alpha(),
-                      pygame.image.load('Picture/machine/machine_2.jpeg').convert_alpha()]
+    MACHINE_FRAMES = [pygame.image.load('Picture/machine/machine_1.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_2.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_3.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_4.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_5.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_6.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_7.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_8.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_9.png').convert_alpha(),
+                      pygame.image.load('Picture/machine/machine_10.png').convert_alpha()]
 
     SQUIRTLE_FRAMES = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
                        pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha(),
@@ -146,6 +172,7 @@ class Plant(pygame.sprite.Sprite):
         super().__init__()
 
         self.plant_type = plant_type
+        self.planting_coordinate = planting_coordinate
 
         if plant_type == 'machine':
             self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.MACHINE_FRAMES]
@@ -164,7 +191,7 @@ class Plant(pygame.sprite.Sprite):
 
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(planting_coordinate))
+        self.rect = self.image.get_rect(center=(self.planting_coordinate))
 
     def update_animation_state(self):
         self.animation_index += 0.1
@@ -212,11 +239,10 @@ class Ninja(pygame.sprite.Sprite):
             print('No ninja found')
 
         # spawn at these position
-        self.position_list_y = [172, 260, 355, 445, 532]
-
+        self.spawn_y = choice([172, 262, 352, 442, 532])
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(randint(1100, 1300), choice(self.position_list_y)))
+        self.rect = self.image.get_rect(center=(randint(1100, 1300), self.spawn_y))
 
     def update_animation_state(self):
         self.animation_index += 0.1
@@ -237,16 +263,15 @@ class Game():
         self.machine_card_initial_position = (120, 8)
         self.pikachu_card_initial_position = (191, 8)
         self.squirtle_card_initial_position = (262, 8)
-        self.num_ball = 10000
-        self.set_up()  # set up surface and rectangle etc
         self.before_press_start = True
         self.after_press_start = False
-        self.chosen_pokemon = None
-        self.coordinate = None
 
         # Groups
         self.ninja_groups = pygame.sprite.Group()
         self.plant_groups = pygame.sprite.Group()
+
+        # reset game state for play again
+        self.reset_game_state()
 
         # set up Ninja timer
         self.ninja_timer = pygame.USEREVENT + 1
@@ -254,6 +279,16 @@ class Game():
 
         # choice of ninja
         self.ninja_choice = ['naruto', 'sasuke', 'kakashi', 'naruto', 'sasuke']
+
+    def reset_game_state(self):
+        self.num_ball = 10000
+        self.chosen_pokemon = None
+        self.coordinate = None
+        self.remaining_time = None
+        self.timer_duration = 900000  # milisec
+        self.ninja_groups.empty()
+        self.plant_groups.empty()
+        self.set_up()  # set up surface and rectangle etc
 
     def set_up(self):  # set up surface and rectangle etc
         welcome_fp = create_file_path('Picture/welcome.png')
@@ -292,6 +327,13 @@ class Game():
         self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
         self.num_ball_rectangle = self.num_ball_surface.get_rect(center=(65, 85))
 
+        wood_plank = create_file_path('Picture/wood.png')
+        self.wood_plank_surface = pygame.image.load(wood_plank).convert()
+        self.wood_plank_surface = pygame.transform.scale(self.wood_plank_surface, (140, 50))
+        self.wood_plank_rectangle = self.wood_plank_surface.get_rect(topleft=(850, 10))
+        self.timer = pygame.font.Font(None, 36).render(None, True, (255, 255, 255))
+        self.timer_rectangle = self.timer.get_rect(center=(890, 35))
+
     def event_handling(self):
         # Event handling
         for event in pygame.event.get():
@@ -300,11 +342,19 @@ class Game():
                 exit()
 
             if event.type == self.ninja_timer and self.after_press_start:
-                self.ninja_groups.add(Ninja((choice(self.ninja_choice))))
+                ninja = Ninja((choice(self.ninja_choice)))
+                self.ninja_groups.add(ninja)
+                print(ninja.spawn_y)
+                # check = ninja.check_zombie_in_row(ninja.spawn_y)
+
+
+
+
 
             if event.type == pygame.MOUSEBUTTONDOWN and self.white_rectangle.collidepoint(event.pos):
                 self.after_press_start = True
                 self.before_press_start = False
+                self.begin_time = pygame.time.get_ticks()  # this record the initial countdown and i put here coz to only program the time when user move to next page
 
             # choose pokemon
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -344,7 +394,8 @@ class Game():
                         if not self.squirtle_card_rectangle.colliderect(self.squirtle_card_initial_position + (1, 1)):
                             self.squirtle_card_rectangle.topleft = self.squirtle_card_initial_position  # Snap back to initial position
 
-                    self.plant_groups.add(Plant(self.chosen_pokemon, self.coordinate))
+                    plant = Plant(self.chosen_pokemon, self.coordinate)
+                    self.plant_groups.add(plant)
 
                 # card snap back without deducting num_balls
                 if self.coordinate is None:
@@ -363,6 +414,17 @@ class Game():
                 self.chosen_pokemon = None
                 self.coordinate = None
 
+            if self.remaining_time == 0 and event.type == pygame.MOUSEBUTTONDOWN:
+                if self.home_page_rect.collidepoint(event.pos):
+                    self.reset_game_state()
+                    self.before_press_start = True
+                    self.after_press_start = False
+                elif self.play_again_rect.collidepoint(event.pos):
+                    self.reset_game_state()
+                    self.after_press_start = True
+                    self.before_press_start = False
+                    self.begin_time = pygame.time.get_ticks()
+
     def game_start(self):
         if self.before_press_start:
             self.screen.blit(self.white_surface, self.white_rectangle)
@@ -371,17 +433,51 @@ class Game():
 
         if self.after_press_start:
             self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
+
+            exact_time = pygame.time.get_ticks()
+            time_pass = exact_time - self.begin_time
+            self.remaining_time = max(0, self.timer_duration - time_pass)
+            minutes = self.remaining_time // 60000
+            seconds = (self.remaining_time % 60000) // 1000
+            self.timer = pygame.font.Font(None, 36).render(f"{minutes:02}:{seconds:02}", True, (255, 255, 255))
+
             self.screen.blit(self.background_surface, (0, 0))
             self.screen.blit(self.machine_card_surface, self.machine_card_rectangle)
             self.screen.blit(self.pikachu_card_surface, self.pikachu_card_rectangle)
             self.screen.blit(self.squirtle_card_surface, self.squirtle_card_rectangle)
             self.screen.blit(self.num_ball_surface, self.num_ball_rectangle)
 
+            self.screen.blit(self.wood_plank_surface, self.wood_plank_rectangle)
+            self.screen.blit(self.timer, self.timer_rectangle)
+
             self.ninja_groups.draw(self.screen)
             self.ninja_groups.update()
 
             self.plant_groups.draw(self.screen)
             self.plant_groups.update()
+
+        if self.remaining_time == 0:
+            self.after_press_start = False
+            self.screen.fill((0, 0, 0))
+            win_message = pygame.font.Font(None, 85).render("You've Won", True, (255, 255, 255))
+            win_message_rect = win_message.get_rect(center=(500, 220))
+            self.screen.blit(win_message, win_message_rect)
+
+            self.wood_plank_surface = pygame.transform.scale(self.wood_plank_surface, (200, 70))
+
+            self.wood_plank_rectangle = self.wood_plank_surface.get_rect(center=(350, 360))
+            self.screen.blit(self.wood_plank_surface, self.wood_plank_rectangle)
+            home_page = pygame.font.Font(None, 40).render('Home Page', True, (255, 255, 255))
+            self.home_page_rect = home_page.get_rect(center=(350, 360))
+            self.screen.blit(home_page, self.home_page_rect)
+
+            self.wood_plank_rectangle = self.wood_plank_surface.get_rect(center=(650, 360))
+            self.screen.blit(self.wood_plank_surface, self.wood_plank_rectangle)
+            play_again = pygame.font.Font(None, 40).render("Play Again", True, (255, 255, 255))
+            self.play_again_rect = play_again.get_rect(center=(650, 360))
+            self.screen.blit(play_again, self.play_again_rect)
+
+
 
     def run(self):
         while True:
@@ -397,8 +493,7 @@ class Game():
             pygame.display.update()
             pygame.display.flip()  # redraw the screen
 
-            self.clock.tick(60)
-
+            self.clock.tick(60) # 60 fps
 
 if __name__ == "__main__":
     Game().run()
