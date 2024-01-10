@@ -125,6 +125,7 @@ class Tools:
                         # return coordinate where pokemon have to stay
                         return coor
 
+
 class Plant(pygame.sprite.Sprite):
     # plant
     MACHINE_FRAMES = [pygame.image.load('Picture/machine/machine_1.png').convert_alpha(),
@@ -219,11 +220,10 @@ class Ninja(pygame.sprite.Sprite):
             print('No ninja found')
 
         # spawn at these position
-        self.position_list_y = [172, 260, 355, 445, 532]
-
+        self.zombie_spawn_y = choice[172, 260, 355, 445, 532]
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(randint(1100, 1300), choice(self.position_list_y)))
+        self.rect = self.image.get_rect(center=(randint(1100, 1300), choice(self.zombie_spawn_y)))
 
     def update_animation_state(self):
         self.animation_index += 0.1
@@ -467,7 +467,6 @@ class Game():
             pygame.display.flip()  # redraw the screen
 
             self.clock.tick(60) # 60 fps
-
 
 if __name__ == "__main__":
     Game().run()

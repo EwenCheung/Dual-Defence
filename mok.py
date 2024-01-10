@@ -222,6 +222,8 @@ class Ninja(pygame.sprite.Sprite):
         else:
             print('No ninja found')
 
+        self.original_speed = self.speed
+
         # spawn at these position
         self.position_list_y = [172, 260, 355, 445, 532]
 
@@ -238,19 +240,24 @@ class Ninja(pygame.sprite.Sprite):
     def update(self, plant_groups):
         self.update_animation_state()
 
-        if self.cooldown > 0 :
+        collisions = pygame.sprite.spritecollide(self, plant_groups, False)
+        if collisions:
+            self.speed = 0 
+            self.animation_index = 2 
+            if self.cooldown == 0:
+                for plant in collisions:
+                    plant.health -= self.attack
+                    self.cooldown = 60  
+                    if plant.health <= 0:
+                        plant.kill()
+                        self.speed = self.original_speed
+        else:
+            self.speed = self.original_speed 
+
+        if self.cooldown > 0:
             self.cooldown -= 1
 
-        collisions = pygame.sprite.spritecollide(self, plant_groups, False)
-        if collisions and self.cooldown == 0 :
-            for plant in collisions:
-                plant.health -= self.attack
-                if plant.health <= 0 :
-                    plant.kill()
-                    self.cooldown = 60
-
         self.rect.x -= self.speed
-
 
 class Game():
     def __init__(self):
