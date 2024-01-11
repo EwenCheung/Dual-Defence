@@ -299,7 +299,7 @@ class Game():
         self.welcome_surface = pygame.image.load(welcome_fp).convert()
         self.welcome_surface = pygame.transform.scale(self.welcome_surface, (1000, 600))
 
-        white_fp = create_file_path('Picture/white_screen.jpeg')
+        white_fp = create_file_path('Picture/utils/white_screen.jpeg')
         self.white_surface = pygame.image.load(white_fp).convert()
         self.white_surface = pygame.transform.scale(self.white_surface, (400, 100))
         self.white_rectangle = self.white_surface.get_rect(topleft=(500, 90))
@@ -312,17 +312,17 @@ class Game():
         self.background_surface = pygame.image.load(background_fp).convert()
         self.background_surface = pygame.transform.scale(self.background_surface, (1000, 600))
 
-        machine_card_fp = create_file_path('Picture/machine_card.png')
+        machine_card_fp = create_file_path('Picture/machine/machine_card.png')
         self.machine_card_surface = pygame.image.load(machine_card_fp).convert()
         self.machine_card_surface = pygame.transform.scale(self.machine_card_surface, (68, 83))
         self.machine_card_rectangle = self.machine_card_surface.get_rect(topleft=self.machine_card_initial_position)
 
-        pikachu_card_fp = create_file_path('Picture/pikachu_card.png')
+        pikachu_card_fp = create_file_path('Picture/pikachu/pikachu_card.png')
         self.pikachu_card_surface = pygame.image.load(pikachu_card_fp).convert()
         self.pikachu_card_surface = pygame.transform.scale(self.pikachu_card_surface, (68, 83))
         self.pikachu_card_rectangle = self.pikachu_card_surface.get_rect(topleft=self.pikachu_card_initial_position)
 
-        squirtle_card_fp = create_file_path('Picture/squirtle_card.png')
+        squirtle_card_fp = create_file_path('Picture/squirtle/squirtle_card.png')
         self.squirtle_card_surface = pygame.image.load(squirtle_card_fp).convert()
         self.squirtle_card_surface = pygame.transform.scale(self.squirtle_card_surface, (68, 83))
         self.squirtle_card_rectangle = self.squirtle_card_surface.get_rect(topleft=self.squirtle_card_initial_position)
@@ -331,7 +331,7 @@ class Game():
         self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
         self.num_ball_rectangle = self.num_ball_surface.get_rect(center=(65, 85))
 
-        wood_plank = create_file_path('Picture/wood.png')
+        wood_plank = create_file_path('Picture/utils/wood.png')
         self.wood_plank_surface = pygame.image.load(wood_plank).convert()
         self.wood_plank_surface = pygame.transform.scale(self.wood_plank_surface, (140, 50))
         self.wood_plank_rectangle = self.wood_plank_surface.get_rect(topleft=(850, 10))
