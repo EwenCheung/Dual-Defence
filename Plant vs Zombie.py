@@ -198,23 +198,12 @@ class Pokemon(pygame.sprite.Sprite):
         self.pikachu_bullet_surface = pygame.transform.scale(self.pikachu_bullet_surface, (50, 50))
         self.pikachu_bullet_rectangle = self.pikachu_bullet_surface.get_rect(center=self.rect.center)
 
-        self.bullet_speed = 5
+        self.squirtle_bullet_surface = pygame.image.load('Picture/squirtle/squirtle_attack.png').convert_alpha()
+        self.squirtle_bullet_surface = pygame.transform.scale(self.squirtle_bullet_surface, (50, 50))
+        self.squirtle_bullet_rectangle = self.squirtle_bullet_surface.get_rect(center=self.rect.center)
 
         # this list will store all active bullet
-        self.pikachu_bullet_rect_storage = []
-
-    # bullet should non-stop shooting, not when one reach the end of the screen only shoot
-    def create_bullet(self):
-        # bullet created append into the list
-        new_bullet = self.pikachu_bullet_surface.get_rect(center=self.rect.center)
-        self.pikachu_bullet_rect_storage.append(new_bullet)
-
-    def move_bullet(self):
-        for bullet_rect in self.pikachu_bullet_rect_storage:
-            bullet_rect.x += self.bullet_speed  # Move the bullet to the right of Pikachu
-            if bullet_rect.x > 1030:
-                # Remove bullets that have moved off-screen
-                self.pikachu_bullet_rect_storage.remove(bullet_rect)
+        self.bullet_rect_storage = []
 
     def update_animation_state(self):
         self.animation_index += 0.1
@@ -224,9 +213,27 @@ class Pokemon(pygame.sprite.Sprite):
 
         self.image = self.frames[int(self.animation_index)]
 
+    # bullet should non-stop shooting, not when one reach the end of the screen only shoot
+    def create_bullet(self):
+        # bullet created append into the list
+        if self.pokemon_type == 'pikachu':
+            new_bullet = self.pikachu_bullet_surface.get_rect(center=self.rect.center)
+        elif self.pokemon_type == 'squirtle':
+            new_bullet = self.squirtle_bullet_surface.get_rect(center=self.rect.center)
+        elif self.pokemon_type == 'machine':
+            pass
+
+        self.bullet_rect_storage.append(new_bullet)
+
+    def move_bullet(self, bullet_speed):
+        for bullet_rect in self.bullet_rect_storage:
+            bullet_rect.x += bullet_speed  # Move the bullet to the right of Pikachu
+            if bullet_rect.x > 1030:
+                # Remove bullets that have moved off-screen
+                self.bullet_rect_storage.remove(bullet_rect)
+
     def update(self):
         self.update_animation_state()
-
 
     def being_attack(self, damage):
         self.health -= damage
@@ -474,10 +481,17 @@ class Game():
             for pokemon in self.pokemon_groups:
                 if pokemon.pokemon_type == 'pikachu':
                     # Update bullet position ( up there at update not using pokemon.bullet anymore)
-                    pokemon.move_bullet()
+                    pokemon.move_bullet(5)
                     # draw out every bullet
-                    for bullet_rect in pokemon.pikachu_bullet_rect_storage:
+                    for bullet_rect in pokemon.bullet_rect_storage:
                         self.screen.blit(pokemon.pikachu_bullet_surface, bullet_rect)
+
+                if pokemon.pokemon_type == 'squirtle':
+                    # Update bullet position ( up there at update not using pokemon.bullet anymore)
+                    pokemon.move_bullet(4)
+                    # draw out every bullet
+                    for bullet_rect in pokemon.bullet_rect_storage:
+                        self.screen.blit(pokemon.squirtle_bullet_surface, bullet_rect)
 
             self.ninja_groups.draw(self.screen)
             self.ninja_groups.update()
