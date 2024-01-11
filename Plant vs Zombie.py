@@ -200,22 +200,33 @@ class Pokemon(pygame.sprite.Sprite):
 
         self.bullet_speed = 5
 
-    def bullet(self):
-        self.pikachu_bullet_rectangle.x += self.bullet_speed  # Move the bullet to the right of Pikachu
+        # this list will store all active bullet
+        self.pikachu_bullet_rect_storage = []
 
-        # Check if the bullet has moved off-screen
-        if self.pikachu_bullet_rectangle.x > 1000:
-            self.pikachu_bullet_rectangle.center = self.rect.center
+    # bullet should non-stop shooting, not when one reach the end of the screen only shoot
+    def create_bullet(self):
+        # bullet created append into the list
+        new_bullet = self.pikachu_bullet_surface.get_rect(center=self.rect.center)
+        self.pikachu_bullet_rect_storage.append(new_bullet)
+
+    def move_bullet(self):
+        for bullet_rect in self.pikachu_bullet_rect_storage:
+            bullet_rect.x += self.bullet_speed  # Move the bullet to the right of Pikachu
+            if bullet_rect.x > 1030:
+                # Remove bullets that have moved off-screen
+                self.pikachu_bullet_rect_storage.remove(bullet_rect)
 
     def update_animation_state(self):
         self.animation_index += 0.1
         if self.animation_index >= len(self.frames):
             self.animation_index = 0
+            self.create_bullet()
+
         self.image = self.frames[int(self.animation_index)]
 
     def update(self):
         self.update_animation_state()
-        self.bullet()
+
 
     def being_attack(self, damage):
         self.health -= damage
@@ -462,15 +473,17 @@ class Game():
 
             for pokemon in self.pokemon_groups:
                 if pokemon.pokemon_type == 'pikachu':
-                    self.screen.blit(pokemon.pikachu_bullet_surface, pokemon.pikachu_bullet_rectangle)
+                    # Update bullet position ( up there at update not using pokemon.bullet anymore)
+                    pokemon.move_bullet()
+                    # draw out every bullet
+                    for bullet_rect in pokemon.pikachu_bullet_rect_storage:
+                        self.screen.blit(pokemon.pikachu_bullet_surface, bullet_rect)
 
             self.ninja_groups.draw(self.screen)
             self.ninja_groups.update()
 
             self.pokemon_groups.draw(self.screen)
             self.pokemon_groups.update()
-
-
 
         if self.remaining_time == 0:
             self.after_press_start = False
