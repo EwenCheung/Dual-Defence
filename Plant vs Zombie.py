@@ -169,11 +169,11 @@ class Pokemon(pygame.sprite.Sprite):
                       pygame.image.load('Picture/pikachu/pikachu_3.png').convert_alpha(),
                       pygame.image.load('Picture/pikachu/pikachu_4.png').convert_alpha()]
 
-    def __init__(self, pokemon_type, planting_coordinate):
+    def __init__(self, pokemon_type, pokemoning_coordinate):
         super().__init__()
 
         self.pokemon_type = pokemon_type
-        self.planting_coordinate = planting_coordinate
+        self.pokemoning_coordinate = pokemoning_coordinate
 
         if pokemon_type == 'machine':
             self.frames = [pygame.transform.scale(frame, (70, 82)) for frame in self.MACHINE_FRAMES]
@@ -192,7 +192,20 @@ class Pokemon(pygame.sprite.Sprite):
 
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(self.planting_coordinate))
+        self.rect = self.image.get_rect(center=(self.pokemoning_coordinate))
+
+        self.pikachu_bullet_surface = pygame.image.load('Picture/pikachu/pikachu_attack.png').convert_alpha()
+        self.pikachu_bullet_surface = pygame.transform.scale(self.pikachu_bullet_surface, (50, 50))
+        self.pikachu_bullet_rectangle = self.pikachu_bullet_surface.get_rect(center=self.rect.center)
+
+        self.bullet_speed = 5
+
+    def bullet(self):
+        self.pikachu_bullet_rectangle.x += self.bullet_speed  # Move the bullet to the right of Pikachu
+
+        # Check if the bullet has moved off-screen
+        if self.pikachu_bullet_rectangle.x > 1000:
+            self.pikachu_bullet_rectangle.center = self.rect.center
 
     def update_animation_state(self):
         self.animation_index += 0.1
@@ -202,6 +215,7 @@ class Pokemon(pygame.sprite.Sprite):
 
     def update(self):
         self.update_animation_state()
+        self.bullet()
 
     def being_attack(self, damage):
         self.health -= damage
@@ -373,7 +387,7 @@ class Game():
 
             # pokemon released and back to the initial position
             if event.type == pygame.MOUSEBUTTONUP and self.chosen_pokemon is not None:
-                self.coordinate = Tools().find_grid_coor(event.pos)  # to plant at which coordinate
+                self.coordinate = Tools().find_grid_coor(event.pos)  # to pokemon at which coordinate
                 if self.coordinate is not None:
                     if self.chosen_pokemon == 'machine':
                         self.num_ball -= 50
@@ -446,11 +460,17 @@ class Game():
             self.screen.blit(self.wood_plank_surface, self.wood_plank_rectangle)
             self.screen.blit(self.timer, self.timer_rectangle)
 
+            for pokemon in self.pokemon_groups:
+                if pokemon.pokemon_type == 'pikachu':
+                    self.screen.blit(pokemon.pikachu_bullet_surface, pokemon.pikachu_bullet_rectangle)
+
             self.ninja_groups.draw(self.screen)
             self.ninja_groups.update()
 
             self.pokemon_groups.draw(self.screen)
             self.pokemon_groups.update()
+
+
 
         if self.remaining_time == 0:
             self.after_press_start = False
