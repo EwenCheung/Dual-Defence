@@ -165,7 +165,7 @@ class Pokemon(pygame.sprite.Sprite):
     # pokemon
     MACHINE_FRAMES = [
                     pygame.image.load('Picture/machine/machine_1.png').convert_alpha() for _ in range(15)] + [
-                    pygame.image.load('Picture/machine/machine_10.png').convert_alpha()
+                    pygame.image.load('Picture/machine/machine_2.png').convert_alpha()
                     ]
 
     SQUIRTLE_FRAMES = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
@@ -276,13 +276,24 @@ class Ninja(pygame.sprite.Sprite):
 
         if ninja_type == 'naruto':
             self.frames = [pygame.transform.scale(frame, (84, 45)) for frame in self.NARUTO_FRAMES]
+            self.health = 100
+            self.attack = 15
+            self.cooldown = 0
         elif ninja_type == 'sasuke':
             self.frames = [pygame.transform.scale(frame, (75, 55)) for frame in self.SASUKE_FRAMES]
+            self.health = 120
+            self.attack = 18
+            self.cooldown = 0
         elif ninja_type == 'kakashi':
             self.frames = [pygame.transform.scale(frame, (90, 60)) for frame in self.KAKASHI_FRAMES]
             self.speed = 2
+            self.health = 150
+            self.attack = 25
+            self.cooldown = 0
         else:
             print('No ninja found')
+
+        self.original_speed = self.speed
 
         # spawn at these position
         self.spawn_y = choice([172, 262, 352, 442, 532])
@@ -296,10 +307,27 @@ class Ninja(pygame.sprite.Sprite):
             self.animation_index = 0
         self.image = self.frames[int(self.animation_index)]
 
-    def update(self):
+    def update(self, plant_groups):
         self.update_animation_state()
-        self.rect.x -= self.speed
 
+        collisions = pygame.sprite.spritecollide(self, plant_groups, False)
+        if collisions:
+            self.speed = 0
+            self.animation_index = 2
+            if self.cooldown == 0:
+                for plant in collisions:
+                    plant.health -= self.attack
+                    self.cooldown = 60
+                    if plant.health <= 0:
+                        plant.kill()
+                        self.speed = self.original_speed
+        else:
+            self.speed = self.original_speed
+
+        if self.cooldown > 0:
+            self.cooldown -= 1
+
+        self.rect.x -= self.speed
 
 class Game():
     def __init__(self):
@@ -500,11 +528,11 @@ class Game():
             self.screen.blit(self.wood_plank_surface, self.wood_plank_rectangle)
             self.screen.blit(self.timer, self.timer_rectangle)
 
-            self.ninja_groups.draw(self.screen)
-            self.ninja_groups.update()
-
             self.pokemon_groups.draw(self.screen)
             self.pokemon_groups.update()
+
+            self.ninja_groups.draw(self.screen)
+            self.ninja_groups.update(self.pokemon_groups)
 
             for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage:
                 self.spawned_ball.drop_poke_ball()
