@@ -248,7 +248,7 @@ class Pokemon(pygame.sprite.Sprite):
     def update(self):
         self.update_animation_state()
 
-    def being_attack(self, damage):
+    def pokemon_being_attack(self, damage):
         self.health -= damage
         if self.health == 0:
             self.kill()
@@ -328,6 +328,11 @@ class Ninja(pygame.sprite.Sprite):
             self.cooldown -= 1
 
         self.rect.x -= self.speed
+
+    def ninja_being_attack(self, damage):
+        self.health -= damage
+        if self.health == 0:
+            self.kill()
 
 class Game():
     def __init__(self):
@@ -424,7 +429,7 @@ class Game():
             interp_x = original_position[0] + (target_position[0] - original_position[0]) * (frame / animation_frames)
             interp_y = original_position[1] + (target_position[1] - original_position[1]) * (frame / animation_frames)
             poke_ball_rect.topleft = (interp_x, interp_y)
-            # pygame.time.delay(10)  # Introduce a small delay to control animation speed
+            pygame.time.delay(10)  # Introduce a small delay to control animation speed
             self.screen.blit(self.background_surface, (0, 0))  # Clear the screen
             self.pokemon_groups.draw(self.screen)  # Draw other elements
             self.ninja_groups.draw(self.screen)
@@ -536,6 +541,10 @@ class Game():
                     self.before_press_start = False
                     self.begin_time = pygame.time.get_ticks()
 
+    def bullet_ninja_collision(self, ninja, bullet_rect, damage):
+        if bullet_rect.colliderect(ninja.rect):
+            ninja.ninja_being_attack(damage)
+
     def game_start(self):
         if self.before_press_start:
             self.screen.blit(self.white_surface, self.white_rectangle)
@@ -577,6 +586,17 @@ class Game():
                     pokemon.move_bullet(5)
                     # draw out every bullet
                     for bullet_rect in pokemon.bullet_rect_storage:
+                        for ninja in self.ninja_groups:
+                            if bullet_rect.colliderect(ninja.rect):
+                                # Bullet hits a ninja, remove the bullet from the list
+                                pokemon.bullet_rect_storage.remove(bullet_rect)
+
+                                # Deal damage to the ninja
+                                self.bullet_ninja_collision(ninja, bullet_rect, 25)  # Pikachu bullet deals 20 damage
+
+
+                                # Exit the loop after removing the bullet
+                                break                      
                         self.screen.blit(pokemon.pikachu_bullet_surface, bullet_rect)
 
                 if pokemon.pokemon_type == 'squirtle':
@@ -584,6 +604,17 @@ class Game():
                     pokemon.move_bullet(4)
                     # draw out every bullet
                     for bullet_rect in pokemon.bullet_rect_storage:
+                        for ninja in self.ninja_groups:
+                            if bullet_rect.colliderect(ninja.rect):
+                                # Bullet hits a ninja, remove the bullet from the list
+                                pokemon.bullet_rect_storage.remove(bullet_rect)
+
+                                # Deal damage to the ninja
+                                self.bullet_ninja_collision(ninja, bullet_rect, 20)  # Squirtle bullet deals 20 damage
+
+                                # Exit the loop after removing the bullet
+                                break  
+
                         self.screen.blit(pokemon.squirtle_bullet_surface, bullet_rect)
 
                 if pokemon.pokemon_type == 'machine':
