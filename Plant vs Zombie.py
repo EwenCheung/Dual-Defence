@@ -2,7 +2,7 @@
 import os
 import pygame
 from sys import exit
-from random import randint, choice
+from random import randint, choice, uniform
 
 
 def create_file_path(file):
@@ -145,6 +145,21 @@ class Tools:
             row2.append('x')
         return [row1, row2, row3, row4, row5]
 
+class Poke_Ball:
+    def __init__(self):
+        self.poke_ball_surface = pygame.image.load('Picture/utils/Poke_Ball.png').convert_alpha()
+        self.poke_ball_surface = pygame.transform.scale(self.poke_ball_surface, (50, 50))
+        self.poke_ball_rect_storage = []
+
+    def create_poke_ball(self):
+        poke_ball_rectangle = self.poke_ball_surface.get_rect(center=(randint(312, 927), randint(-500,-100)))
+        self.poke_ball_rect_storage.append(poke_ball_rectangle)
+
+    def drop_poke_ball(self):
+        for poke_ball_rect in self.poke_ball_rect_storage:
+            # dropping from up and stop at bottom
+            if poke_ball_rect.y < 535:
+                poke_ball_rect.y += uniform(0.3, 0.6)
 
 class Pokemon(pygame.sprite.Sprite):
     # pokemon
@@ -196,11 +211,9 @@ class Pokemon(pygame.sprite.Sprite):
 
         self.pikachu_bullet_surface = pygame.image.load('Picture/pikachu/pikachu_attack.png').convert_alpha()
         self.pikachu_bullet_surface = pygame.transform.scale(self.pikachu_bullet_surface, (50, 50))
-        self.pikachu_bullet_rectangle = self.pikachu_bullet_surface.get_rect(center=self.rect.center)
 
         self.squirtle_bullet_surface = pygame.image.load('Picture/squirtle/squirtle_attack.png').convert_alpha()
         self.squirtle_bullet_surface = pygame.transform.scale(self.squirtle_bullet_surface, (50, 50))
-        self.squirtle_bullet_rectangle = self.squirtle_bullet_surface.get_rect(center=self.rect.center)
 
         # this list will store all active bullet
         self.bullet_rect_storage = []
@@ -228,8 +241,8 @@ class Pokemon(pygame.sprite.Sprite):
     def move_bullet(self, bullet_speed):
         for bullet_rect in self.bullet_rect_storage:
             bullet_rect.x += bullet_speed  # Move the bullet to the right of Pikachu
+            # Remove bullets that have moved off-screen
             if bullet_rect.x > 1030:
-                # Remove bullets that have moved off-screen
                 self.bullet_rect_storage.remove(bullet_rect)
 
     def update(self):
@@ -275,7 +288,7 @@ class Ninja(pygame.sprite.Sprite):
         self.spawn_y = choice([172, 262, 352, 442, 532])
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(randint(1100, 1300), self.spawn_y))
+        self.rect = self.image.get_rect(center=(randint(1100, 2000), self.spawn_y))
 
     def update_animation_state(self):
         self.animation_index += 0.1
@@ -303,12 +316,18 @@ class Game():
         self.ninja_groups = pygame.sprite.Group()
         self.pokemon_groups = pygame.sprite.Group()
 
+        self.spawned_ball = Poke_Ball()
+
         # reset game state for play again
         self.reset_game_state()
 
         # set up Ninja timer
         self.ninja_timer = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.ninja_timer, 1500)
+        pygame.time.set_timer(self.ninja_timer, 6000)
+
+        # set up poke_ball_drop_timer
+        self.poke_ball_timer = pygame.USEREVENT + 2
+        pygame.time.set_timer(self.poke_ball_timer, 13000)
 
         # choice of ninja
         self.ninja_choice = ['naruto', 'sasuke', 'kakashi', 'naruto', 'sasuke']
@@ -318,7 +337,7 @@ class Game():
         self.chosen_pokemon = None
         self.coordinate = None
         self.remaining_time = None
-        self.timer_duration = 900000  # milisec
+        self.timer_duration = 90000  # milisec
         self.ninja_groups.empty()
         self.pokemon_groups.empty()
         self.set_up()  # set up surface and rectangle etc
@@ -378,6 +397,9 @@ class Game():
                 spawned_ninja = Ninja((choice(self.ninja_choice)))
                 self.ninja_groups.add(spawned_ninja)
                 # check = ninja.check_ninja_in_row(ninja.spawn_y)
+
+            if event.type == self.poke_ball_timer and self.after_press_start:
+                self.spawned_ball.create_poke_ball()
 
             if event.type == pygame.MOUSEBUTTONDOWN and self.white_rectangle.collidepoint(event.pos):
                 self.after_press_start = True
@@ -492,6 +514,12 @@ class Game():
                     # draw out every bullet
                     for bullet_rect in pokemon.bullet_rect_storage:
                         self.screen.blit(pokemon.squirtle_bullet_surface, bullet_rect)
+
+            for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage:
+                self.spawned_ball.drop_poke_ball()
+                self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)
+
+
 
             self.ninja_groups.draw(self.screen)
             self.ninja_groups.update()
