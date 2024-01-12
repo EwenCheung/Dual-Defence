@@ -414,6 +414,23 @@ class Game():
         self.timer = pygame.font.Font(None, 36).render(None, True, (255, 255, 255))
         self.timer_rectangle = self.timer.get_rect(center=(890, 35))
 
+    def animate_poke_ball_return(self, poke_ball_rect):
+        # Animate the Poke Ball back to the num_ball position
+        original_position = poke_ball_rect.topleft
+        target_position = self.num_ball_rectangle.topleft
+        animation_frames = 30  # Adjust the number of frames for the animation
+        for frame in range(animation_frames):
+            # Interpolate the position between the original and target positions
+            interp_x = original_position[0] + (target_position[0] - original_position[0]) * (frame / animation_frames)
+            interp_y = original_position[1] + (target_position[1] - original_position[1]) * (frame / animation_frames)
+            poke_ball_rect.topleft = (interp_x, interp_y)
+            # pygame.time.delay(10)  # Introduce a small delay to control animation speed
+            self.screen.blit(self.background_surface, (0, 0))  # Clear the screen
+            self.pokemon_groups.draw(self.screen)  # Draw other elements
+            self.ninja_groups.draw(self.screen)
+            self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)  # Draw the animated Poke Ball
+            pygame.display.flip()  # Update the display
+
     def event_handling(self):
         # Event handling
         for event in pygame.event.get():
@@ -443,20 +460,21 @@ class Game():
                 elif self.squirtle_card_rectangle.collidepoint(event.pos):
                     self.chosen_pokemon = 'squirtle'
 
+                for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage: 
+                    if poke_ball_rect.collidepoint(event.pos): # if the ball pos collide witht the pos i click
+                        self.num_ball += 50
+                        # animate
+                        self.animate_poke_ball_return(poke_ball_rect)
+                        self.spawned_ball.poke_ball_rect_storage.remove(poke_ball_rect) # remove
+
                 for machine_pokemon in self.pokemon_groups:
                     if machine_pokemon.pokemon_type == 'machine':
                         for bullet_rect in machine_pokemon.bullet_rect_storage:
                             if bullet_rect.collidepoint(event.pos):
                                 self.num_ball += 50
+                                # Animate the Poke Ball's return
+                                self.animate_poke_ball_return(bullet_rect)
                                 machine_pokemon.bullet_rect_storage.remove(bullet_rect)
-
-                for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage:
-                    if poke_ball_rect.collidepoint(event.pos):
-                        self.num_ball += 50
-                        self.spawned_ball.poke_ball_rect_storage.remove(poke_ball_rect)
-
-
-
 
             # drag pokemon
             if self.chosen_pokemon and event.type == pygame.MOUSEMOTION:
