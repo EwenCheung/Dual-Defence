@@ -99,16 +99,19 @@ pygame.display.set_mode((1000, 600))
 class Tools:
     def __init__(self):
         # center coordinate for each box
-        # x = [312, 400, 486, 577, 663, 750, 838,927]
+        # x = [312, 400, 486, 577, 663, 750, 838, 927]
         # y = [172, 262, 352, 442, 532]
-        self.grid_coor = [[(312, 172), (312, 262), (312, 352), (312, 442), (312, 532)],
-                          [(400, 172), (400, 262), (400, 352), (400, 442), (400, 532)],
-                          [(486, 172), (486, 262), (486, 352), (486, 442), (486, 532)],
-                          [(577, 172), (577, 262), (577, 352), (577, 442), (577, 532)],
-                          [(663, 172), (663, 262), (663, 352), (663, 442), (663, 532)],
-                          [(750, 172), (750, 262), (750, 352), (750, 442), (750, 532)],
-                          [(838, 172), (838, 262), (838, 352), (838, 442), (838, 532)],
-                          [(927, 172), (927, 262), (927, 352), (927, 442), (927, 532)]]
+        # grid_coor [0] is x_coor , [1] is y_coor , [2] is the grid been taken
+        self.grid_coor = [
+            [[312, 172, 0], [312, 262, 0], [312, 352, 0], [312, 442, 0], [312, 532, 0]],
+            [[400, 172, 0], [400, 262, 0], [400, 352, 0], [400, 442, 0], [400, 532, 0]],
+            [[486, 172, 0], [486, 262, 0], [486, 352, 0], [486, 442, 0], [486, 532, 0]],
+            [[577, 172, 0], [577, 262, 0], [577, 352, 0], [577, 442, 0], [577, 532, 0]],
+            [[663, 172, 0], [663, 262, 0], [663, 352, 0], [663, 442, 0], [663, 532, 0]],
+            [[750, 172, 0], [750, 262, 0], [750, 352, 0], [750, 442, 0], [750, 532, 0]],
+            [[838, 172, 0], [838, 262, 0], [838, 352, 0], [838, 442, 0], [838, 532, 0]],
+            [[927, 172, 0], [927, 262, 0], [927, 352, 0], [927, 442, 0], [927, 532, 0]]
+        ]
 
     def find_grid_coor(self, pos):
         # check whether out of map
@@ -116,6 +119,7 @@ class Tools:
         # 172 - 45 = 127 ( least y ) , 532 + 45 = 577 ( max x )
         if pos[0] < 272 or pos[0] > 967 or pos[1] < 127 or pos[1] > 577:
             return None
+
         # check at which column (finding coordinate x)
         for i, column in enumerate(self.grid_coor):
             # cause our grid_coor is center so use + and - to get the max result
@@ -123,27 +127,11 @@ class Tools:
                 # check at which row (finding coordinate y), will output the coor for x and y
                 for coor in column:
                     if coor[1] - 45 <= pos[1] and coor[1] + 45 >= pos[1]:
-                        # return coordinate where pokemon have to stay
-                        return coor
-
-    # if ninja in row, pokemons will shoot
-    def check_ninja_in_row(self, ninja_coor_y):
-        row1 = []
-        row2 = []
-        row3 = []
-        row4 = []
-        row5 = []
-        if ninja_coor_y == 172:
-            row1.append('x')
-        elif ninja_coor_y == 262:
-            row2.append('x')
-        elif ninja_coor_y == 352:
-            row2.append('x')
-        elif ninja_coor_y == 442:
-            row2.append('x')
-        elif ninja_coor_y == 532:
-            row2.append('x')
-        return [row1, row2, row3, row4, row5]
+                        if coor[2] == 1:
+                            return None
+                        elif coor[2] == 0:
+                            coor[2] = 1
+                            return (coor[0], coor[1])  # return coordinate where pokemon have to stay
 
 class Poke_Ball:
     def __init__(self):
@@ -152,7 +140,7 @@ class Poke_Ball:
         self.poke_ball_rect_storage = []
 
     def create_poke_ball(self):
-        poke_ball_rectangle = self.poke_ball_surface.get_rect(center=(randint(312, 927), randint(-500,-100)))
+        poke_ball_rectangle = self.poke_ball_surface.get_rect(center=(randint(312, 927), randint(-500, -100)))
         self.poke_ball_rect_storage.append(poke_ball_rectangle)
 
     def drop_poke_ball(self):
@@ -161,12 +149,13 @@ class Poke_Ball:
             if poke_ball_rect.y < 535:
                 poke_ball_rect.y += uniform(0.3, 0.6)
 
+
 class Pokemon(pygame.sprite.Sprite):
     # pokemon
     MACHINE_FRAMES = [
-                    pygame.image.load('Picture/machine/machine_1.png').convert_alpha() for _ in range(15)] + [
-                    pygame.image.load('Picture/machine/machine_2.png').convert_alpha()
-                    ]
+                         pygame.image.load('Picture/machine/machine_1.png').convert_alpha() for _ in range(15)] + [
+                         pygame.image.load('Picture/machine/machine_2.png').convert_alpha()
+                     ]
 
     SQUIRTLE_FRAMES = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
                        pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha(),
@@ -192,10 +181,12 @@ class Pokemon(pygame.sprite.Sprite):
             self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.PIKACHU_FRAMES]
             self.health = 200
             self.damage = 25
+            self.bullet_speed = 5
         elif self.pokemon_type == 'squirtle':
             self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.SQUIRTLE_FRAMES]
             self.health = 150
             self.damage = 20
+            self.bullet_speed = 4
         else:
             print('No pokemon found')
 
@@ -238,9 +229,9 @@ class Pokemon(pygame.sprite.Sprite):
 
         self.bullet_rect_storage.append(new_bullet)
 
-    def move_bullet(self, bullet_speed):
+    def move_bullet(self):
         for bullet_rect in self.bullet_rect_storage:
-            bullet_rect.x += bullet_speed  # Move the bullet to the right of Pikachu
+            bullet_rect.x += self.bullet_speed  # Move the bullet to the right of Pikachu
             if bullet_rect.x > 1030:
                 # Remove bullets that have moved off-screen
                 self.bullet_rect_storage.remove(bullet_rect)
@@ -329,6 +320,7 @@ class Ninja(pygame.sprite.Sprite):
 
         self.rect.x -= self.speed
 
+
 class Game():
     def __init__(self):
         pygame.display.set_caption('Pokemon vs Naruto')  # title name
@@ -339,6 +331,7 @@ class Game():
         self.squirtle_card_initial_position = (262, 8)
         self.before_press_start = True
         self.after_press_start = False
+        self.tools = Tools()
 
         # Groups
         self.ninja_groups = pygame.sprite.Group()
@@ -366,6 +359,7 @@ class Game():
         self.coordinate = None
         self.remaining_time = None
         self.timer_duration = 90000  # milisec
+        self.row_with_ninja = []
         self.ninja_groups.empty()
         self.pokemon_groups.empty()
         self.set_up()  # set up surface and rectangle etc
@@ -424,7 +418,6 @@ class Game():
             if event.type == self.ninja_timer and self.after_press_start:
                 spawned_ninja = Ninja((choice(self.ninja_choice)))
                 self.ninja_groups.add(spawned_ninja)
-                # check = ninja.check_ninja_in_row(ninja.spawn_y)
 
             if event.type == self.poke_ball_timer and self.after_press_start:
                 self.spawned_ball.create_poke_ball()
@@ -455,7 +448,7 @@ class Game():
 
             # pokemon released and back to the initial position
             if event.type == pygame.MOUSEBUTTONUP and self.chosen_pokemon is not None:
-                self.coordinate = Tools().find_grid_coor(event.pos)  # to pokemon at which coordinate
+                self.coordinate = self.tools.find_grid_coor(event.pos)  # check pokemon release at which coordinate
                 if self.coordinate is not None:
                     if self.chosen_pokemon == 'machine':
                         self.num_ball -= 50
@@ -539,25 +532,26 @@ class Game():
                 self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)
 
             for pokemon in self.pokemon_groups:
-                if pokemon.pokemon_type == 'pikachu':
-                    # Update bullet position ( up there at update not using pokemon.bullet anymore)
-                    pokemon.move_bullet(5)
-                    # draw out every bullet
-                    for bullet_rect in pokemon.bullet_rect_storage:
-                        self.screen.blit(pokemon.pikachu_bullet_surface, bullet_rect)
+                for ninja in self.ninja_groups:
+                    if ninja.rect.centerx < 1010 and ninja.rect.centery == pokemon.rect.centery:
+                        if ninja.rect.centery not in self.row_with_ninja:
+                            self.row_with_ninja.append(ninja.rect.centery)
 
-                if pokemon.pokemon_type == 'squirtle':
-                    # Update bullet position ( up there at update not using pokemon.bullet anymore)
-                    pokemon.move_bullet(4)
-                    # draw out every bullet
-                    for bullet_rect in pokemon.bullet_rect_storage:
-                        self.screen.blit(pokemon.squirtle_bullet_surface, bullet_rect)
+            for pokemon in self.pokemon_groups:
+                if pokemon.rect.centery in self.row_with_ninja:
+                    if pokemon.pokemon_type == 'pikachu':
+                        pokemon.move_bullet()
+                        for bullet_rect in pokemon.bullet_rect_storage:
+                            self.screen.blit(pokemon.pikachu_bullet_surface, bullet_rect)
+
+                    elif pokemon.pokemon_type == 'squirtle':
+                        pokemon.move_bullet()
+                        for bullet_rect in pokemon.bullet_rect_storage:
+                            self.screen.blit(pokemon.squirtle_bullet_surface, bullet_rect)
 
                 if pokemon.pokemon_type == 'machine':
-                    # Draw the poke ball at the updated position
                     for bullet_rect in pokemon.bullet_rect_storage:
-                        self.screen.blit(pokemon.machine_ball_surface, bullet_rect)
-
+                        self.screen.blit(pokemon.machine_ball_surface, bullet_rect)  # Draw the poke ball
 
         if self.remaining_time == 0:
             self.after_press_start = False
