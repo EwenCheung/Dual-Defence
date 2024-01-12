@@ -126,24 +126,6 @@ class Tools:
                         # return coordinate where pokemon have to stay
                         return coor
 
-    # if ninja in row, pokemons will shoot
-    def check_ninja_in_row(self, ninja_coor_y):
-        row1 = []
-        row2 = []
-        row3 = []
-        row4 = []
-        row5 = []
-        if ninja_coor_y == 172:
-            row1.append('x')
-        elif ninja_coor_y == 262:
-            row2.append('x')
-        elif ninja_coor_y == 352:
-            row2.append('x')
-        elif ninja_coor_y == 442:
-            row2.append('x')
-        elif ninja_coor_y == 532:
-            row2.append('x')
-        return [row1, row2, row3, row4, row5]
 
 class Poke_Ball:
     def __init__(self):
@@ -152,7 +134,7 @@ class Poke_Ball:
         self.poke_ball_rect_storage = []
 
     def create_poke_ball(self):
-        poke_ball_rectangle = self.poke_ball_surface.get_rect(center=(randint(312, 927), randint(-500,-100)))
+        poke_ball_rectangle = self.poke_ball_surface.get_rect(center=(randint(312, 927), randint(-500, -100)))
         self.poke_ball_rect_storage.append(poke_ball_rectangle)
 
     def drop_poke_ball(self):
@@ -161,12 +143,13 @@ class Poke_Ball:
             if poke_ball_rect.y < 535:
                 poke_ball_rect.y += uniform(0.3, 0.6)
 
+
 class Pokemon(pygame.sprite.Sprite):
     # pokemon
     MACHINE_FRAMES = [
-                    pygame.image.load('Picture/machine/machine_1.png').convert_alpha() for _ in range(15)] + [
-                    pygame.image.load('Picture/machine/machine_2.png').convert_alpha()
-                    ]
+                         pygame.image.load('Picture/machine/machine_1.png').convert_alpha() for _ in range(15)] + [
+                         pygame.image.load('Picture/machine/machine_2.png').convert_alpha()
+                     ]
 
     SQUIRTLE_FRAMES = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
                        pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha(),
@@ -192,10 +175,12 @@ class Pokemon(pygame.sprite.Sprite):
             self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.PIKACHU_FRAMES]
             self.health = 200
             self.damage = 25
+            self.bullet_speed = 5
         elif self.pokemon_type == 'squirtle':
             self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.SQUIRTLE_FRAMES]
             self.health = 150
             self.damage = 20
+            self.bullet_speed = 4
         else:
             print('No pokemon found')
 
@@ -238,9 +223,9 @@ class Pokemon(pygame.sprite.Sprite):
 
         self.bullet_rect_storage.append(new_bullet)
 
-    def move_bullet(self, bullet_speed):
+    def move_bullet(self):
         for bullet_rect in self.bullet_rect_storage:
-            bullet_rect.x += bullet_speed  # Move the bullet to the right of Pikachu
+            bullet_rect.x += self.bullet_speed  # Move the bullet to the right of Pikachu
             if bullet_rect.x > 1030:
                 # Remove bullets that have moved off-screen
                 self.bullet_rect_storage.remove(bullet_rect)
@@ -328,6 +313,7 @@ class Ninja(pygame.sprite.Sprite):
             self.cooldown -= 1
 
         self.rect.x -= self.speed
+
 
 class Game():
     def __init__(self):
@@ -424,7 +410,6 @@ class Game():
             if event.type == self.ninja_timer and self.after_press_start:
                 spawned_ninja = Ninja((choice(self.ninja_choice)))
                 self.ninja_groups.add(spawned_ninja)
-                # check = ninja.check_ninja_in_row(ninja.spawn_y)
 
             if event.type == self.poke_ball_timer and self.after_press_start:
                 self.spawned_ball.create_poke_ball()
@@ -539,25 +524,23 @@ class Game():
                 self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)
 
             for pokemon in self.pokemon_groups:
-                if pokemon.pokemon_type == 'pikachu':
-                    # Update bullet position ( up there at update not using pokemon.bullet anymore)
-                    pokemon.move_bullet(5)
-                    # draw out every bullet
-                    for bullet_rect in pokemon.bullet_rect_storage:
-                        self.screen.blit(pokemon.pikachu_bullet_surface, bullet_rect)
+                for ninja in self.ninja_groups:
+                    if ninja.rect.centerx < 1010 and ninja.rect.centery == pokemon.rect.centery:
+                        if pokemon.pokemon_type == 'pikachu':
+                            pokemon.move_bullet()
+                            # draw out every bullet
+                            for bullet_rect in pokemon.bullet_rect_storage:
+                                self.screen.blit(pokemon.pikachu_bullet_surface, bullet_rect)
 
-                if pokemon.pokemon_type == 'squirtle':
-                    # Update bullet position ( up there at update not using pokemon.bullet anymore)
-                    pokemon.move_bullet(4)
-                    # draw out every bullet
-                    for bullet_rect in pokemon.bullet_rect_storage:
-                        self.screen.blit(pokemon.squirtle_bullet_surface, bullet_rect)
+                        elif pokemon.pokemon_type == 'squirtle':
+                            pokemon.move_bullet()
+                            # draw out every bullet
+                            for bullet_rect in pokemon.bullet_rect_storage:
+                                self.screen.blit(pokemon.squirtle_bullet_surface, bullet_rect)
 
-                if pokemon.pokemon_type == 'machine':
-                    # Draw the poke ball at the updated position
-                    for bullet_rect in pokemon.bullet_rect_storage:
-                        self.screen.blit(pokemon.machine_ball_surface, bullet_rect)
-
+                        elif pokemon.pokemon_type == 'machine':
+                            for bullet_rect in pokemon.bullet_rect_storage:
+                                self.screen.blit(pokemon.machine_ball_surface, bullet_rect) # Draw the poke ball
 
         if self.remaining_time == 0:
             self.after_press_start = False
