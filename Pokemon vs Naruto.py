@@ -298,28 +298,27 @@ class Ninja(pygame.sprite.Sprite):
             self.animation_index = 0
         self.image = self.frames[int(self.animation_index)]
 
-    def update(self, plant_groups):
-        self.update_animation_state()
+    def update(self, pokemon_groups):
+            self.update_animation_state()
 
-        collisions = pygame.sprite.spritecollide(self, plant_groups, False)
-        if collisions:
-            self.speed = 0
-            self.animation_index = 2
-            if self.cooldown == 0:
-                for plant in collisions:
-                    plant.health -= self.attack
-                    self.cooldown = 60
-                    if plant.health <= 0:
-                        plant.kill()
-                        self.speed = self.original_speed
-        else:
-            self.speed = self.original_speed
+            collisions = pygame.sprite.spritecollide(self, pokemon_groups, False)
+            if collisions:
+                self.speed = 0 
+                self.animation_index = 2
+                if self.cooldown == 0:
+                    for pokemon in collisions:
+                        pokemon.health -= self.attack
+                        self.cooldown = 60  
+                        if pokemon.health <= 0:
+                            pokemon.kill()
+                            self.speed = self.original_speed
+            else:
+                self.speed = self.original_speed 
 
-        if self.cooldown > 0:
-            self.cooldown -= 1
+            if self.cooldown > 0:
+                self.cooldown -= 1
 
-        self.rect.x -= self.speed
-
+            self.rect.x -= self.speed
 
 class Game():
     def __init__(self):

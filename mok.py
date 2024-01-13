@@ -2,7 +2,7 @@
 import os
 import pygame
 from sys import exit
-from random import randint, choice
+from random import randint, choice, uniform
 
 
 def create_file_path(file):
@@ -145,19 +145,28 @@ class Tools:
             row2.append('x')
         return [row1, row2, row3, row4, row5]
 
+class Poke_Ball:
+    def __init__(self):
+        self.poke_ball_surface = pygame.image.load('Picture/utils/Poke_Ball.png').convert_alpha()
+        self.poke_ball_surface = pygame.transform.scale(self.poke_ball_surface, (50, 50))
+        self.poke_ball_rect_storage = []
+
+    def create_poke_ball(self):
+        poke_ball_rectangle = self.poke_ball_surface.get_rect(center=(randint(312, 927), randint(-500,-100)))
+        self.poke_ball_rect_storage.append(poke_ball_rectangle)
+
+    def drop_poke_ball(self):
+        for poke_ball_rect in self.poke_ball_rect_storage:
+            # dropping from up and stop at bottom
+            if poke_ball_rect.y < 535:
+                poke_ball_rect.y += uniform(0.3, 0.6)
 
 class Pokemon(pygame.sprite.Sprite):
     # pokemon
-    MACHINE_FRAMES = [pygame.image.load('Picture/machine/machine_1.png').convert_alpha(),
-                      pygame.image.load('Picture/machine/machine_2.png').convert_alpha(),
-                      pygame.image.load('Picture/machine/machine_3.png').convert_alpha(),
-                      pygame.image.load('Picture/machine/machine_4.png').convert_alpha(),
-                      pygame.image.load('Picture/machine/machine_5.png').convert_alpha(),
-                      pygame.image.load('Picture/machine/machine_6.png').convert_alpha(),
-                      pygame.image.load('Picture/machine/machine_7.png').convert_alpha(),
-                      pygame.image.load('Picture/machine/machine_8.png').convert_alpha(),
-                      pygame.image.load('Picture/machine/machine_9.png').convert_alpha(),
-                      pygame.image.load('Picture/machine/machine_2.png').convert_alpha()]
+    MACHINE_FRAMES = [
+                    pygame.image.load('Picture/machine/machine_1.png').convert_alpha() for _ in range(15)] + [
+                    pygame.image.load('Picture/machine/machine_2.png').convert_alpha()
+                    ]
 
     SQUIRTLE_FRAMES = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
                        pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha(),
@@ -175,15 +184,15 @@ class Pokemon(pygame.sprite.Sprite):
         self.pokemon_type = pokemon_type
         self.pokemoning_coordinate = pokemoning_coordinate
 
-        if pokemon_type == 'machine':
+        if self.pokemon_type == 'machine':
             self.frames = [pygame.transform.scale(frame, (70, 82)) for frame in self.MACHINE_FRAMES]
             self.health = 100
             self.damage = 0
-        elif pokemon_type == 'pikachu':
+        elif self.pokemon_type == 'pikachu':
             self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.PIKACHU_FRAMES]
             self.health = 200
             self.damage = 25
-        elif pokemon_type == 'squirtle':
+        elif self.pokemon_type == 'squirtle':
             self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in self.SQUIRTLE_FRAMES]
             self.health = 150
             self.damage = 20
@@ -201,6 +210,10 @@ class Pokemon(pygame.sprite.Sprite):
         self.squirtle_bullet_surface = pygame.image.load('Picture/squirtle/squirtle_attack.png').convert_alpha()
         self.squirtle_bullet_surface = pygame.transform.scale(self.squirtle_bullet_surface, (50, 50))
         self.squirtle_bullet_rectangle = self.squirtle_bullet_surface.get_rect(center=self.rect.center)
+
+        self.machine_ball_surface = pygame.image.load('Picture/utils/Poke_Ball.png').convert_alpha()
+        self.machine_ball_surface = pygame.transform.scale(self.machine_ball_surface, (50, 50))
+        self.machine_ball_rectangle = self.machine_ball_surface.get_rect(center=self.rect.center)
 
         # this list will store all active bullet
         self.bullet_rect_storage = []
@@ -221,7 +234,7 @@ class Pokemon(pygame.sprite.Sprite):
         elif self.pokemon_type == 'squirtle':
             new_bullet = self.squirtle_bullet_surface.get_rect(center=self.rect.center)
         elif self.pokemon_type == 'machine':
-            pass
+            new_bullet = self.machine_ball_surface.get_rect(center=self.rect.bottomright)
 
         self.bullet_rect_storage.append(new_bullet)
 
@@ -235,7 +248,7 @@ class Pokemon(pygame.sprite.Sprite):
     def update(self):
         self.update_animation_state()
 
-    def being_attack(self, damage):
+    def pokemon_being_attack(self, damage):
         self.health -= damage
         if self.health == 0:
             self.kill()
@@ -254,6 +267,16 @@ class Ninja(pygame.sprite.Sprite):
     KAKASHI_FRAMES = [pygame.image.load('Picture/kakashi/kakashi_run_1.png').convert_alpha(),
                       pygame.image.load('Picture/kakashi/kakashi_run_2.png').convert_alpha(),
                       pygame.image.load('Picture/kakashi/kakashi_run_3.png').convert_alpha()]
+    
+    #attack image
+    Naruto_attack_frame = [pygame.image.load('Picture/naruto/naruto_attack_1.png').convert_alpha(),
+                           pygame.image.load('Picture/naruto/naruto_attack_2.png').convert_alpha()]
+    
+    Sasuke_attack_frame = [pygame.image.load('Picture/sasuke/sasuke_attack_1.png').convert_alpha(),
+                           pygame.image.load('Picture/sasuke/sasuke_attack_2.png').convert_alpha()]
+    
+    Kakashi_attack_frame = [pygame.image.load('Picture/kakashi/kakashi_attack_1.png').convert_alpha(),
+                           pygame.image.load('Picture/kakashi/kakashi_attack_2.png').convert_alpha()]
 
     def __init__(self, ninja_type):
         super().__init__()
@@ -263,16 +286,19 @@ class Ninja(pygame.sprite.Sprite):
 
         if ninja_type == 'naruto':
             self.frames = [pygame.transform.scale(frame, (84, 45)) for frame in self.NARUTO_FRAMES]
+            self.frame = [pygame.transform.scale(frame, (84, 45)) for frame in self.Naruto_attack_frame]
             self.health = 100
             self.attack = 15
             self.cooldown = 0
         elif ninja_type == 'sasuke':
             self.frames = [pygame.transform.scale(frame, (75, 55)) for frame in self.SASUKE_FRAMES]
+            self.frame = [pygame.transform.scale(frame, (84, 45)) for frame in self.Sasuke_attack_frame]
             self.health = 120
             self.attack = 18
             self.cooldown = 0
         elif ninja_type == 'kakashi':
             self.frames = [pygame.transform.scale(frame, (90, 60)) for frame in self.KAKASHI_FRAMES]
+            self.frame = [pygame.transform.scale(frame, (84, 45)) for frame in self.Kakashi_attack_frame]
             self.speed = 2
             self.health = 150
             self.attack = 25
@@ -286,7 +312,10 @@ class Ninja(pygame.sprite.Sprite):
         self.spawn_y = choice([172, 262, 352, 442, 532])
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(randint(1100, 1300), self.spawn_y))
+        self.rect = self.image.get_rect(center=(randint(1100, 2000), self.spawn_y))
+
+        self.animation_attack_index = 0
+        self.image = self.frame[self.animation_attack_index]
 
     def update_animation_state(self):
         self.animation_index += 0.1
@@ -294,13 +323,20 @@ class Ninja(pygame.sprite.Sprite):
             self.animation_index = 0
         self.image = self.frames[int(self.animation_index)]
 
+    def animation_attack_state(self):
+        self.animation_attack_index += 0.1
+        if self.animation_attack_index >= len(self.frame):
+            self.animation_attack_index = 0
+        self.image = self.frame[int(self.animation_attack_index)]
+
+        
     def update(self, pokemon_groups):
             self.update_animation_state()
 
             collisions = pygame.sprite.spritecollide(self, pokemon_groups, False)
             if collisions:
                 self.speed = 0 
-                self.animation_index = 2 
+                self.animation_attack_state() 
                 if self.cooldown == 0:
                     for pokemon in collisions:
                         pokemon.health -= self.attack
@@ -316,6 +352,10 @@ class Ninja(pygame.sprite.Sprite):
 
             self.rect.x -= self.speed
 
+    def ninja_being_attack(self, damage):
+        self.health -= damage
+        if self.health == 0:
+            self.kill()
 
 class Game():
     def __init__(self):
@@ -332,12 +372,18 @@ class Game():
         self.ninja_groups = pygame.sprite.Group()
         self.pokemon_groups = pygame.sprite.Group()
 
+        self.spawned_ball = Poke_Ball()
+
         # reset game state for play again
         self.reset_game_state()
 
         # set up Ninja timer
         self.ninja_timer = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.ninja_timer, 1500)
+        pygame.time.set_timer(self.ninja_timer, 6000)
+
+        # set up poke_ball_drop_timer
+        self.poke_ball_timer = pygame.USEREVENT + 2
+        pygame.time.set_timer(self.poke_ball_timer, 13000)
 
         # choice of ninja
         self.ninja_choice = ['naruto', 'sasuke', 'kakashi', 'naruto', 'sasuke']
@@ -347,7 +393,7 @@ class Game():
         self.chosen_pokemon = None
         self.coordinate = None
         self.remaining_time = None
-        self.timer_duration = 900000  # milisec
+        self.timer_duration = 90000  # milisec
         self.ninja_groups.empty()
         self.pokemon_groups.empty()
         self.set_up()  # set up surface and rectangle etc
@@ -396,6 +442,23 @@ class Game():
         self.timer = pygame.font.Font(None, 36).render(None, True, (255, 255, 255))
         self.timer_rectangle = self.timer.get_rect(center=(890, 35))
 
+    def animate_poke_ball_return(self, poke_ball_rect):
+        # Animate the Poke Ball back to the num_ball position
+        original_position = poke_ball_rect.topleft
+        target_position = self.num_ball_rectangle.topleft
+        animation_frames = 30  # Adjust the number of frames for the animation
+        for frame in range(animation_frames):
+            # Interpolate the position between the original and target positions
+            interp_x = original_position[0] + (target_position[0] - original_position[0]) * (frame / animation_frames)
+            interp_y = original_position[1] + (target_position[1] - original_position[1]) * (frame / animation_frames)
+            poke_ball_rect.topleft = (interp_x, interp_y)
+            pygame.time.delay(10)  # Introduce a small delay to control animation speed
+            self.screen.blit(self.background_surface, (0, 0))  # Clear the screen
+            self.pokemon_groups.draw(self.screen)  # Draw other elements
+            self.ninja_groups.draw(self.screen)
+            self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)  # Draw the animated Poke Ball
+            pygame.display.flip()  # Update the display
+
     def event_handling(self):
         # Event handling
         for event in pygame.event.get():
@@ -407,6 +470,9 @@ class Game():
                 spawned_ninja = Ninja((choice(self.ninja_choice)))
                 self.ninja_groups.add(spawned_ninja)
                 # check = ninja.check_ninja_in_row(ninja.spawn_y)
+
+            if event.type == self.poke_ball_timer and self.after_press_start:
+                self.spawned_ball.create_poke_ball()
 
             if event.type == pygame.MOUSEBUTTONDOWN and self.white_rectangle.collidepoint(event.pos):
                 self.after_press_start = True
@@ -421,6 +487,22 @@ class Game():
                     self.chosen_pokemon = 'pikachu'
                 elif self.squirtle_card_rectangle.collidepoint(event.pos):
                     self.chosen_pokemon = 'squirtle'
+
+                for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage: 
+                    if poke_ball_rect.collidepoint(event.pos): # if the ball pos collide witht the pos i click
+                        self.num_ball += 50
+                        # animate
+                        self.animate_poke_ball_return(poke_ball_rect)
+                        self.spawned_ball.poke_ball_rect_storage.remove(poke_ball_rect) # remove
+
+                for machine_pokemon in self.pokemon_groups:
+                    if machine_pokemon.pokemon_type == 'machine':
+                        for bullet_rect in machine_pokemon.bullet_rect_storage:
+                            if bullet_rect.collidepoint(event.pos):
+                                self.num_ball += 50
+                                # Animate the Poke Ball's return
+                                self.animate_poke_ball_return(bullet_rect)
+                                machine_pokemon.bullet_rect_storage.remove(bullet_rect)
 
             # drag pokemon
             if self.chosen_pokemon and event.type == pygame.MOUSEMOTION:
@@ -482,6 +564,10 @@ class Game():
                     self.before_press_start = False
                     self.begin_time = pygame.time.get_ticks()
 
+    def bullet_ninja_collision(self, ninja, bullet_rect, damage):
+        if bullet_rect.colliderect(ninja.rect):
+            ninja.ninja_being_attack(damage)
+
     def game_start(self):
         if self.before_press_start:
             self.screen.blit(self.white_surface, self.white_rectangle)
@@ -507,12 +593,33 @@ class Game():
             self.screen.blit(self.wood_plank_surface, self.wood_plank_rectangle)
             self.screen.blit(self.timer, self.timer_rectangle)
 
+            self.pokemon_groups.draw(self.screen)
+            self.pokemon_groups.update()
+
+            self.ninja_groups.draw(self.screen)
+            self.ninja_groups.update(self.pokemon_groups)
+
+            for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage:
+                self.spawned_ball.drop_poke_ball()
+                self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)
+
             for pokemon in self.pokemon_groups:
                 if pokemon.pokemon_type == 'pikachu':
                     # Update bullet position ( up there at update not using pokemon.bullet anymore)
                     pokemon.move_bullet(5)
                     # draw out every bullet
                     for bullet_rect in pokemon.bullet_rect_storage:
+                        for ninja in self.ninja_groups:
+                            if bullet_rect.colliderect(ninja.rect):
+                                # Bullet hits a ninja, remove the bullet from the list
+                                pokemon.bullet_rect_storage.remove(bullet_rect)
+
+                                # Deal damage to the ninja
+                                self.bullet_ninja_collision(ninja, bullet_rect, 25)  # Pikachu bullet deals 20 damage
+
+
+                                # Exit the loop after removing the bullet
+                                break                      
                         self.screen.blit(pokemon.pikachu_bullet_surface, bullet_rect)
 
                 if pokemon.pokemon_type == 'squirtle':
@@ -520,13 +627,24 @@ class Game():
                     pokemon.move_bullet(4)
                     # draw out every bullet
                     for bullet_rect in pokemon.bullet_rect_storage:
+                        for ninja in self.ninja_groups:
+                            if bullet_rect.colliderect(ninja.rect):
+                                # Bullet hits a ninja, remove the bullet from the list
+                                pokemon.bullet_rect_storage.remove(bullet_rect)
+
+                                # Deal damage to the ninja
+                                self.bullet_ninja_collision(ninja, bullet_rect, 20)  # Squirtle bullet deals 20 damage
+
+                                # Exit the loop after removing the bullet
+                                break  
+
                         self.screen.blit(pokemon.squirtle_bullet_surface, bullet_rect)
 
-            self.ninja_groups.draw(self.screen)
-            self.ninja_groups.update(self.pokemon_groups)
+                if pokemon.pokemon_type == 'machine':
+                    # Draw the poke ball at the updated position
+                    for bullet_rect in pokemon.bullet_rect_storage:
+                        self.screen.blit(pokemon.machine_ball_surface, bullet_rect)
 
-            self.pokemon_groups.draw(self.screen)
-            self.pokemon_groups.update()
 
         if self.remaining_time == 0:
             self.after_press_start = False
