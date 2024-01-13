@@ -288,8 +288,8 @@ class Ninja(pygame.sprite.Sprite):
             self.attack = 18
             self.cooldown = 0
         elif ninja_type == 'kakashi':
-            self.frames = [pygame.transform.scale(frame, (90, 60)) for frame in self.KAKASHI_FRAMES]
-            self.frame = [pygame.transform.scale(frame, (80, 100)) for frame in self.Kakashi_attack_frame]
+            self.frames = [pygame.transform.scale(frame, (110, 85)) for frame in self.KAKASHI_FRAMES]
+            self.frame = [pygame.transform.scale(frame, (110, 85)) for frame in self.Kakashi_attack_frame]
             self.speed = 2
             self.health = 150
             self.attack = 25
