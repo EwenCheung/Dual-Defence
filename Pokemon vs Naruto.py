@@ -148,7 +148,7 @@ class Poke_Ball:
         for poke_ball_rect in self.poke_ball_rect_storage:
             # dropping from up and stop at bottom
             if poke_ball_rect.y < 535:
-                poke_ball_rect.y += uniform(0.4, 0.5)
+                poke_ball_rect.y += uniform(0.4,0.6)
 
 
 class Pokemon(pygame.sprite.Sprite):
@@ -394,7 +394,7 @@ class Game():
 
         # set up poke_ball_drop_timer
         self.poke_ball_timer = pygame.USEREVENT + 2
-        pygame.time.set_timer(self.poke_ball_timer, 1000)
+        pygame.time.set_timer(self.poke_ball_timer, 10000)
 
         # choice of ninja
         self.ninja_choice = ['naruto', 'sasuke', 'kakashi', 'sasuke']
@@ -587,10 +587,6 @@ class Game():
             self.ninja_groups.draw(self.screen)
             self.ninja_groups.update(self.pokemon_groups)
 
-            for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage:
-                self.spawned_ball.drop_poke_ball()
-                self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)
-
             for pokemon in self.pokemon_groups:
                 for ninja in self.ninja_groups:
                     # if ninja in that row, add into self.row_with_ninja
@@ -636,6 +632,10 @@ class Game():
                 if pokemon.pokemon_type == 'machine':
                     for bullet_rect in pokemon.bullet_rect_storage:
                         self.screen.blit(pokemon.machine_ball_surface, bullet_rect)  # Draw the poke ball
+
+            for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage:
+                self.spawned_ball.drop_poke_ball()
+                self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)
 
             left_pokemon = []
             for pokemon in self.pokemon_groups:
