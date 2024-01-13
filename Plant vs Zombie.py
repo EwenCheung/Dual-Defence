@@ -352,7 +352,7 @@ class Game():
 
         # set up poke_ball_drop_timer
         self.poke_ball_timer = pygame.USEREVENT + 2
-        pygame.time.set_timer(self.poke_ball_timer, 13000)
+        pygame.time.set_timer(self.poke_ball_timer, 1000)
 
         # choice of ninja
         self.ninja_choice = ['naruto', 'sasuke', 'kakashi', 'naruto', 'sasuke']
