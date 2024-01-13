@@ -140,14 +140,14 @@ class Poke_Ball:
         self.poke_ball_rect_storage = []
 
     def create_poke_ball(self):
-        poke_ball_rectangle = self.poke_ball_surface.get_rect(center=(randint(312, 927), randint(-500, -100)))
+        poke_ball_rectangle = self.poke_ball_surface.get_rect(center=(randint(312, 927), randint(-250, -100)))
         self.poke_ball_rect_storage.append(poke_ball_rectangle)
 
     def drop_poke_ball(self):
         for poke_ball_rect in self.poke_ball_rect_storage:
             # dropping from up and stop at bottom
             if poke_ball_rect.y < 535:
-                poke_ball_rect.y += uniform(0.3, 0.6)
+                poke_ball_rect.y += uniform(0.4, 0.5)
 
 
 class Pokemon(pygame.sprite.Sprite):
@@ -439,6 +439,20 @@ class Game():
                     self.chosen_pokemon = 'pikachu'
                 elif self.squirtle_card_rectangle.collidepoint(event.pos):
                     self.chosen_pokemon = 'squirtle'
+
+                for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage:
+                    if poke_ball_rect.collidepoint(event.pos): # if the ball pos collide witht the pos i click
+                        self.spawned_ball.poke_ball_rect_storage.remove(poke_ball_rect) # remove
+                        self.num_ball += 50
+                        break
+
+                for machine_pokemon in self.pokemon_groups:
+                    if machine_pokemon.pokemon_type == 'machine':
+                        for bullet_rect in machine_pokemon.bullet_rect_storage:
+                            if bullet_rect.collidepoint(event.pos):
+                                machine_pokemon.bullet_rect_storage.remove(bullet_rect)
+                                self.num_ball += 50
+                                break
 
             # drag pokemon
             if self.chosen_pokemon and event.type == pygame.MOUSEMOTION:
