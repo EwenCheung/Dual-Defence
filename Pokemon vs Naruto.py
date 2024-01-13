@@ -239,7 +239,7 @@ class Pokemon(pygame.sprite.Sprite):
     def update(self):
         self.update_animation_state()
 
-    def being_attack(self, damage):
+    def pokemon_being_attack(self, damage):
         self.health -= damage
         if self.health == 0:
             self.kill()
@@ -298,27 +298,32 @@ class Ninja(pygame.sprite.Sprite):
             self.animation_index = 0
         self.image = self.frames[int(self.animation_index)]
 
-    def update(self, pokemon_groups):
-            self.update_animation_state()
+    def update(self, plant_groups):
+        self.update_animation_state()
 
-            collisions = pygame.sprite.spritecollide(self, pokemon_groups, False)
-            if collisions:
-                self.speed = 0 
-                self.animation_index = 2
-                if self.cooldown == 0:
-                    for pokemon in collisions:
-                        pokemon.health -= self.attack
-                        self.cooldown = 60  
-                        if pokemon.health <= 0:
-                            pokemon.kill()
-                            self.speed = self.original_speed
-            else:
-                self.speed = self.original_speed 
+        collisions = pygame.sprite.spritecollide(self, plant_groups, False)
+        if collisions:
+            self.speed = 0
+            self.animation_index = 2
+            if self.cooldown == 0:
+                for plant in collisions:
+                    plant.health -= self.attack
+                    self.cooldown = 60
+                    if plant.health <= 0:
+                        plant.kill()
+                        self.speed = self.original_speed
+        else:
+            self.speed = self.original_speed
 
-            if self.cooldown > 0:
-                self.cooldown -= 1
+        if self.cooldown > 0:
+            self.cooldown -= 1
 
-            self.rect.x -= self.speed
+        self.rect.x -= self.speed
+
+    def ninja_being_attack(self, damage):
+        self.health -= damage
+        if self.health == 0:
+            self.kill()
 
 class Game():
     def __init__(self):
@@ -535,6 +540,15 @@ class Game():
                     if ninja.rect.centerx < 1010 and ninja.rect.centery == pokemon.rect.centery:
                         if ninja.rect.centery not in self.row_with_ninja:
                             self.row_with_ninja.append(ninja.rect.centery)
+                        for bullet_rect in pokemon.bullet_rect_storage:
+                            if bullet_rect.colliderect(ninja.rect):
+                                pokemon.bullet_rect_storage.remove(bullet_rect)
+                                if pokemon.pokemon_type == 'pokemon':
+                                    ninja.ninja_being_attack(25)
+                                elif pokemon.pokemon_type == 'squirtle':
+                                    ninja.ninja_being_attack(20)
+                                break
+
 
             for pokemon in self.pokemon_groups:
                 if pokemon.rect.centery in self.row_with_ninja:

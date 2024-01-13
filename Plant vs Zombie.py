@@ -239,7 +239,7 @@ class Pokemon(pygame.sprite.Sprite):
     def update(self):
         self.update_animation_state()
 
-    def being_attack(self, damage):
+    def pokemon_being_attack(self, damage):
         self.health -= damage
         if self.health == 0:
             self.kill()
@@ -320,6 +320,10 @@ class Ninja(pygame.sprite.Sprite):
 
         self.rect.x -= self.speed
 
+    def ninja_being_attack(self, damage):
+        self.health -= damage
+        if self.health == 0:
+            self.kill()
 
 class Game():
     def __init__(self):
@@ -536,6 +540,15 @@ class Game():
                     if ninja.rect.centerx < 1010 and ninja.rect.centery == pokemon.rect.centery:
                         if ninja.rect.centery not in self.row_with_ninja:
                             self.row_with_ninja.append(ninja.rect.centery)
+                        for bullet_rect in pokemon.bullet_rect_storage:
+                            if bullet_rect.colliderect(ninja.rect):
+                                pokemon.bullet_rect_storage.remove(bullet_rect)
+                                if pokemon.pokemon_type == 'pokemon':
+                                    ninja.ninja_being_attack(25)
+                                elif pokemon.pokemon_type == 'squirtle':
+                                    ninja.ninja_being_attack(20)
+                                break
+
 
             for pokemon in self.pokemon_groups:
                 if pokemon.rect.centery in self.row_with_ninja:
