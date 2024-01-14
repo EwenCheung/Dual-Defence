@@ -426,11 +426,12 @@ class Game():
         animation_frames = 30  # Adjust the number of frames for the animation
         for frame in range(animation_frames):
             # Interpolate the position between the original and target positions
+            # interpolation formula : interp=start+(end−start)×fraction
             interp_x = original_position[0] + (target_position[0] - original_position[0]) * (frame / animation_frames)
             interp_y = original_position[1] + (target_position[1] - original_position[1]) * (frame / animation_frames)
             poke_ball_rect.topleft = (interp_x, interp_y)
             pygame.time.delay(10)  # Introduce a small delay to control animation speed
-            # self.screen.blit(self.background_surface, (0, 0))  # Clear the screen
+            self.screen.blit(self.background_surface, (0, 0))  # Clear the screen so when i press the ball the screen wont be white color
             self.pokemon_groups.draw(self.screen)  # Draw other elements
             self.ninja_groups.draw(self.screen)
             self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)  # Draw the animated Poke Ball
