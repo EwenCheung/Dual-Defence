@@ -117,17 +117,6 @@ class Tools:
                             coor[2] = 1
                             return (coor[0], coor[1])  # return coordinate where pokemon have to stay
 
-    def check_alive_pokemon(self, poke_groups, grid_coor):
-        alive_pokemon = []
-        for pokemon in poke_groups:
-            if [pokemon.rect[0], pokemon.rect[1], 0] not in alive_pokemon:
-                alive_pokemon.append([pokemon.rect[0], pokemon.rect[1], 1])
-            for column in grid_coor:
-                for coor in column:
-                    if coor[2] != 0:
-                        if coor not in alive_pokemon:
-                            coor[2] = 0
-
 
 class Poke_Ball:
     def __init__(self):
@@ -276,7 +265,7 @@ class Ninja(pygame.sprite.Sprite):
     Kakashi_attack_frame = [pygame.image.load('Picture/kakashi/kakashi_attack_1.png').convert_alpha(),
                             pygame.image.load('Picture/kakashi/kakashi_attack_2.png').convert_alpha()]
 
-    def __init__(self, ninja_type,all_grid_coor):
+    def __init__(self, ninja_type, all_grid_coor):
         super().__init__()
         # speed cannot be lower than 0.6 , if not ninja will not spawn
         self.ninja_type = ninja_type
@@ -351,7 +340,7 @@ class Ninja(pygame.sprite.Sprite):
                             for coor in column:
                                 if coor[2] == 1:
                                     coor_with_1.append(coor)
-                                    if [pokemon.rect.centerx, pokemon.rect.centery,1] in coor_with_1:
+                                    if [pokemon.rect.centerx, pokemon.rect.centery, 1] in coor_with_1:
                                         coor[2] = 0
                         pokemon.kill()
                         self.speed = self.original_speed
@@ -643,8 +632,6 @@ class Game():
                 if pokemon.pokemon_type == 'machine':
                     for bullet_rect in pokemon.bullet_rect_storage:
                         self.screen.blit(pokemon.machine_ball_surface, bullet_rect)  # Draw the poke ball
-
-            # self.tools.check_alive_pokemon(self.pokemon_groups, self.grid_coor)
 
             for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage:
                 self.spawned_ball.drop_poke_ball()
