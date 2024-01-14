@@ -97,23 +97,7 @@ pygame.display.set_mode((1000, 600))
 
 
 class Tools:
-    def __init__(self):
-        # center coordinate for each box
-        # x = [312, 400, 486, 577, 663, 750, 838, 927]
-        # y = [172, 262, 352, 442, 532]
-        # grid_coor [0] is x_coor , [1] is y_coor , [2] is the grid been taken
-        self.grid_coor = [
-            [[312, 172, 0], [312, 262, 0], [312, 352, 0], [312, 442, 0], [312, 532, 0]],
-            [[400, 172, 0], [400, 262, 0], [400, 352, 0], [400, 442, 0], [400, 532, 0]],
-            [[486, 172, 0], [486, 262, 0], [486, 352, 0], [486, 442, 0], [486, 532, 0]],
-            [[577, 172, 0], [577, 262, 0], [577, 352, 0], [577, 442, 0], [577, 532, 0]],
-            [[663, 172, 0], [663, 262, 0], [663, 352, 0], [663, 442, 0], [663, 532, 0]],
-            [[750, 172, 0], [750, 262, 0], [750, 352, 0], [750, 442, 0], [750, 532, 0]],
-            [[838, 172, 0], [838, 262, 0], [838, 352, 0], [838, 442, 0], [838, 532, 0]],
-            [[927, 172, 0], [927, 262, 0], [927, 352, 0], [927, 442, 0], [927, 532, 0]]
-        ]
-
-    def find_grid_coor(self, pos):
+    def find_grid_coor(self, pos, grid_coor):
         # check whether out of map
         # 312 - 42 = 272 ( least x ) , 927 + 42 = 967 ( max x )
         # 172 - 45 = 127 ( least y ) , 532 + 45 = 577 ( max x )
@@ -121,9 +105,9 @@ class Tools:
             return None
 
         # check at which column (finding coordinate x)
-        for i, column in enumerate(self.grid_coor):
+        for i, column in enumerate(grid_coor):
             # cause our grid_coor is center so use + and - to get the max result
-            if self.grid_coor[i][0][0] - 42 <= pos[0] and self.grid_coor[i][0][0] + 42 >= pos[0]:
+            if grid_coor[i][0][0] - 42 <= pos[0] and grid_coor[i][0][0] + 42 >= pos[0]:
                 # check at which row (finding coordinate y), will output the coor for x and y
                 for coor in column:
                     if coor[1] - 45 <= pos[1] and coor[1] + 45 >= pos[1]:
@@ -133,12 +117,12 @@ class Tools:
                             coor[2] = 1
                             return (coor[0], coor[1])  # return coordinate where pokemon have to stay
 
-    def check_alive_pokemon(self, poke_groups):
+    def check_alive_pokemon(self, poke_groups, grid_coor):
         alive_pokemon = []
         for pokemon in poke_groups:
             if [pokemon.rect[0], pokemon.rect[1], 0] not in alive_pokemon:
                 alive_pokemon.append([pokemon.rect[0], pokemon.rect[1], 1])
-            for column in self.grid_coor:
+            for column in grid_coor:
                 for coor in column:
                     if coor[2] != 0:
                         if coor not in alive_pokemon:
@@ -292,11 +276,12 @@ class Ninja(pygame.sprite.Sprite):
     Kakashi_attack_frame = [pygame.image.load('Picture/kakashi/kakashi_attack_1.png').convert_alpha(),
                             pygame.image.load('Picture/kakashi/kakashi_attack_2.png').convert_alpha()]
 
-    def __init__(self, ninja_type):
+    def __init__(self, ninja_type,all_grid_coor):
         super().__init__()
         # speed cannot be lower than 0.6 , if not ninja will not spawn
         self.ninja_type = ninja_type
         self.speed = 1
+        self.all_grid_coor = all_grid_coor
 
         if ninja_type == 'naruto':
             self.frames = [pygame.transform.scale(frame, (84, 45)) for frame in self.NARUTO_FRAMES]
@@ -361,6 +346,13 @@ class Ninja(pygame.sprite.Sprite):
 
                     self.cooldown = 60
                     if pokemon.health <= 0:
+                        coor_with_1 = []
+                        for column in self.all_grid_coor:
+                            for coor in column:
+                                if coor[2] == 1:
+                                    coor_with_1.append(coor)
+                                    if [pokemon.rect.centerx, pokemon.rect.centery,1] in coor_with_1:
+                                        coor[2] = 0
                         pokemon.kill()
                         self.speed = self.original_speed
         else:
@@ -411,6 +403,20 @@ class Game():
         self.remaining_time = None
         self.timer_duration = 90000  # milisec
         self.row_with_ninja = []
+        # center coordinate for each box
+        # x = [312, 400, 486, 577, 663, 750, 838, 927]
+        # y = [172, 262, 352, 442, 532]
+        # grid_coor [0] is x_coor , [1] is y_coor , [2] is the grid been taken
+        self.grid_coor = [
+            [[312, 172, 0], [312, 262, 0], [312, 352, 0], [312, 442, 0], [312, 532, 0]],
+            [[400, 172, 0], [400, 262, 0], [400, 352, 0], [400, 442, 0], [400, 532, 0]],
+            [[486, 172, 0], [486, 262, 0], [486, 352, 0], [486, 442, 0], [486, 532, 0]],
+            [[577, 172, 0], [577, 262, 0], [577, 352, 0], [577, 442, 0], [577, 532, 0]],
+            [[663, 172, 0], [663, 262, 0], [663, 352, 0], [663, 442, 0], [663, 532, 0]],
+            [[750, 172, 0], [750, 262, 0], [750, 352, 0], [750, 442, 0], [750, 532, 0]],
+            [[838, 172, 0], [838, 262, 0], [838, 352, 0], [838, 442, 0], [838, 532, 0]],
+            [[927, 172, 0], [927, 262, 0], [927, 352, 0], [927, 442, 0], [927, 532, 0]]
+        ]
         self.tools = Tools()
         self.ninja_groups.empty()
         self.pokemon_groups.empty()
@@ -468,7 +474,7 @@ class Game():
                 exit()
 
             if event.type == self.ninja_timer and self.after_press_start:
-                spawned_ninja = Ninja((choice(self.ninja_choice)))
+                spawned_ninja = Ninja((choice(self.ninja_choice)), self.grid_coor)
                 self.ninja_groups.add(spawned_ninja)
 
             if event.type == self.poke_ball_timer and self.after_press_start:
@@ -515,7 +521,7 @@ class Game():
             # pokemon released and back to the initial position
             if event.type == pygame.MOUSEBUTTONUP and self.chosen_pokemon is not None:
                 # check pokemon release at which coordinate
-                self.coordinate = self.tools.find_grid_coor(event.pos)
+                self.coordinate = self.tools.find_grid_coor(event.pos, self.grid_coor)
                 if self.coordinate is not None:
                     if self.chosen_pokemon == 'machine':
                         self.num_ball -= 50
@@ -638,7 +644,7 @@ class Game():
                     for bullet_rect in pokemon.bullet_rect_storage:
                         self.screen.blit(pokemon.machine_ball_surface, bullet_rect)  # Draw the poke ball
 
-            self.tools.check_alive_pokemon(self.pokemon_groups)
+            # self.tools.check_alive_pokemon(self.pokemon_groups, self.grid_coor)
 
             for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage:
                 self.spawned_ball.drop_poke_ball()
