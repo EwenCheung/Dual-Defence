@@ -635,7 +635,7 @@ class Game():
                     for bullet_rect in pokemon.bullet_rect_storage:
                         self.screen.blit(pokemon.machine_ball_surface, bullet_rect)  # Draw the poke ball
 
-            self.tools.check_alive_pokemon(self.pokemon_groups,self.grid_coor)
+            # self.tools.check_alive_pokemon(self.pokemon_groups,self.grid_coor)
 
             for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage:
                 self.spawned_ball.drop_poke_ball()
