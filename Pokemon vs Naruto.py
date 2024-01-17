@@ -97,12 +97,22 @@ pygame.display.set_mode((1000, 600))
 
 
 class Tools:
-    def find_grid_coor(self, pos, grid_coor):
+    def find_grid_coor(self, pos, grid_coor,num_ball,pokemon_type):
         # check whether out of map
         # 312 - 42 = 272 ( least x ) , 927 + 42 = 967 ( max x )
         # 172 - 45 = 127 ( least y ) , 532 + 45 = 577 ( max x )
         if pos[0] < 272 or pos[0] > 967 or pos[1] < 127 or pos[1] > 577:
             return None
+
+        if pokemon_type == 'machine':
+            if num_ball <50:
+                return None
+        elif pokemon_type == 'pikachu':
+            if num_ball < 150:
+                return None
+        elif pokemon_type == 'squirtle':
+            if num_ball<100:
+                return None
 
         # check at which column (finding coordinate x)
         for i, column in enumerate(grid_coor):
@@ -381,7 +391,7 @@ class Game():
 
         # set up Ninja timer
         self.ninja_timer = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.ninja_timer, 1000)
+        pygame.time.set_timer(self.ninja_timer, 8000)
 
         # set up poke_ball_drop_timer
         self.poke_ball_timer = pygame.USEREVENT + 2
@@ -391,7 +401,7 @@ class Game():
         self.ninja_choice = ['naruto', 'sasuke', 'kakashi', 'sasuke']
 
     def reset_game_state(self):
-        self.num_ball = 10000
+        self.num_ball = 100
         self.chosen_pokemon = None
         self.coordinate = None
         self.remaining_time = None
@@ -516,7 +526,7 @@ class Game():
             # pokemon released and back to the initial position
             if event.type == pygame.MOUSEBUTTONUP and self.chosen_pokemon is not None:
                 # check pokemon release at which coordinate
-                self.coordinate = self.tools.find_grid_coor(event.pos, self.grid_coor)
+                self.coordinate = self.tools.find_grid_coor(event.pos, self.grid_coor,self.num_ball,self.chosen_pokemon)
                 if self.coordinate is not None:
                     if self.chosen_pokemon == 'machine':
                         self.num_ball -= 50
@@ -608,9 +618,9 @@ class Game():
                         die = ninja.check_ninja_die()
                         if die or ninja.rect.centerx < (pokemon.rect.centerx - 20):
                             self.row_with_ninja.remove(ninja.rect.centery)
-                            if pokemon.pokemon_type != 'machine':
-                                pokemon.bullet_rect_storage = []
-                                print('hi')
+                            for pokemon in self.pokemon_groups:
+                                if pokemon.pokemon_type != 'machine':
+                                    pokemon.bullet_rect_storage = []
                             pokemon.check_attacking('normal')
 
                     # bullet collide then cause damage
