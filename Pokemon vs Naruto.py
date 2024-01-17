@@ -211,10 +211,16 @@ class Pokemon(pygame.sprite.Sprite):
                 self.frames = self.normal_frames
 
     def update_animation_state(self):
-        self.animation_index += 0.1
-        if self.animation_index >= len(self.frames):
-            self.animation_index = 0
-            self.create_bullet()
+        if self.pokemon_type == 'pikachu' or self.pokemon_type == 'squirtle':
+            self.animation_index += 0.1
+            if self.animation_index >= len(self.frames):
+                self.create_bullet()
+                self.animation_index = 0
+        if self.pokemon_type == 'machine' :
+            self.animation_index += 0.05
+            if self.animation_index >= len(self.frames):
+                self.create_bullet()
+                self.animation_index = 0
 
         self.image = self.frames[int(self.animation_index)]
 
@@ -233,7 +239,7 @@ class Pokemon(pygame.sprite.Sprite):
     def move_bullet(self):
         for bullet_rect in self.bullet_rect_storage:
             bullet_rect.x += self.bullet_speed  # Move the bullet to the right of Pikachu
-            if bullet_rect.x > 1010:
+            if bullet_rect.x > 1030:
                 # Remove bullets that have moved off-screen
                 self.bullet_rect_storage.remove(bullet_rect)
 
@@ -375,12 +381,11 @@ class Game():
 
         # set up Ninja timer
         self.ninja_timer = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.ninja_timer, 6000)
+        pygame.time.set_timer(self.ninja_timer, 1000)
 
-        self.spawned_ball = Poke_Ball()
         # set up poke_ball_drop_timer
         self.poke_ball_timer = pygame.USEREVENT + 2
-        pygame.time.set_timer(self.poke_ball_timer, 10000)
+        pygame.time.set_timer(self.poke_ball_timer, 20000)
 
         # choice of ninja
         self.ninja_choice = ['naruto', 'sasuke', 'kakashi', 'sasuke']
@@ -407,6 +412,7 @@ class Game():
             [[927, 172, 0], [927, 262, 0], [927, 352, 0], [927, 442, 0], [927, 532, 0]]
         ]
         self.tools = Tools()
+        self.spawned_ball = Poke_Ball()
         self.ninja_groups.empty()
         self.pokemon_groups.empty()
         self.set_up()  # set up surface and rectangle etc
@@ -514,17 +520,17 @@ class Game():
                 if self.coordinate is not None:
                     if self.chosen_pokemon == 'machine':
                         self.num_ball -= 50
-                        if not self.machine_card_rectangle.colliderect(self.machine_card_initial_position + (1, 1)):
+                        if not self.machine_card_rectangle.topleft == self.machine_card_initial_position:
                             self.machine_card_rectangle.topleft = self.machine_card_initial_position  # Snap back to initial position
 
                     elif self.chosen_pokemon == 'pikachu':
                         self.num_ball -= 150
-                        if not self.pikachu_card_rectangle.colliderect(self.pikachu_card_initial_position + (1, 1)):
+                        if not self.pikachu_card_rectangle.topleft == self.pikachu_card_initial_position:
                             self.pikachu_card_rectangle.topleft = self.pikachu_card_initial_position  # Snap back to initial position
 
                     elif self.chosen_pokemon == 'squirtle':
                         self.num_ball -= 100
-                        if not self.squirtle_card_rectangle.colliderect(self.squirtle_card_initial_position + (1, 1)):
+                        if not self.squirtle_card_rectangle.topleft == self.squirtle_card_initial_position:
                             self.squirtle_card_rectangle.topleft = self.squirtle_card_initial_position  # Snap back to initial position
 
                     spawned_pokemon = Pokemon(self.chosen_pokemon, self.coordinate)
@@ -533,15 +539,15 @@ class Game():
                 # card snap back without deducting num_balls
                 if self.coordinate is None:
                     if self.chosen_pokemon == 'machine':
-                        if not self.machine_card_rectangle.colliderect(self.machine_card_initial_position + (1, 1)):
+                        if not self.machine_card_rectangle.topleft == self.machine_card_initial_position :
                             self.machine_card_rectangle.topleft = self.machine_card_initial_position
 
                     elif self.chosen_pokemon == 'pikachu':
-                        if not self.pikachu_card_rectangle.colliderect(self.pikachu_card_initial_position + (1, 1)):
+                        if not self.pikachu_card_rectangle.topleft == self.pikachu_card_initial_position:
                             self.pikachu_card_rectangle.topleft = self.pikachu_card_initial_position
 
                     elif self.chosen_pokemon == 'squirtle':
-                        if not self.squirtle_card_rectangle.colliderect(self.squirtle_card_initial_position + (1, 1)):
+                        if not self.squirtle_card_rectangle.topleft == self.squirtle_card_initial_position:
                             self.squirtle_card_rectangle.topleft = self.squirtle_card_initial_position
 
                 self.chosen_pokemon = None
@@ -592,7 +598,7 @@ class Game():
             for pokemon in self.pokemon_groups:
                 for ninja in self.ninja_groups:
                     # if ninja in that row, add into self.row_with_ninja
-                    if ninja.rect.centerx < 1000 and ninja.rect.centery == pokemon.rect.centery:
+                    if ninja.rect.centerx < 980 and ninja.rect.centery == pokemon.rect.centery:
                         if ninja.rect.centery not in self.row_with_ninja:
                             # append the y_coor into it
                             # using y_coor is because later check whether same y_coor with plant which mean by same row
@@ -602,14 +608,14 @@ class Game():
                         die = ninja.check_ninja_die()
                         if die or ninja.rect.centerx < (pokemon.rect.centerx - 20):
                             self.row_with_ninja.remove(ninja.rect.centery)
-                            for bullet_rect in pokemon.bullet_rect_storage:
-                                if bullet_rect.x > 1030:
-                                    pokemon.bullet_rect_storage.remove(bullet_rect)
+                            if pokemon.pokemon_type != 'machine':
+                                pokemon.bullet_rect_storage = []
+                                print('hi')
                             pokemon.check_attacking('normal')
 
                     # bullet collide then cause damage
                     for bullet_rect in pokemon.bullet_rect_storage:
-                        if bullet_rect.colliderect(ninja.rect):
+                        if pokemon.pokemon_type != 'machine' and bullet_rect.colliderect(ninja.rect):
                             pokemon.bullet_rect_storage.remove(bullet_rect)
                             if pokemon.pokemon_type == 'pikachu':
                                 ninja.ninja_being_attack(20)
