@@ -404,7 +404,7 @@ class Game():
     def reset_game_state(self):
         #create a background music
         self.bg_music =pygame.mixer.Sound('audio/bg_music.mp3')
-        self.bg_music.set_volume(0.85)
+        self.bg_music.set_volume(0.1)
         self.bg_music.play(loops=-1)
 
         self.num_ball = 500
@@ -497,7 +497,7 @@ class Game():
             if event.type == self.poke_ball_timer and self.after_press_start:
                 self.spawned_ball.create_poke_ball()
 
-            if event.type == pygame.MOUSEBUTTONDOWN and self.white_rectangle.collidepoint(event.pos):
+            if event.type == pygame.MOUSEBUTTONDOWN and self.white_rectangle.collidepoint(event.pos) and self.before_press_start == True:
                 self.after_press_start = True
                 self.before_press_start = False
                 self.begin_time = pygame.time.get_ticks()  # this record the initial countdown and i put here coz to only program the time when user move to next page
