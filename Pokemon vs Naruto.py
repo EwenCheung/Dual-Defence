@@ -382,11 +382,6 @@ class Game():
         self.before_press_start = True
         self.after_press_start = False
 
-        #create a background music
-        self.bg_music =pygame.mixer.Sound('audio/bg_music.mp3')
-        self.bg_music.set_volume(0.85)
-        self.bg_music.play(loops=-1)
-
         # Groups
         self.ninja_groups = pygame.sprite.Group()
         self.pokemon_groups = pygame.sprite.Group()
@@ -396,7 +391,8 @@ class Game():
 
         # set up Ninja timer
         self.ninja_timer = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.ninja_timer, 8000)
+        self.spawn_time = 8000
+        pygame.time.set_timer(self.ninja_timer, self.spawn_time)
 
         # set up poke_ball_drop_timer
         self.poke_ball_timer = pygame.USEREVENT + 2
@@ -406,11 +402,17 @@ class Game():
         self.ninja_choice = ['naruto', 'sasuke', 'kakashi', 'sasuke']
 
     def reset_game_state(self):
-        self.num_ball = 100
+        #create a background music
+        self.bg_music =pygame.mixer.Sound('audio/bg_music.mp3')
+        self.bg_music.set_volume(0.85)
+        self.bg_music.play(loops=-1)
+
+        self.num_ball = 500
         self.chosen_pokemon = None
         self.coordinate = None
         self.remaining_time = None
         self.lose = False
+        self.wave = 1
         self.row_with_ninja = []
         # center coordinate for each box
         # x = [312, 400, 486, 577, 663, 750, 838, 927]
@@ -466,8 +468,12 @@ class Game():
         self.squirtle_card_rectangle = self.squirtle_card_surface.get_rect(topleft=self.squirtle_card_initial_position)
 
         self.num_ball_font = pygame.font.Font(None, 30)
-        self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
+        self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), True, 'Black')
         self.num_ball_rectangle = self.num_ball_surface.get_rect(center=(65, 85))
+
+        self.wave_font = pygame.font.Font(None, 50)
+        self.wave_surface = self.wave_font.render(f'Wave {self.wave}', True, 'White')
+        self.wave_rectangle = self.wave_surface.get_rect(center=(80,580))
 
         wood_plank = create_file_path('Picture/utils/wood.png')
         self.wood_plank_surface = pygame.image.load(wood_plank).convert()
@@ -569,7 +575,7 @@ class Game():
                 self.chosen_pokemon = None
                 self.coordinate = None
 
-            if self.remaining_time == 0 and event.type == pygame.MOUSEBUTTONDOWN:
+            if self.lose and event.type == pygame.MOUSEBUTTONDOWN:
                 if self.home_page_rect.collidepoint(event.pos):
                     self.reset_game_state()
                     self.before_press_start = True
@@ -595,6 +601,14 @@ class Game():
             seconds = time_pass % 60
             self.time = f"{minutes:02}:{seconds:02}"
             self.timer = pygame.font.Font(None, 36).render(self.time, True, (255, 255, 255))
+
+            if minutes >= self.wave:
+                # self.ninja_timer = pygame.USEREVENT + 1
+                self.spawn_time = self.spawn_time//5
+                pygame.time.set_timer(self.ninja_timer, self.spawn_time)
+                self.wave = minutes+1
+
+                self.wave_surface = pygame.font.Font(None, 50).render(f'Wave {self.wave}',True,'White')
 
             self.screen.blit(self.background_surface, (0, 0))
             self.screen.blit(self.machine_card_surface, self.machine_card_rectangle)
@@ -664,8 +678,11 @@ class Game():
                 self.spawned_ball.drop_poke_ball()
                 self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)
 
+            self.screen.blit(self.wave_surface, self.wave_rectangle)
+
         if self.lose:
             self.screen.fill((0, 0, 0))
+
             loss_message = pygame.font.Font(None, 135).render("K.O.", True, (255, 255, 255))
             loss_message_rect = loss_message.get_rect(center=(500, 145))
             self.screen.blit(loss_message, loss_message_rect)
@@ -674,10 +691,9 @@ class Game():
             used_time_rect = used_time.get_rect(center=(500, 250))
             self.screen.blit(used_time,used_time_rect)
 
-            wave_message = pygame.font.Font(None, 70).render('Ewen is stupid', True, (255, 255, 255))
+            wave_message = pygame.font.Font(None, 70).render(f'You reached Wave {self.wave}', True, (255, 255, 255))
             wave_message_rect = wave_message.get_rect(center=(500, 335))
             self.screen.blit(wave_message,wave_message_rect)
-
 
             self.wood_plank_surface = pygame.transform.scale(self.wood_plank_surface, (200, 70))
 
