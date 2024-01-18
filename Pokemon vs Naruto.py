@@ -382,6 +382,11 @@ class Game():
         self.before_press_start = True
         self.after_press_start = False
 
+        #create a background music
+        self.bg_music =pygame.mixer.Sound('audio/bg_music.mp3')
+        self.bg_music.set_volume(0.85)
+        self.bg_music.play(loops=-1)
+
         # Groups
         self.ninja_groups = pygame.sprite.Group()
         self.pokemon_groups = pygame.sprite.Group()
@@ -661,26 +666,31 @@ class Game():
 
         if self.lose:
             self.screen.fill((0, 0, 0))
-            win_message = pygame.font.Font(None, 85).render("K.O.", True, (255, 255, 255))
-            win_message_rect = win_message.get_rect(center=(500, 220))
-            self.screen.blit(win_message, win_message_rect)
+            loss_message = pygame.font.Font(None, 135).render("K.O.", True, (255, 255, 255))
+            loss_message_rect = loss_message.get_rect(center=(500, 145))
+            self.screen.blit(loss_message, loss_message_rect)
 
-            used_time = pygame.font.Font(None, 85).render(f'You survived for {self.time}', True, (255, 255, 255))
-            used_time_rect = used_time.get_rect(center=(400, 220))
+            used_time = pygame.font.Font(None, 70).render(f'You survived for {self.time}', True, (255, 255, 255))
+            used_time_rect = used_time.get_rect(center=(500, 250))
             self.screen.blit(used_time,used_time_rect)
+
+            wave_message = pygame.font.Font(None, 70).render('Ewen is stupid', True, (255, 255, 255))
+            wave_message_rect = wave_message.get_rect(center=(500, 335))
+            self.screen.blit(wave_message,wave_message_rect)
+
 
             self.wood_plank_surface = pygame.transform.scale(self.wood_plank_surface, (200, 70))
 
-            self.wood_plank_rectangle = self.wood_plank_surface.get_rect(center=(350, 360))
+            self.wood_plank_rectangle = self.wood_plank_surface.get_rect(center=(350, 430))
             self.screen.blit(self.wood_plank_surface, self.wood_plank_rectangle)
             home_page = pygame.font.Font(None, 40).render('Home Page', True, (255, 255, 255))
-            self.home_page_rect = home_page.get_rect(center=(350, 360))
+            self.home_page_rect = home_page.get_rect(center=(350, 430))
             self.screen.blit(home_page, self.home_page_rect)
 
-            self.wood_plank_rectangle = self.wood_plank_surface.get_rect(center=(650, 360))
+            self.wood_plank_rectangle = self.wood_plank_surface.get_rect(center=(650, 430))
             self.screen.blit(self.wood_plank_surface, self.wood_plank_rectangle)
             play_again = pygame.font.Font(None, 40).render("Play Again", True, (255, 255, 255))
-            self.play_again_rect = play_again.get_rect(center=(650, 360))
+            self.play_again_rect = play_again.get_rect(center=(650, 430))
             self.screen.blit(play_again, self.play_again_rect)
 
     def run(self):
