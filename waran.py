@@ -651,7 +651,7 @@ class Game():
                 self.spawned_ball.drop_poke_ball()
                 self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)
 
-        if time_pass == 0:
+        if self.remaining_time == 0:
             self.after_press_start = False
             self.screen.fill((0, 0, 0))
             win_message = pygame.font.Font(None, 85).render("You've Won", True, (255, 255, 255))
