@@ -402,6 +402,7 @@ class Game():
 
         # set up Ninja timer
         self.ninja_timer = pygame.USEREVENT + 1
+        self.spawn_time = 8000
         pygame.time.set_timer(self.ninja_timer, self.spawn_time)
         self.exact_time = None
 
