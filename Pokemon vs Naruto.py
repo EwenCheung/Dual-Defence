@@ -387,10 +387,6 @@ class Game():
         # reset game state for play again
         self.reset_game_state()
 
-        # set up Ninja timer
-        self.ninja_timer = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.ninja_timer, self.spawn_time)
-
         # set up poke_ball_drop_timer
         self.poke_ball_timer = pygame.USEREVENT + 2
         pygame.time.set_timer(self.poke_ball_timer, 20000)
@@ -404,7 +400,10 @@ class Game():
         self.bg_music.set_volume(0.1)
         self.bg_music.play(loops=-1)
 
-        self.spawn_time = 8000
+        # set up Ninja timer
+        self.ninja_timer = pygame.USEREVENT + 1
+        pygame.time.set_timer(self.ninja_timer, self.spawn_time)
+        self.exact_time = None
 
         self.num_ball = 500
         self.chosen_pokemon = None
@@ -594,16 +593,15 @@ class Game():
         if self.after_press_start:
             self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
 
-            exact_time = pygame.time.get_ticks()
-            time_pass = (exact_time - self.begin_time) // 1000
+            self.exact_time = pygame.time.get_ticks()
+            time_pass = (self.exact_time - self.begin_time) // 1000
             minutes = time_pass // 60
             seconds = time_pass % 60
             self.time = f"{minutes:02}:{seconds:02}"
             self.timer = pygame.font.Font(None, 36).render(self.time, True, (255, 255, 255))
 
             if minutes >= self.wave:
-                # self.ninja_timer = pygame.USEREVENT + 1
-                self.spawn_time = self.spawn_time//5
+                self.spawn_time = self.spawn_time//3
                 pygame.time.set_timer(self.ninja_timer, self.spawn_time)
                 self.wave = minutes+1
 
