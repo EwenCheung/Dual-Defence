@@ -144,38 +144,6 @@ class Poke_Ball:
             if poke_ball_rect.y < 535:
                 poke_ball_rect.y += uniform(0.4, 0.6)
 
-class Hammer(pygame.sprite.Sprite):
-    HAMMER_FRAMES = [pygame.image.load('Picture/utils/hammer_1.png').convert_alpha(),
-                     pygame.image.load('Picture/utils/hammer_2.png').convert_alpha(),
-                     pygame.image.load('Picture/utils/hammer_3.png').convert_alpha(),
-                     pygame.image.load('Picture/utils/hammer_4.png').convert_alpha()]
-    
-    def __init__(self, stuff_type, stuff_coordinate):
-        super().__init__()
-
-        self.stuff_type = stuff_type
-        self.stuff_coordinate = stuff_coordinate
-
-        if stuff_type == 'hammer':
-            self.hammer_frames = [pygame.transform.scale(frame, (70, 82)) for frame in self.HAMMER_FRAMES]
-            self.damage = 1000
-        else:
-            print('No stuff')
-
-        self.frames = self.hammer_frames
-        self.animation_index = 0
-        self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(self.stuff_coordinate))
-
-    def update_animation_state(self):
-        self.animation_index += 0.1
-        if self.animation_index >= len(self.frame):
-            self.kill()
-
-        self.image = self.frames[int(self.animation_index)]
-
-    def update(self):
-        self.update_animation_state()
 
 class Pokemon(pygame.sprite.Sprite):
     # pokemon
@@ -225,8 +193,9 @@ class Pokemon(pygame.sprite.Sprite):
         else:
             print('No pokemon found')
 
+        self.frames = self.normal_frames
         self.animation_index = 0
-        self.image = self.normal_frames[self.animation_index]
+        self.image = self.frames[self.animation_index]
         self.rect = self.image.get_rect(center=(self.pokemoning_coordinate))
 
         self.pikachu_bullet_surface = pygame.image.load('Picture/pikachu/pikachu_attack.png').convert_alpha()
@@ -263,7 +232,7 @@ class Pokemon(pygame.sprite.Sprite):
                 self.create_bullet()
                 self.animation_index = 0
 
-        self.image = self.normal_frames[int(self.animation_index)]
+        self.image = self.frames[int(self.animation_index)]
 
     def create_bullet(self):
         # bullet created append into the list
@@ -410,14 +379,12 @@ class Game():
         self.machine_card_initial_position = (120, 8)
         self.pikachu_card_initial_position = (191, 8)
         self.squirtle_card_initial_position = (262, 8)
-        self.hammer_card_initial_position = (333, 8)
         self.before_press_start = True
         self.after_press_start = False
 
         # Groups
         self.ninja_groups = pygame.sprite.Group()
         self.pokemon_groups = pygame.sprite.Group()
-        self.stuff_groups = pygame.sprite.Group()
 
         # reset game state for play again
         self.reset_game_state()
@@ -436,7 +403,6 @@ class Game():
     def reset_game_state(self):
         self.num_ball = 100
         self.chosen_pokemon = None
-        self.chosen_stuff = None
         self.coordinate = None
         self.remaining_time = None
         self.timer_duration = 90000  # milisec
@@ -494,11 +460,6 @@ class Game():
         self.squirtle_card_surface = pygame.transform.scale(self.squirtle_card_surface, (68, 83))
         self.squirtle_card_rectangle = self.squirtle_card_surface.get_rect(topleft=self.squirtle_card_initial_position)
 
-        hammer_card_fp = create_file_path('Picture/utils/hammer_1.png')
-        self.hammer_card_surface = pygame.image.load(hammer_card_fp).convert()
-        self.hammer_card_surface = pygame.transform.scale(self.hammer_card_surface, (68, 83))
-        self.hammer_card_rectangle = self.hammer_card_surface.get_rect(topleft=self.hammer_card_initial_position)
-
         self.num_ball_font = pygame.font.Font(None, 30)
         self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
         self.num_ball_rectangle = self.num_ball_surface.get_rect(center=(65, 85))
@@ -537,8 +498,6 @@ class Game():
                     self.chosen_pokemon = 'pikachu'
                 elif self.squirtle_card_rectangle.collidepoint(event.pos):
                     self.chosen_pokemon = 'squirtle'
-                elif self.hammer_card_rectangle.collidepoint(event.pos):
-                    self.chosen_stuff = 'hammer'
 
                 for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage:
                     if poke_ball_rect.collidepoint(event.pos):  # if the ball pos collide witht the pos i click
@@ -553,31 +512,6 @@ class Game():
                                 machine_pokemon.bullet_rect_storage.remove(bullet_rect)
                                 self.num_ball += 20
                                 break
-            #drag hammer
-            if self.chosen_stuff and event.type == pygame.MOUSEMOTION:
-                if self.chosen_stuff == 'hammer':
-                    self.hammer_card_rectangle.move_ip(event.rel)
-
-            # hammer released and back to the initial position
-            if event.type == pygame.MOUSEBUTTONUP and self.chosen_stuff is not None:
-                self.coordinate = Tools().find_grid_coor(event.pos, self.grid_coor, self.num_ball, self.chosen_stuff)  # to hammer at which coordinate
-                if self.coordinate is not None:
-                    if self.chosen_stuff == 'hammer':
-                        self.num_ball -= 10
-                        if not self.hammer_card_rectangle.colliderect(self.hammer_card_initial_position + (1, 1)):
-                            self.hammer_card_rectangle.topleft = self.hammer_card_initial_position  # Snap back to initial position
-                            
-                    spawned_stuff = Pokemon(self.chosen_stuff, self.coordinate)
-                    self.stuff_groups.add(spawned_stuff)  
-
-                # card snap back without deducting num_balls
-                if self.coordinate is None:
-                    if self.chosen_stuff == 'hammer':
-                        if not self.hammer_card_rectangle.colliderect(self.hammer_card_initial_position + (1, 1)):
-                            self.hammer_card_rectangle.topleft = self.hammer_card_initial_position
-
-                self.chosen_stuff = None
-                self.coordinate = None                  
 
             # drag pokemon
             if self.chosen_pokemon and event.type == pygame.MOUSEMOTION:
@@ -660,14 +594,10 @@ class Game():
             self.screen.blit(self.machine_card_surface, self.machine_card_rectangle)
             self.screen.blit(self.pikachu_card_surface, self.pikachu_card_rectangle)
             self.screen.blit(self.squirtle_card_surface, self.squirtle_card_rectangle)
-            self.screen.blit(self.hammer_card_surface, self.hammer_card_rectangle)
             self.screen.blit(self.num_ball_surface, self.num_ball_rectangle)
 
             self.screen.blit(self.wood_plank_surface, self.wood_plank_rectangle)
             self.screen.blit(self.timer, self.timer_rectangle)
-
-            self.stuff_groups.draw(self.screen)
-            self.stuff_groups.update()
 
             self.pokemon_groups.draw(self.screen)
             self.pokemon_groups.update()

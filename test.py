@@ -97,12 +97,22 @@ pygame.display.set_mode((1000, 600))
 
 
 class Tools:
-    def find_grid_coor(self, pos, grid_coor):
+    def find_grid_coor(self, pos, grid_coor,num_ball,pokemon_type):
         # check whether out of map
         # 312 - 42 = 272 ( least x ) , 927 + 42 = 967 ( max x )
         # 172 - 45 = 127 ( least y ) , 532 + 45 = 577 ( max x )
         if pos[0] < 272 or pos[0] > 967 or pos[1] < 127 or pos[1] > 577:
             return None
+
+        if pokemon_type == 'machine':
+            if num_ball <50:
+                return None
+        elif pokemon_type == 'pikachu':
+            if num_ball < 150:
+                return None
+        elif pokemon_type == 'squirtle':
+            if num_ball<100:
+                return None
 
         # check at which column (finding coordinate x)
         for i, column in enumerate(grid_coor):
@@ -133,6 +143,39 @@ class Poke_Ball:
             # dropping from up and stop at bottom
             if poke_ball_rect.y < 535:
                 poke_ball_rect.y += uniform(0.4, 0.6)
+
+class Hammer(pygame.sprite.Sprite):
+    HAMMER_FRAMES = [pygame.image.load('Picture/utils/hammer_1.png').convert_alpha(),
+                     pygame.image.load('Picture/utils/hammer_2.png').convert_alpha(),
+                     pygame.image.load('Picture/utils/hammer_3.png').convert_alpha(),
+                     pygame.image.load('Picture/utils/hammer_4.png').convert_alpha()]
+    
+    def __init__(self, stuff_type, stuff_coordinate):
+        super().__init__()
+
+        self.stuff_type = stuff_type
+        self.stuff_coordinate = stuff_coordinate
+
+        if stuff_type == 'hammer':
+            self.hammer_frames = [pygame.transform.scale(frame, (70, 82)) for frame in self.HAMMER_FRAMES]
+            self.damage = 1000
+        else:
+            print('No stuff')
+
+        self.frames = self.hammer_frames
+        self.animation_index = 0
+        self.image = self.frames[self.animation_index]
+        self.rect = self.image.get_rect(center=(self.stuff_coordinate))
+
+    def update_animation_state(self):
+        self.animation_index += 0.1
+        if self.animation_index >= len(self.frame):
+            self.kill()
+
+        self.image = self.frames[int(self.animation_index)]
+
+    def update(self):
+        self.update_animation_state()
 
 class Pokemon(pygame.sprite.Sprite):
     # pokemon
@@ -182,9 +225,8 @@ class Pokemon(pygame.sprite.Sprite):
         else:
             print('No pokemon found')
 
-        self.frames = self.normal_frames
         self.animation_index = 0
-        self.image = self.frames[self.animation_index]
+        self.image = self.normal_frames[self.animation_index]
         self.rect = self.image.get_rect(center=(self.pokemoning_coordinate))
 
         self.pikachu_bullet_surface = pygame.image.load('Picture/pikachu/pikachu_attack.png').convert_alpha()
@@ -210,10 +252,16 @@ class Pokemon(pygame.sprite.Sprite):
                 self.frames = self.normal_frames
 
     def update_animation_state(self):
-        self.animation_index += 0.1
-        if self.animation_index >= len(self.frames):
-            self.animation_index = 0
-            self.create_bullet()
+        if self.pokemon_type == 'pikachu' or self.pokemon_type == 'squirtle':
+            self.animation_index += 0.1
+            if self.animation_index >= len(self.frames):
+                self.create_bullet()
+                self.animation_index = 0
+        if self.pokemon_type == 'machine' :
+            self.animation_index += 0.05
+            if self.animation_index >= len(self.frames):
+                self.create_bullet()
+                self.animation_index = 0
 
         self.image = self.frames[int(self.animation_index)]
 
@@ -232,7 +280,7 @@ class Pokemon(pygame.sprite.Sprite):
     def move_bullet(self):
         for bullet_rect in self.bullet_rect_storage:
             bullet_rect.x += self.bullet_speed  # Move the bullet to the right of Pikachu
-            if bullet_rect.x > 1010:
+            if bullet_rect.x > 1030:
                 # Remove bullets that have moved off-screen
                 self.bullet_rect_storage.remove(bullet_rect)
 
@@ -354,38 +402,6 @@ class Ninja(pygame.sprite.Sprite):
             self.kill()
             return True
 
-class Hammer(pygame.sprite.Sprite):
-    HAMMER_FRAMES = [pygame.image.load('Picture/utils/hammer_1.png').convert_alpha(),
-                     pygame.image.load('Picture/utils/hammer_2.png').convert_alpha(),
-                     pygame.image.load('Picture/utils/hammer_3.png').convert_alpha(),
-                     pygame.image.load('Picture/utils/hammer_4.png').convert_alpha()]
-    
-    def __init__(self, stuff_type, stuff_coordinate):
-        super().__init__()
-
-        self.stuff_type = stuff_type
-        self.stuff_coordinate = stuff_coordinate
-
-        if stuff_type == 'hammer':
-            self.hammer_frames = [pygame.transform.scale(frame, (70, 82)) for frame in self.HAMMER_FRAMES]
-            self.damage = 1000
-        else:
-            print('No stuff')
-
-        self.frames = self.hammer_frames
-        self.animation_index = 0
-        self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(self.stuff_coordinate))
-
-    def update_animation_state(self):
-        self.animation_index += 0.1
-        if self.animation_index >= len(self.frame):
-            self.kill()
-
-        self.image = self.frames[int(self.animation_index)]
-
-    def update(self):
-        self.update_animation_state()  
 
 class Game():
     def __init__(self):
@@ -408,18 +424,17 @@ class Game():
 
         # set up Ninja timer
         self.ninja_timer = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.ninja_timer, 6000)
+        pygame.time.set_timer(self.ninja_timer, 8000)
 
-        self.spawned_ball = Poke_Ball()
         # set up poke_ball_drop_timer
         self.poke_ball_timer = pygame.USEREVENT + 2
-        pygame.time.set_timer(self.poke_ball_timer, 10000)
+        pygame.time.set_timer(self.poke_ball_timer, 20000)
 
         # choice of ninja
         self.ninja_choice = ['naruto', 'sasuke', 'kakashi', 'sasuke']
 
     def reset_game_state(self):
-        self.num_ball = 10000
+        self.num_ball = 100
         self.chosen_pokemon = None
         self.chosen_stuff = None
         self.coordinate = None
@@ -441,9 +456,9 @@ class Game():
             [[927, 172, 0], [927, 262, 0], [927, 352, 0], [927, 442, 0], [927, 532, 0]]
         ]
         self.tools = Tools()
+        self.spawned_ball = Poke_Ball()
         self.ninja_groups.empty()
         self.pokemon_groups.empty()
-        self.stuff_groups.empty()
         self.set_up()  # set up surface and rectangle etc
 
     def set_up(self):  # set up surface and rectangle etc
@@ -516,15 +531,14 @@ class Game():
 
             # choose pokemon
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.hammer_card_rectangle.collidepoint(event.pos):
-                    self.chosen_stuff = 'hammer'
-
                 if self.machine_card_rectangle.collidepoint(event.pos):
                     self.chosen_pokemon = 'machine'
                 elif self.pikachu_card_rectangle.collidepoint(event.pos):
                     self.chosen_pokemon = 'pikachu'
                 elif self.squirtle_card_rectangle.collidepoint(event.pos):
                     self.chosen_pokemon = 'squirtle'
+                elif self.hammer_card_rectangle.collidepoint(event.pos):
+                    self.chosen_stuff = 'hammer'
 
                 for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage:
                     if poke_ball_rect.collidepoint(event.pos):  # if the ball pos collide witht the pos i click
@@ -539,7 +553,6 @@ class Game():
                                 machine_pokemon.bullet_rect_storage.remove(bullet_rect)
                                 self.num_ball += 20
                                 break
-
             #drag hammer
             if self.chosen_stuff and event.type == pygame.MOUSEMOTION:
                 if self.chosen_stuff == 'hammer':
@@ -547,10 +560,10 @@ class Game():
 
             # hammer released and back to the initial position
             if event.type == pygame.MOUSEBUTTONUP and self.chosen_stuff is not None:
-                self.coordinate = Tools().find_grid_coor(event.pos, self.grid_coor)  # to hammer at which coordinate
+                self.coordinate = Tools().find_grid_coor(event.pos, self.grid_coor, self.num_ball, self.chosen_stuff)  # to hammer at which coordinate
                 if self.coordinate is not None:
                     if self.chosen_stuff == 'hammer':
-                        self.num_ball -= 50
+                        self.num_ball -= 10
                         if not self.hammer_card_rectangle.colliderect(self.hammer_card_initial_position + (1, 1)):
                             self.hammer_card_rectangle.topleft = self.hammer_card_initial_position  # Snap back to initial position
                             
@@ -579,21 +592,21 @@ class Game():
             # pokemon released and back to the initial position
             if event.type == pygame.MOUSEBUTTONUP and self.chosen_pokemon is not None:
                 # check pokemon release at which coordinate
-                self.coordinate = self.tools.find_grid_coor(event.pos, self.grid_coor)
+                self.coordinate = self.tools.find_grid_coor(event.pos, self.grid_coor,self.num_ball,self.chosen_pokemon)
                 if self.coordinate is not None:
                     if self.chosen_pokemon == 'machine':
                         self.num_ball -= 50
-                        if not self.machine_card_rectangle.colliderect(self.machine_card_initial_position + (1, 1)):
+                        if not self.machine_card_rectangle.topleft == self.machine_card_initial_position:
                             self.machine_card_rectangle.topleft = self.machine_card_initial_position  # Snap back to initial position
 
                     elif self.chosen_pokemon == 'pikachu':
                         self.num_ball -= 150
-                        if not self.pikachu_card_rectangle.colliderect(self.pikachu_card_initial_position + (1, 1)):
+                        if not self.pikachu_card_rectangle.topleft == self.pikachu_card_initial_position:
                             self.pikachu_card_rectangle.topleft = self.pikachu_card_initial_position  # Snap back to initial position
 
                     elif self.chosen_pokemon == 'squirtle':
                         self.num_ball -= 100
-                        if not self.squirtle_card_rectangle.colliderect(self.squirtle_card_initial_position + (1, 1)):
+                        if not self.squirtle_card_rectangle.topleft == self.squirtle_card_initial_position:
                             self.squirtle_card_rectangle.topleft = self.squirtle_card_initial_position  # Snap back to initial position
 
                     spawned_pokemon = Pokemon(self.chosen_pokemon, self.coordinate)
@@ -602,15 +615,15 @@ class Game():
                 # card snap back without deducting num_balls
                 if self.coordinate is None:
                     if self.chosen_pokemon == 'machine':
-                        if not self.machine_card_rectangle.colliderect(self.machine_card_initial_position + (1, 1)):
+                        if not self.machine_card_rectangle.topleft == self.machine_card_initial_position :
                             self.machine_card_rectangle.topleft = self.machine_card_initial_position
 
                     elif self.chosen_pokemon == 'pikachu':
-                        if not self.pikachu_card_rectangle.colliderect(self.pikachu_card_initial_position + (1, 1)):
+                        if not self.pikachu_card_rectangle.topleft == self.pikachu_card_initial_position:
                             self.pikachu_card_rectangle.topleft = self.pikachu_card_initial_position
 
                     elif self.chosen_pokemon == 'squirtle':
-                        if not self.squirtle_card_rectangle.colliderect(self.squirtle_card_initial_position + (1, 1)):
+                        if not self.squirtle_card_rectangle.topleft == self.squirtle_card_initial_position:
                             self.squirtle_card_rectangle.topleft = self.squirtle_card_initial_position
 
                 self.chosen_pokemon = None
@@ -665,7 +678,7 @@ class Game():
             for pokemon in self.pokemon_groups:
                 for ninja in self.ninja_groups:
                     # if ninja in that row, add into self.row_with_ninja
-                    if ninja.rect.centerx < 1000 and ninja.rect.centery == pokemon.rect.centery:
+                    if ninja.rect.centerx < 980 and ninja.rect.centery == pokemon.rect.centery:
                         if ninja.rect.centery not in self.row_with_ninja:
                             # append the y_coor into it
                             # using y_coor is because later check whether same y_coor with plant which mean by same row
@@ -675,14 +688,14 @@ class Game():
                         die = ninja.check_ninja_die()
                         if die or ninja.rect.centerx < (pokemon.rect.centerx - 20):
                             self.row_with_ninja.remove(ninja.rect.centery)
-                            for bullet_rect in pokemon.bullet_rect_storage:
-                                if bullet_rect.x > 1030:
-                                    pokemon.bullet_rect_storage.remove(bullet_rect)
+                            for pokemon in self.pokemon_groups:
+                                if pokemon.pokemon_type != 'machine':
+                                    pokemon.bullet_rect_storage = []
                             pokemon.check_attacking('normal')
 
                     # bullet collide then cause damage
                     for bullet_rect in pokemon.bullet_rect_storage:
-                        if bullet_rect.colliderect(ninja.rect):
+                        if pokemon.pokemon_type != 'machine' and bullet_rect.colliderect(ninja.rect):
                             pokemon.bullet_rect_storage.remove(bullet_rect)
                             if pokemon.pokemon_type == 'pikachu':
                                 ninja.ninja_being_attack(20)
