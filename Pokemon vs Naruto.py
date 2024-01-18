@@ -162,14 +162,15 @@ class Pokemon(pygame.sprite.Sprite):
                       pygame.image.load('Picture/pikachu/pikachu_3.png').convert_alpha(),
                       pygame.image.load('Picture/pikachu/pikachu_4.png').convert_alpha()]
 
-    PIKACHU_NORMAL = [pygame.image.load('Picture/pikachu/pikachu_1.png').convert_alpha(),
-                      pygame.image.load('Picture/pikachu/pikachu_3.png').convert_alpha(),
-                      pygame.image.load('Picture/pikachu/pikachu_4.png').convert_alpha()]
-
     SQUIRTLE_NORMAL = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
                        pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
                        pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha(),
                        pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha()]
+
+    PIKACHU_NORMAL = [pygame.image.load('Picture/pikachu/pikachu_1.png').convert_alpha(),
+                      pygame.image.load('Picture/pikachu/pikachu_3.png').convert_alpha(),
+                      pygame.image.load('Picture/pikachu/pikachu_4.png').convert_alpha()]
+
 
     def __init__(self, pokemon_type, pokemoning_coordinate):
         super().__init__()
@@ -200,15 +201,12 @@ class Pokemon(pygame.sprite.Sprite):
 
         self.pikachu_bullet_surface = pygame.image.load('Picture/pikachu/pikachu_attack.png').convert_alpha()
         self.pikachu_bullet_surface = pygame.transform.scale(self.pikachu_bullet_surface, (50, 50))
-        self.pikachu_bullet_rectangle = self.pikachu_bullet_surface.get_rect(center=self.rect.center)
 
         self.squirtle_bullet_surface = pygame.image.load('Picture/squirtle/squirtle_attack_2.png').convert_alpha()
         self.squirtle_bullet_surface = pygame.transform.scale(self.squirtle_bullet_surface, (50, 50))
-        self.squirtle_bullet_rectangle = self.squirtle_bullet_surface.get_rect(center=self.rect.center)
 
         self.machine_ball_surface = pygame.image.load('Picture/utils/Poke_Ball.png').convert_alpha()
         self.machine_ball_surface = pygame.transform.scale(self.machine_ball_surface, (25, 25))
-        self.machine_ball_rectangle = self.machine_ball_surface.get_rect(center=self.rect.center)
 
         # this list will store all active bullet
         self.bullet_rect_storage = []
@@ -391,7 +389,6 @@ class Game():
 
         # set up Ninja timer
         self.ninja_timer = pygame.USEREVENT + 1
-        self.spawn_time = 8000
         pygame.time.set_timer(self.ninja_timer, self.spawn_time)
 
         # set up poke_ball_drop_timer
@@ -406,6 +403,8 @@ class Game():
         self.bg_music =pygame.mixer.Sound('audio/bg_music.mp3')
         self.bg_music.set_volume(0.1)
         self.bg_music.play(loops=-1)
+
+        self.spawn_time = 8000
 
         self.num_ball = 500
         self.chosen_pokemon = None
