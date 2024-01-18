@@ -405,7 +405,6 @@ class Game():
         self.chosen_pokemon = None
         self.coordinate = None
         self.remaining_time = None
-        self.timer_duration = 90000  # milisec
         self.row_with_ninja = []
         # center coordinate for each box
         # x = [312, 400, 486, 577, 663, 750, 838, 927]
@@ -584,10 +583,9 @@ class Game():
             self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
 
             exact_time = pygame.time.get_ticks()
-            time_pass = exact_time - self.begin_time
-            self.remaining_time = max(0, self.timer_duration - time_pass)
-            minutes = self.remaining_time // 60000
-            seconds = (self.remaining_time % 60000) // 1000
+            time_pass = (exact_time - self.begin_time) // 1000
+            minutes = time_pass // 60
+            seconds = time_pass % 60
             self.timer = pygame.font.Font(None, 36).render(f"{minutes:02}:{seconds:02}", True, (255, 255, 255))
 
             self.screen.blit(self.background_surface, (0, 0))
