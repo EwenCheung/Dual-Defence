@@ -202,7 +202,7 @@ class Pokemon(pygame.sprite.Sprite):
         self.pikachu_bullet_surface = pygame.transform.scale(self.pikachu_bullet_surface, (50, 50))
         self.pikachu_bullet_rectangle = self.pikachu_bullet_surface.get_rect(center=self.rect.center)
 
-        self.squirtle_bullet_surface = pygame.image.load('Picture/squirtle/squirtle_attack.png').convert_alpha()
+        self.squirtle_bullet_surface = pygame.image.load('Picture/squirtle/squirtle_attack_2.png').convert_alpha()
         self.squirtle_bullet_surface = pygame.transform.scale(self.squirtle_bullet_surface, (50, 50))
         self.squirtle_bullet_rectangle = self.squirtle_bullet_surface.get_rect(center=self.rect.center)
 
@@ -405,7 +405,7 @@ class Game():
         self.chosen_pokemon = None
         self.coordinate = None
         self.remaining_time = None
-        self.timer_duration = 90000  # milisec
+        self.lose = False
         self.row_with_ninja = []
         # center coordinate for each box
         # x = [312, 400, 486, 577, 663, 750, 838, 927]
@@ -468,6 +468,7 @@ class Game():
         self.wood_plank_surface = pygame.image.load(wood_plank).convert()
         self.wood_plank_surface = pygame.transform.scale(self.wood_plank_surface, (140, 50))
         self.wood_plank_rectangle = self.wood_plank_surface.get_rect(topleft=(850, 10))
+        self.time = None
         self.timer = pygame.font.Font(None, 36).render(None, True, (255, 255, 255))
         self.timer_rectangle = self.timer.get_rect(center=(890, 35))
 
@@ -584,11 +585,11 @@ class Game():
             self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
 
             exact_time = pygame.time.get_ticks()
-            time_pass = exact_time - self.begin_time
-            self.remaining_time = max(0, self.timer_duration - time_pass)
-            minutes = self.remaining_time // 60000
-            seconds = (self.remaining_time % 60000) // 1000
-            self.timer = pygame.font.Font(None, 36).render(f"{minutes:02}:{seconds:02}", True, (255, 255, 255))
+            time_pass = (exact_time - self.begin_time) // 1000
+            minutes = time_pass // 60
+            seconds = time_pass % 60
+            self.time = f"{minutes:02}:{seconds:02}"
+            self.timer = pygame.font.Font(None, 36).render(self.time, True, (255, 255, 255))
 
             self.screen.blit(self.background_surface, (0, 0))
             self.screen.blit(self.machine_card_surface, self.machine_card_rectangle)
@@ -633,6 +634,11 @@ class Game():
                                 ninja.ninja_being_attack(20)
                             break
 
+            for ninja in self.ninja_groups:
+                if ninja.rect.centerx < 250:
+                    self.lose = True
+                    self.after_press_start = False
+
             # move bullet and blit bullet for pokemon in row_with_ninja
             for pokemon in self.pokemon_groups:
                 if pokemon.rect.centery in self.row_with_ninja:
@@ -653,12 +659,15 @@ class Game():
                 self.spawned_ball.drop_poke_ball()
                 self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)
 
-        if self.remaining_time == 0:
-            self.after_press_start = False
+        if self.lose:
             self.screen.fill((0, 0, 0))
-            win_message = pygame.font.Font(None, 85).render("You've Won", True, (255, 255, 255))
+            win_message = pygame.font.Font(None, 85).render("K.O.", True, (255, 255, 255))
             win_message_rect = win_message.get_rect(center=(500, 220))
             self.screen.blit(win_message, win_message_rect)
+
+            used_time = pygame.font.Font(None, 85).render(f'You survived for {self.time}', True, (255, 255, 255))
+            used_time_rect = used_time.get_rect(center=(400, 220))
+            self.screen.blit(used_time,used_time_rect)
 
             self.wood_plank_surface = pygame.transform.scale(self.wood_plank_surface, (200, 70))
 
