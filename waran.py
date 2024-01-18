@@ -582,11 +582,11 @@ class Game():
         if self.after_press_start:
             self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
 
-            exact_time = pygame.time.get_ticks()
-            time_pass = (exact_time - self.begin_time) // 1000
+            exact_time = pygame.time.get_ticks() 
+            time_pass = (exact_time - self.begin_time) // 1000  # divide by 1000 because the pygame.get_ticks() is in milisec form so we have to change it to sec form.
             minutes = time_pass // 60
             seconds = time_pass % 60
-            self.timer = pygame.font.Font(None, 36).render(f"{minutes:02}:{seconds:02}", True, (255, 255, 255))
+            self.timer = pygame.font.Font(None, 36).render(f"{minutes:02}:{seconds:02}", True, (255, 255, 255)) # in the font render part we have to put true because to smooth the font, if put false the font doesnt look nice.
 
             self.screen.blit(self.background_surface, (0, 0))
             self.screen.blit(self.machine_card_surface, self.machine_card_rectangle)
