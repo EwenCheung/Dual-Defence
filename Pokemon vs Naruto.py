@@ -474,6 +474,10 @@ class Game():
         self.wave_surface = self.wave_font.render(f'Wave {self.wave}', True, 'White')
         self.wave_rectangle = self.wave_surface.get_rect(center=(80,580))
 
+        self.simple_background_surf = pygame.image.load('Picture/utils/simple_background.jpeg').convert()
+        self.simple_background_surf = pygame.transform.scale(self.simple_background_surf,(140, 50))
+        self.simple_background_rect = self.simple_background_surf.get_rect(center=(80,580))
+
         wood_plank = create_file_path('Picture/utils/wood.png')
         self.wood_plank_surface = pygame.image.load(wood_plank).convert()
         self.wood_plank_surface = pygame.transform.scale(self.wood_plank_surface, (140, 50))
@@ -676,6 +680,7 @@ class Game():
                 self.spawned_ball.drop_poke_ball()
                 self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)
 
+            self.screen.blit(self.simple_background_surf, self.simple_background_rect)
             self.screen.blit(self.wave_surface, self.wave_rectangle)
 
         if self.lose:
