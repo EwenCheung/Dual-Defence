@@ -383,7 +383,7 @@ class Game():
         self.after_press_start = False
 
         # Groups
-        self.ninja_groups = pygame.sprite.Group()
+        self.ninja_groups = pygame.sprite.Group() # it is like a list, same goes to the below one
         self.pokemon_groups = pygame.sprite.Group()
 
         # reset game state for play again
@@ -582,10 +582,11 @@ class Game():
         if self.after_press_start:
             self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
 
-            exact_time = pygame.time.get_ticks() 
+            exact_time = pygame.time.get_ticks() # already started to count when i run the pygame while the begin_time only start when i press start the game
             time_pass = (exact_time - self.begin_time) // 1000  # divide by 1000 because the pygame.get_ticks() is in milisec form so we have to change it to sec form.
             minutes = time_pass // 60
             seconds = time_pass % 60
+            # above there already have self.timer but we put down here again to update it.
             self.timer = pygame.font.Font(None, 36).render(f"{minutes:02}:{seconds:02}", True, (255, 255, 255)) # in the font render part we have to put true because to smooth the font, if put false the font doesnt look nice.
 
             self.screen.blit(self.background_surface, (0, 0))
