@@ -20,11 +20,11 @@ class LogInMethod():
         self.log_in_as = ''
 
     def sign_up(self, username, password):
-        with open(self.data_user, mode='a') as f:
+        with open('Data/user.txt', mode='a') as f:
             f.write(f'{username}----{password}\n')
 
     def check_username_taken(self, input_username):
-        with open(self.data_user, mode='rt', encoding='utf-8') as f:
+        with open('Data/user.txt', mode='rt', encoding='utf-8') as f:
             for line in f:
                 username, password = line.strip().split('----')
                 if input_username == username:
@@ -32,12 +32,12 @@ class LogInMethod():
             return True
 
     def check_user_pass(self, input_username, input_password):
-        with open(self.data_user, mode='rt', encoding='utf-8') as f:
+        with open('Data/user.txt', mode='rt', encoding='utf-8') as f:
             for line in f:
                 username, password = line.strip().split('----')
                 if input_username == username and input_password == password:
                     return True
-            print('No account found. Check your username and password. You have to register an account to sign in')
+            print('\nNo account found. Check your username and password. You have to register an account to sign in')
             return False
 
     def ask_log_in_method(self):
@@ -58,19 +58,22 @@ class LogInMethod():
 
             elif log_in_method == 'U':  # sign up an account
                 while True:
+                    print(" Press 'E' to quit ")
                     input_username = input('Enter username for sign up : ').strip()
                     res = self.check_username_taken(input_username)
-                    if res:
+                    if input_username.upper() == 'E':
+                        print()
+                        break
+                    elif res:
                         input_password = input('Enter your password: ').strip()
                         print('Successfully registered')
                         print(f'Username:  {input_username}')
                         print(f'Password:  {input_password}')
                         print('Now, you can sign in your account\n')
+                        self.sign_up(input_username, input_password)
                         break
                     else:
                         print('Username Taken, Please choose an another one')
-
-                self.sign_up(input_username, input_password)
 
             elif log_in_method == 'I':
                 while True:
@@ -82,7 +85,8 @@ class LogInMethod():
                         print(f'Logged in as : {self.log_in_as.title()}')
                         return self.log_in_as.title()
                     else:
-                        print('Incorrect username or password. Please try again.')
+                        print('Please try again.\n')
+                        break
 
             else:
                 print('Please enter the correct symbol\n')
@@ -90,14 +94,14 @@ class LogInMethod():
 
 logged_in_user = LogInMethod().run()
 
-# have to initialise the pygame first because of loading image in class Ninja
+
+# have to initialise the pygame first
 pygame.init()
 pygame.display.set_caption('Pokemon vs Naruto')  # title name
 pygame.display.set_mode((1000, 600))
 
-
 class Tools:
-    def find_grid_coor(self, pos, grid_coor,num_ball,pokemon_type):
+    def find_grid_coor(self, pos, grid_coor, num_ball, pokemon_type):
         # check whether out of map
         # 312 - 42 = 272 ( least x ) , 927 + 42 = 967 ( max x )
         # 172 - 45 = 127 ( least y ) , 532 + 45 = 577 ( max x )
@@ -105,13 +109,13 @@ class Tools:
             return None
 
         if pokemon_type == 'machine':
-            if num_ball <50:
+            if num_ball < 50:
                 return None
         elif pokemon_type == 'pikachu':
             if num_ball < 150:
                 return None
         elif pokemon_type == 'squirtle':
-            if num_ball<100:
+            if num_ball < 100:
                 return None
 
         # check at which column (finding coordinate x)
@@ -144,37 +148,6 @@ class Poke_Ball:
             if poke_ball_rect.y < 535:
                 poke_ball_rect.y += uniform(0.4, 0.6)
 
-class Hammer():
-    HAMMER_FRAMES = [pygame.image.load('Picture/utils/hammer_1.png').convert_alpha(),
-                     pygame.image.load('Picture/utils/hammer_2.png').convert_alpha(),
-                     pygame.image.load('Picture/utils/hammer_3.png').convert_alpha(),
-                     pygame.image.load('Picture/utils/hammer_4.png').convert_alpha()]
-    
-    def __init__(self, stuff_type, stuff_coordinate):
-        super().__init__()
-
-        self.stuff_type = stuff_type
-        self.stuff_coordinate = stuff_coordinate
-
-        if stuff_type == 'hammer':
-            self.frames = [pygame.transform.scale(frame, (70, 82)) for frame in self.HAMMER_FRAMES]
-            self.damage = 1000
-        else:
-            print('No stuff')
-
-        self.animation_index = 0
-        self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(self.stuff_coordinate))
-
-    def update_animation_state(self):
-        self.animation_index += 0.1
-        if self.animation_index >= len(self.frame):
-            self.kill()
-
-        self.image = self.frames[int(self.animation_index)]
-
-    def update(self):
-        self.update_animation_state()
 
 class Pokemon(pygame.sprite.Sprite):
     # pokemon
@@ -193,14 +166,14 @@ class Pokemon(pygame.sprite.Sprite):
                       pygame.image.load('Picture/pikachu/pikachu_3.png').convert_alpha(),
                       pygame.image.load('Picture/pikachu/pikachu_4.png').convert_alpha()]
 
-    PIKACHU_NORMAL = [pygame.image.load('Picture/pikachu/pikachu_1.png').convert_alpha(),
-                      pygame.image.load('Picture/pikachu/pikachu_3.png').convert_alpha(),
-                      pygame.image.load('Picture/pikachu/pikachu_4.png').convert_alpha()]
-
     SQUIRTLE_NORMAL = [pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
                        pygame.image.load('Picture/squirtle/squirtle_1.png').convert_alpha(),
                        pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha(),
                        pygame.image.load('Picture/squirtle/squirtle_2.png').convert_alpha()]
+
+    PIKACHU_NORMAL = [pygame.image.load('Picture/pikachu/pikachu_1.png').convert_alpha(),
+                      pygame.image.load('Picture/pikachu/pikachu_3.png').convert_alpha(),
+                      pygame.image.load('Picture/pikachu/pikachu_4.png').convert_alpha()]
 
     def __init__(self, pokemon_type, pokemoning_coordinate):
         super().__init__()
@@ -229,17 +202,14 @@ class Pokemon(pygame.sprite.Sprite):
         self.image = self.frames[self.animation_index]
         self.rect = self.image.get_rect(center=(self.pokemoning_coordinate))
 
-        self.pikachu_bullet_surface = pygame.image.load('Picture/pikachu/pikachu_attack.png').convert_alpha()
+        self.pikachu_bullet_surface = pygame.image.load('Picture/pikachu/pikachu_bullet.png').convert_alpha()
         self.pikachu_bullet_surface = pygame.transform.scale(self.pikachu_bullet_surface, (50, 50))
-        # self.pikachu_bullet_rectangle = self.pikachu_bullet_surface.get_rect(center=self.rect.center)
 
-        self.squirtle_bullet_surface = pygame.image.load('Picture/squirtle/squirtle_attack.png').convert_alpha()
+        self.squirtle_bullet_surface = pygame.image.load('Picture/squirtle/squirtle_attack_2.png').convert_alpha()
         self.squirtle_bullet_surface = pygame.transform.scale(self.squirtle_bullet_surface, (50, 50))
-        # self.squirtle_bullet_rectangle = self.squirtle_bullet_surface.get_rect(center=self.rect.center)
 
         self.machine_ball_surface = pygame.image.load('Picture/utils/Poke_Ball.png').convert_alpha()
         self.machine_ball_surface = pygame.transform.scale(self.machine_ball_surface, (25, 25))
-        # self.machine_ball_rectangle = self.machine_ball_surface.get_rect(center=self.rect.center)
 
         # this list will store all active bullet
         self.bullet_rect_storage = []
@@ -257,7 +227,7 @@ class Pokemon(pygame.sprite.Sprite):
             if self.animation_index >= len(self.frames):
                 self.create_bullet()
                 self.animation_index = 0
-        if self.pokemon_type == 'machine' :
+        if self.pokemon_type == 'machine':
             self.animation_index += 0.05
             if self.animation_index >= len(self.frames):
                 self.create_bullet()
@@ -274,7 +244,6 @@ class Pokemon(pygame.sprite.Sprite):
         elif self.pokemon_type == 'machine':
             new_bullet = self.machine_ball_surface.get_rect(
                 center=((self.rect.bottomright[0] + randint(-15, 15)), ((self.rect.bottomright[1] + randint(-15, 15)))))
-
         self.bullet_rect_storage.append(new_bullet)
 
     def move_bullet(self):
@@ -289,7 +258,7 @@ class Pokemon(pygame.sprite.Sprite):
 
 
 class Ninja(pygame.sprite.Sprite):
-    # load images
+    # load image
     NARUTO_FRAMES = [pygame.image.load('Picture/naruto/naruto_walk_1.png').convert_alpha(),
                      pygame.image.load('Picture/naruto/naruto_walk_2.png').convert_alpha(),
                      pygame.image.load('Picture/naruto/naruto_walk_3.png').convert_alpha()]
@@ -410,7 +379,6 @@ class Game():
         self.machine_card_initial_position = (120, 8)
         self.pikachu_card_initial_position = (191, 8)
         self.squirtle_card_initial_position = (262, 8)
-        self.hammer_card_initial_position = (333, 8)
         self.before_press_start = True
         self.after_press_start = False
 
@@ -421,10 +389,6 @@ class Game():
         # reset game state for play again
         self.reset_game_state()
 
-        # set up Ninja timer
-        self.ninja_timer = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.ninja_timer, 8000)
-
         # set up poke_ball_drop_timer
         self.poke_ball_timer = pygame.USEREVENT + 2
         pygame.time.set_timer(self.poke_ball_timer, 20000)
@@ -433,12 +397,24 @@ class Game():
         self.ninja_choice = ['naruto', 'sasuke', 'kakashi', 'sasuke']
 
     def reset_game_state(self):
-        self.num_ball = 100
+        # create a background music
+        self.bg_music = pygame.mixer.Sound('audio/bg_music.mp3')
+        self.bg_music.set_volume(0.1)
+        self.bg_music.play(loops=-1)
+
+        # set up Ninja timer
+        self.ninja_timer = pygame.USEREVENT + 1
+        self.spawn_time = 8000
+        pygame.time.set_timer(self.ninja_timer, self.spawn_time)
+
+        self.exact_time = None
+
+        self.num_ball = 500
         self.chosen_pokemon = None
         self.coordinate = None
         self.remaining_time = None
-        self.chosen_stuff = None
-        self.timer_duration = 90000  # milisec
+        self.lose = False
+        self.wave = 1
         self.row_with_ninja = []
         # center coordinate for each box
         # x = [312, 400, 486, 577, 663, 750, 838, 927]
@@ -455,7 +431,6 @@ class Game():
             [[927, 172, 0], [927, 262, 0], [927, 352, 0], [927, 442, 0], [927, 532, 0]]
         ]
         self.tools = Tools()
-        self.spawned_stuff = Hammer(self.chosen_stuff, self.coordinate)
         self.spawned_ball = Poke_Ball()
         self.ninja_groups.empty()
         self.pokemon_groups.empty()
@@ -494,19 +469,23 @@ class Game():
         self.squirtle_card_surface = pygame.transform.scale(self.squirtle_card_surface, (68, 83))
         self.squirtle_card_rectangle = self.squirtle_card_surface.get_rect(topleft=self.squirtle_card_initial_position)
 
-        hammer_card_fp = create_file_path('Picture/utils/hammer_1.png')
-        self.hammer_card_surface = pygame.image.load(hammer_card_fp).convert()
-        self.hammer_card_surface = pygame.transform.scale(self.hammer_card_surface, (68, 83))
-        self.hammer_card_rectangle = self.hammer_card_surface.get_rect(topleft=self.hammer_card_initial_position)
-
         self.num_ball_font = pygame.font.Font(None, 30)
-        self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
+        self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), True, 'Black')
         self.num_ball_rectangle = self.num_ball_surface.get_rect(center=(65, 85))
+
+        self.wave_font = pygame.font.Font(None, 50)
+        self.wave_surface = self.wave_font.render(f'Wave {self.wave}', True, 'White')
+        self.wave_rectangle = self.wave_surface.get_rect(center=(80, 580))
+
+        self.simple_background_surf = pygame.image.load('Picture/utils/wave_background.jpeg').convert()
+        self.simple_background_surf = pygame.transform.scale(self.simple_background_surf, (140, 50))
+        self.simple_background_rect = self.simple_background_surf.get_rect(center=(80, 580))
 
         wood_plank = create_file_path('Picture/utils/wood.png')
         self.wood_plank_surface = pygame.image.load(wood_plank).convert()
         self.wood_plank_surface = pygame.transform.scale(self.wood_plank_surface, (140, 50))
         self.wood_plank_rectangle = self.wood_plank_surface.get_rect(topleft=(850, 10))
+        self.time = None
         self.timer = pygame.font.Font(None, 36).render(None, True, (255, 255, 255))
         self.timer_rectangle = self.timer.get_rect(center=(890, 35))
 
@@ -524,7 +503,8 @@ class Game():
             if event.type == self.poke_ball_timer and self.after_press_start:
                 self.spawned_ball.create_poke_ball()
 
-            if event.type == pygame.MOUSEBUTTONDOWN and self.white_rectangle.collidepoint(event.pos):
+            if event.type == pygame.MOUSEBUTTONDOWN and self.white_rectangle.collidepoint(
+                    event.pos) and self.before_press_start == True:
                 self.after_press_start = True
                 self.before_press_start = False
                 self.begin_time = pygame.time.get_ticks()  # this record the initial countdown and i put here coz to only program the time when user move to next page
@@ -537,8 +517,6 @@ class Game():
                     self.chosen_pokemon = 'pikachu'
                 elif self.squirtle_card_rectangle.collidepoint(event.pos):
                     self.chosen_pokemon = 'squirtle'
-                elif self.hammer_card_rectangle.collidepoint(event.pos):
-                    self.chosen_stuff = 'hammer'
 
                 for poke_ball_rect in self.spawned_ball.poke_ball_rect_storage:
                     if poke_ball_rect.collidepoint(event.pos):  # if the ball pos collide witht the pos i click
@@ -563,14 +541,12 @@ class Game():
                     self.pikachu_card_rectangle.move_ip(event.rel)
                 elif self.chosen_pokemon == 'squirtle':
                     self.squirtle_card_rectangle.move_ip(event.rel)
-                #drag hammer            
-                elif self.chosen_stuff == 'hammer':
-                    self.hammer_card_rectangle.move_ip(event.rel)
 
             # pokemon released and back to the initial position
             if event.type == pygame.MOUSEBUTTONUP and self.chosen_pokemon is not None:
                 # check pokemon release at which coordinate
-                self.coordinate = self.tools.find_grid_coor(event.pos, self.grid_coor,self.num_ball,self.chosen_pokemon)
+                self.coordinate = self.tools.find_grid_coor(event.pos, self.grid_coor, self.num_ball,
+                                                            self.chosen_pokemon)
                 if self.coordinate is not None:
                     if self.chosen_pokemon == 'machine':
                         self.num_ball -= 50
@@ -590,15 +566,10 @@ class Game():
                     spawned_pokemon = Pokemon(self.chosen_pokemon, self.coordinate)
                     self.pokemon_groups.add(spawned_pokemon)
 
-                    if self.chosen_stuff == 'hammer':
-                        if not self.hammer_card_rectangle.topleft == self.hammer_card_initial_position:
-                            self.hammer_card_rectangle.topleft = self.hammer_card_initial_position  # Snap back to initial position
-                            
-
                 # card snap back without deducting num_balls
                 if self.coordinate is None:
                     if self.chosen_pokemon == 'machine':
-                        if not self.machine_card_rectangle.topleft == self.machine_card_initial_position :
+                        if not self.machine_card_rectangle.topleft == self.machine_card_initial_position:
                             self.machine_card_rectangle.topleft = self.machine_card_initial_position
 
                     elif self.chosen_pokemon == 'pikachu':
@@ -609,17 +580,10 @@ class Game():
                         if not self.squirtle_card_rectangle.topleft == self.squirtle_card_initial_position:
                             self.squirtle_card_rectangle.topleft = self.squirtle_card_initial_position
 
-                    elif self.chosen_stuff == 'hammer':
-                        if not self.hammer_card_rectangle.topleft == self.hammer_card_initial_position:
-                            self.hammer_card_rectangle.topleft = self.hammer_card_initial_position
-
-                self.chosen_stuff = None
                 self.chosen_pokemon = None
                 self.coordinate = None
 
-
-
-            if self.remaining_time == 0 and event.type == pygame.MOUSEBUTTONDOWN:
+            if self.lose and event.type == pygame.MOUSEBUTTONDOWN:
                 if self.home_page_rect.collidepoint(event.pos):
                     self.reset_game_state()
                     self.before_press_start = True
@@ -639,18 +603,24 @@ class Game():
         if self.after_press_start:
             self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
 
-            exact_time = pygame.time.get_ticks()
-            time_pass = exact_time - self.begin_time
-            self.remaining_time = max(0, self.timer_duration - time_pass)
-            minutes = self.remaining_time // 60000
-            seconds = (self.remaining_time % 60000) // 1000
-            self.timer = pygame.font.Font(None, 36).render(f"{minutes:02}:{seconds:02}", True, (255, 255, 255))
+            self.exact_time = pygame.time.get_ticks()
+            time_pass = (self.exact_time - self.begin_time) // 1000
+            minutes = time_pass // 60
+            seconds = time_pass % 60
+            self.time = f"{minutes:02}:{seconds:02}"
+            self.timer = pygame.font.Font(None, 36).render(self.time, True, (255, 255, 255))
+
+            if minutes >= self.wave:
+                self.spawn_time = self.spawn_time // 3
+                pygame.time.set_timer(self.ninja_timer, self.spawn_time)
+                self.wave = minutes + 1
+
+                self.wave_surface = pygame.font.Font(None, 50).render(f'Wave {self.wave}', True, 'White')
 
             self.screen.blit(self.background_surface, (0, 0))
             self.screen.blit(self.machine_card_surface, self.machine_card_rectangle)
             self.screen.blit(self.pikachu_card_surface, self.pikachu_card_rectangle)
             self.screen.blit(self.squirtle_card_surface, self.squirtle_card_rectangle)
-            self.screen.blit(self.hammer_card_surface, self.hammer_card_rectangle)
             self.screen.blit(self.num_ball_surface, self.num_ball_rectangle)
 
             self.screen.blit(self.wood_plank_surface, self.wood_plank_rectangle)
@@ -690,6 +660,11 @@ class Game():
                                 ninja.ninja_being_attack(20)
                             break
 
+            for ninja in self.ninja_groups:
+                if ninja.rect.centerx < 250:
+                    self.lose = True
+                    self.after_press_start = False
+
             # move bullet and blit bullet for pokemon in row_with_ninja
             for pokemon in self.pokemon_groups:
                 if pokemon.rect.centery in self.row_with_ninja:
@@ -710,25 +685,36 @@ class Game():
                 self.spawned_ball.drop_poke_ball()
                 self.screen.blit(self.spawned_ball.poke_ball_surface, poke_ball_rect)
 
-        if self.remaining_time == 0:
-            self.after_press_start = False
+            self.screen.blit(self.simple_background_surf, self.simple_background_rect)
+            self.screen.blit(self.wave_surface, self.wave_rectangle)
+
+        if self.lose:
             self.screen.fill((0, 0, 0))
-            win_message = pygame.font.Font(None, 85).render("You've Won", True, (255, 255, 255))
-            win_message_rect = win_message.get_rect(center=(500, 220))
-            self.screen.blit(win_message, win_message_rect)
+
+            loss_message = pygame.font.Font(None, 135).render("K.O.", True, (255, 255, 255))
+            loss_message_rect = loss_message.get_rect(center=(500, 145))
+            self.screen.blit(loss_message, loss_message_rect)
+
+            used_time = pygame.font.Font(None, 70).render(f'You survived for {self.time}', True, (255, 255, 255))
+            used_time_rect = used_time.get_rect(center=(500, 250))
+            self.screen.blit(used_time, used_time_rect)
+
+            wave_message = pygame.font.Font(None, 70).render(f'You reached Wave {self.wave}', True, (255, 255, 255))
+            wave_message_rect = wave_message.get_rect(center=(500, 335))
+            self.screen.blit(wave_message, wave_message_rect)
 
             self.wood_plank_surface = pygame.transform.scale(self.wood_plank_surface, (200, 70))
 
-            self.wood_plank_rectangle = self.wood_plank_surface.get_rect(center=(350, 360))
+            self.wood_plank_rectangle = self.wood_plank_surface.get_rect(center=(350, 430))
             self.screen.blit(self.wood_plank_surface, self.wood_plank_rectangle)
             home_page = pygame.font.Font(None, 40).render('Home Page', True, (255, 255, 255))
-            self.home_page_rect = home_page.get_rect(center=(350, 360))
+            self.home_page_rect = home_page.get_rect(center=(350, 430))
             self.screen.blit(home_page, self.home_page_rect)
 
-            self.wood_plank_rectangle = self.wood_plank_surface.get_rect(center=(650, 360))
+            self.wood_plank_rectangle = self.wood_plank_surface.get_rect(center=(650, 430))
             self.screen.blit(self.wood_plank_surface, self.wood_plank_rectangle)
             play_again = pygame.font.Font(None, 40).render("Play Again", True, (255, 255, 255))
-            self.play_again_rect = play_again.get_rect(center=(650, 360))
+            self.play_again_rect = play_again.get_rect(center=(650, 430))
             self.screen.blit(play_again, self.play_again_rect)
 
     def run(self):
