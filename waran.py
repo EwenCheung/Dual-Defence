@@ -383,7 +383,7 @@ class Game():
         self.after_press_start = False
 
         # Groups
-        self.ninja_groups = pygame.sprite.Group() 
+        self.ninja_groups = pygame.sprite.Group() # it is like a list, same goes to the below one
         self.pokemon_groups = pygame.sprite.Group()
 
         # reset game state for play again

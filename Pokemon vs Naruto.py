@@ -1,14 +1,3 @@
-# *********************************************************
-# Program: Pokemon vs Naruto.py
-# Course: PSP0101 PROBLEM SOLVING AND PROGRAM DESIGN
-# Class: TL9L
-# Year: 2023/24 Trimester 1
-# Names: EWEN CHEUNG YI WEN | MOK CHUN BING | DAKHINESWARAN A/L R MANIMARAN
-# IDs: 1221109220 | 1221107598 | 1221109301
-# Emails: 1221109220@student.mmu.edu.my | 1221107598@student.mmu.edu.my | 1221109301@student.mmu.edu.my
-# Phones: 012-630 2899 | 018-229 2716 | 017-388 9823
-# ********************************************************* 
-
 # coding: utf-8
 import os
 import pygame
@@ -392,7 +381,7 @@ class Game():
         self.after_press_start = False
 
         # Groups
-        self.ninja_groups = pygame.sprite.Group() # it is like a list, same goes to the below one
+        self.ninja_groups = pygame.sprite.Group()
         self.pokemon_groups = pygame.sprite.Group()
 
         # reset game state for play again
@@ -440,7 +429,7 @@ class Game():
         ]
         self.tools = Tools()
         self.spawned_ball = Poke_Ball()
-        self.ninja_groups.empty() # empty the list
+        self.ninja_groups.empty()
         self.pokemon_groups.empty()
         self.set_up()  # set up surface and rectangle etc
 
@@ -609,12 +598,11 @@ class Game():
         if self.after_press_start:
             self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
 
-            self.exact_time = pygame.time.get_ticks() # already started to count when i run the pygame while the begin_time only start when i press start the game
-            time_pass = (self.exact_time - self.begin_time) // 1000  # divide by 1000 because the pygame.get_ticks() is in milisec form so we have to change it to sec form.
+            self.exact_time = pygame.time.get_ticks()
+            time_pass = (self.exact_time - self.begin_time) // 1000
             minutes = time_pass // 60
             seconds = time_pass % 60
             self.time = f"{minutes:02}:{seconds:02}"
-             # above there already have self.timer but we put down here again to update it.
             self.timer = pygame.font.Font(None, 36).render(self.time, True, (255, 255, 255))
 
             if minutes >= self.wave:
