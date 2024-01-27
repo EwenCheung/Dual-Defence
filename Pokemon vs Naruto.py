@@ -1,4 +1,16 @@
 # coding: utf-8
+
+"""
+Program: Pokemon vs Naruto.py
+Course: PSP0101 PROBLEM SOLVING AND PROGRAM DESIGN
+Class: TL9L
+Year: 2023/24 Trimester 1
+Names: EWEN CHEUNG YI WEN | MOK CHUN BING | DAKHINESWARAN A/L R MANIMARAN
+IDs: 1221109220 | 1221107598 | 1221109301
+Emails: 1221109220@student.mmu.edu.my | 1221107598@student.mmu.edu.my | 1221109301@student.mmu.edu.my
+Phones: 012-630 2899 | 018-229 2716 | 017-388 9823
+"""
+
 import pygame
 from sys import exit
 from random import randint, choice, uniform
