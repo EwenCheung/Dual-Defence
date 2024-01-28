@@ -145,7 +145,7 @@ class Poke_Ball:
         for poke_ball_rect in self.poke_ball_rect_storage:
             # dropping from up and stop at bottom
             if poke_ball_rect.y < 535:
-                poke_ball_rect.y += 0.4
+                poke_ball_rect.y += 0.6 # speed cannot below 0.6
 
 
 # load pokemon frame
