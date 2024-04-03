@@ -13,7 +13,7 @@ Phones: 012-630 2899 | 018-229 2716 | 017-388 9823
 
 import pygame
 from sys import exit
-from random import randint, choice, uniform
+from random import randint, choice
 
 
 class LogInMethod():
@@ -145,7 +145,7 @@ class Poke_Ball:
         for poke_ball_rect in self.poke_ball_rect_storage:
             # dropping from up and stop at bottom
             if poke_ball_rect.y < 535:
-                poke_ball_rect.y += uniform(0.4, 0.6)
+                poke_ball_rect.y += 0.6 # speed cannot below 0.6
 
 
 # load pokemon frame
@@ -188,12 +188,12 @@ class Pokemon(pygame.sprite.Sprite):
         elif self.pokemon_type == 'pikachu':
             self.attack_frames = [pygame.transform.scale(frame, (75, 82)) for frame in pikachu_attack]
             self.normal_frames = [pygame.transform.scale(frame, (75, 82)) for frame in pikachu_normal]
-            self.health = 200
+            self.health = 180
             self.bullet_speed = 5
         elif self.pokemon_type == 'squirtle':
             self.attack_frames = [pygame.transform.scale(frame, (75, 82)) for frame in squirtle_attack]
             self.normal_frames = [pygame.transform.scale(frame, (75, 82)) for frame in squirtle_normal]
-            self.health = 150
+            self.health = 200
             self.bullet_speed = 4
         else:
             print('No pokemon found')
@@ -369,6 +369,7 @@ class Ninja(pygame.sprite.Sprite):
             self.kill()
             return True
 
+
 class Game():
     def __init__(self):
         self.clock = pygame.time.Clock()
@@ -409,6 +410,7 @@ class Game():
         self.chosen_pokemon = None
         self.coordinate = None
         self.remaining_time = None
+        self.help_menu_page = None
         self.lose = False
         self.wave = 1
         self.row_with_ninja = []
@@ -444,6 +446,16 @@ class Game():
         username_font = pygame.font.Font(None, 30)
         self.username_surface = username_font.render(logged_in_user, True, 'Green')
         self.username_rectangle = self.username_surface.get_rect(center=(257, 90))
+
+        press_h_font = pygame.font.Font(None, 35)
+        self.h_surface = press_h_font.render(("Press 'h' for help menu. You can find guides there"), True, 'White')
+        self.h_rectangle = self.h_surface.get_rect(center=(500, 570))
+
+        self.help_menu_font = pygame.font.Font(None, 20)
+        # Read the help_menu_file file
+        with open("Data/help_menu.txt", "r") as file:
+            self.help_menu_content = file.read()
+        self.help_menu_page = False
 
         # game start surface and rect
         self.background_surface = pygame.image.load('Picture/utils/game_background.png').convert()
@@ -488,6 +500,23 @@ class Game():
                 pygame.quit()
                 exit()
 
+            if self.before_press_start and event.type == pygame.KEYDOWN:
+                if not self.help_menu_page and event.key == pygame.K_h:  # if press 'h' for Help
+                    self.help_menu_page = True
+                    self.before_press_start = False
+
+            elif self.help_menu_page and event.type == pygame.KEYDOWN:
+                if not self.before_press_start and event.key == pygame.K_h:  # if press 'h' for Help
+                    self.before_press_start = True
+                    self.help_menu_page = False
+
+            # press 'start adventure' in the home page, then game will start
+            if event.type == pygame.MOUSEBUTTONDOWN and self.start_adventure_rect.collidepoint(
+                    event.pos) and self.before_press_start:
+                self.after_press_start = True
+                self.before_press_start = False
+                self.begin_time = pygame.time.get_ticks()  # this record the initial countdown and i put here coz to only program the time when user move to next page
+
             # spawned ninja
             if event.type == self.ninja_timer and self.after_press_start:
                 spawned_ninja = Ninja((choice(self.ninja_choice)), self.grid_coor)
@@ -496,13 +525,6 @@ class Game():
             # spawned poke_ball from sky
             if event.type == self.poke_ball_timer and self.after_press_start:
                 self.spawned_ball.create_poke_ball()
-
-            # press 'start adventure' in the home page, then game will start
-            if event.type == pygame.MOUSEBUTTONDOWN and self.start_adventure_rect.collidepoint(
-                    event.pos) and self.before_press_start == True:
-                self.after_press_start = True
-                self.before_press_start = False
-                self.begin_time = pygame.time.get_ticks()  # this record the initial countdown and i put here coz to only program the time when user move to next page
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # press pokemon card from the top , and chosen pokemon will be that
@@ -603,10 +625,22 @@ class Game():
             self.screen.blit(self.start_adventure_surface, self.start_adventure_rect)
             self.screen.blit(self.welcome_surface, (0, 0))
             self.screen.blit(self.username_surface, self.username_rectangle)
+            self.screen.blit(self.h_surface, self.h_rectangle)
+
+        if self.help_menu_page:
+            self.screen.fill((255, 255, 255))
+            text_lines = self.help_menu_content.split('\n')
+            y_position = 10
+
+            for line in text_lines:
+                text = self.help_menu_font.render(line, True, (0, 0, 0))
+                self.screen.blit(text, (10, y_position))
+                y_position += 20  # Adjust the line spacing as needed
 
         if self.after_press_start:  # game start
             self.num_ball_surface = self.num_ball_font.render(str(self.num_ball), None, 'Black')
 
+            # timer
             exact_time = pygame.time.get_ticks()
             time_pass = (exact_time - self.begin_time) // 1000
             minutes = time_pass // 60
@@ -614,6 +648,7 @@ class Game():
             self.time = f"{minutes:02}:{seconds:02}"
             self.timer = pygame.font.Font(None, 36).render(self.time, True, (255, 255, 255))
 
+            # wave
             if minutes >= self.wave:
                 self.spawn_time = self.spawn_time // 3
                 pygame.time.set_timer(self.ninja_timer, self.spawn_time)
@@ -644,7 +679,6 @@ class Game():
             self.screen.blit(self.wave_background_surf, self.wave_background_rect)
             self.screen.blit(self.wave_surface, self.wave_rectangle)
 
-
             # three usage for this piece of code
             # 1. check ninja with pokemon in same row ( have to attack or not )
             # 2. change pokemon mode(attacking or normal)
@@ -674,7 +708,7 @@ class Game():
                             if pokemon.pokemon_type == 'pikachu':
                                 ninja.ninja_being_attack(25)
                             elif pokemon.pokemon_type == 'squirtle':
-                                ninja.ninja_being_attack(20)
+                                ninja.ninja_being_attack(18)
                             break
 
             # move and blit bullet for pokemon in row_with_ninja
