@@ -463,7 +463,7 @@ class GamePokemonVsStick:
         self.back_background_surf.fill((14, 25, 45))
         self.back_background_rect = self.back_background_surf.get_rect(center=(254, 40))
 
-        self.back_button_surf = pygame.image.load('Stick of War/Picture/Store/back_to_level.png').convert_alpha()
+        self.back_button_surf = pygame.image.load('Stick of War/Picture/store/back_to_level.png').convert_alpha()
         self.back_button_surf = pygame.transform.scale(self.back_button_surf, (75, 75))
         self.back_button_rect = self.back_button_surf.get_rect(center=(155, 40))
 

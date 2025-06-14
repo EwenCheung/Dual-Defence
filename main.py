@@ -1,5 +1,13 @@
+# /// script
+# dependencies = [
+#  "pygame-ce",
+# ]
+# ///
+
+import asyncio
 import subprocess
 import sys
+import platform
 
 
 def install(package):
@@ -12,10 +20,19 @@ except ImportError:
     install("pygame")
     import pygame
 
+# Check if running in browser
+IS_WEB = sys.platform == "emscripten"
+
 pygame.init()
 pygame.font.init()
 pygame.display.set_caption('Stick_Defend')  # title name
-pygame.display.set_mode((1000, 600))
+screen = pygame.display.set_mode((1000, 600))
+
+# Set pixelated rendering for web
+if IS_WEB:
+    platform.window.canvas.style.imageRendering = "pixelated"
+    # Set background color around pygame screen
+    platform.document.body.style.background = "#000000"
 from Database import database
 from Bokemon_vs_Stick import GamePokemonVsStick
 from Home import GameHome
@@ -34,22 +51,20 @@ run_store = False
 run_stick_of_war = False
 
 
-def main():
-    global home
-    global level
-    global stick_of_war
-    global run_pokemon_vs_stick
-    global run_home
-    global run_level
-    global run_store
-    global run_stick_of_war
+async def main():
+    global home, level, stick_of_war, pokemon_vs_stick
+    global run_pokemon_vs_stick, run_home, run_level, run_store, run_stick_of_war
 
     while True:
         try:
             if run_home:
-                home.home_music = pygame.mixer.Sound('Stick of War/Music/home_music.wav')
+                if IS_WEB:
+                    home.home_music = pygame.mixer.Sound('ogg_music/home_music.ogg')
+                else:
+                    home.home_music = pygame.mixer.Sound('Stick of War/Music/home_music.wav')
                 home.home_music.set_volume(0.2)
                 home.home_music.play(loops=-1)
+                
                 while True:
                     home.screen.fill((255, 255, 255))
 
@@ -82,12 +97,17 @@ def main():
                     home.display_message()
                     pygame.display.update()
                     home.clock.tick(60)
+                    await asyncio.sleep(0)  # Give control back to browser
 
             elif run_pokemon_vs_stick:
                 pokemon_vs_stick.reset_func()
-                pokemon_vs_stick.bg_music = pygame.mixer.Sound('Bokemon vs Stick/audio/bg_music.mp3')
+                if IS_WEB:
+                    pokemon_vs_stick.bg_music = pygame.mixer.Sound('ogg_music/bg_music.ogg')
+                else:
+                    pokemon_vs_stick.bg_music = pygame.mixer.Sound('Bokemon vs Stick/audio/bg_music.mp3')
                 pokemon_vs_stick.bg_music.set_volume(0.1)
                 pokemon_vs_stick.bg_music.play(loops=-1)
+                
                 while True:
                     if pokemon_vs_stick.go_home_py:
                         run_home = True
@@ -112,9 +132,13 @@ def main():
                     pygame.display.flip()  # redraw the screen
 
                     pokemon_vs_stick.clock.tick(60)  # 60 fps
+                    await asyncio.sleep(0)  # Give control back to browser
 
             elif run_level:
-                level.level_select_music = pygame.mixer.Sound('Stick of War/Music/level.mp3')
+                if IS_WEB:
+                    level.level_select_music = pygame.mixer.Sound('ogg_music/level.ogg')
+                else:
+                    level.level_select_music = pygame.mixer.Sound('Stick of War/Music/level.mp3')
                 level.level_select_music.set_volume(0.2)
                 level.level_select_music.play(loops=-1)
 
@@ -147,6 +171,7 @@ def main():
 
                     pygame.display.update()
                     level.clock.tick(60)
+                    await asyncio.sleep(0)  # Give control back to browser
 
             elif run_store:
                 store = Game_Store()
@@ -162,12 +187,17 @@ def main():
                     store.game_start()
                     pygame.display.update()
                     store.clock.tick(60)
+                    await asyncio.sleep(0)  # Give control back to browser
 
             elif run_stick_of_war:
                 stick_of_war.reset_func()
-                stick_of_war.game_music = pygame.mixer.Sound('Stick of War/Music/game_music.mp3')
+                if IS_WEB:
+                    stick_of_war.game_music = pygame.mixer.Sound('ogg_music/game_music.ogg')
+                else:
+                    stick_of_war.game_music = pygame.mixer.Sound('Stick of War/Music/game_music.mp3')
                 stick_of_war.game_music.set_volume(0.2)
                 stick_of_war.game_music.play(loops=-1)
+                
                 while True:
                     if stick_of_war.go_level_py:
                         run_level = True
@@ -179,11 +209,18 @@ def main():
 
                     pygame.display.update()  # Update the display
                     stick_of_war.clock.tick(60)  # Limit frame rate to 60 FPS
-        except:
-            database.update_user()
-            database.push_data()
+                    await asyncio.sleep(0)  # Give control back to browser
+        except Exception as e:
+            # Better error handling - only log errors on desktop to avoid performance issues
+            if not IS_WEB:
+                print(f"Error in main loop: {e}")
+            try:
+                database.update_user()
+                database.push_data()
+            except:
+                pass  # Ignore database errors during cleanup
             break
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

@@ -32,7 +32,7 @@ class GameLevel:
         self.three_star = pygame.image.load('Stick of War/Picture/utils/three_star.png')
         self.three_star_surf = pygame.transform.scale(self.three_star, (90, 40))
 
-        self.level_bg = pygame.image.load('Stick of War/Picture/utils/choose level.png')
+        self.level_bg = pygame.image.load('Stick of War/Picture/utils/CHOOSE LEVEL.png')
 
         self.go_home_py = False
         self.go_store_py = False
