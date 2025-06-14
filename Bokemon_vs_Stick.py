@@ -138,7 +138,9 @@ class Hero(pygame.sprite.Sprite):
     def update_animation_state(self):
         self.animation_index += 0.1
         if self.animation_index >= len(self.frames):
-            self.create_bullet()
+            # Only create bullets when in attacking mode (or machine type which always shoots)
+            if self.hero_type == 'machine' or self.frames == self.attack_frames:
+                self.create_bullet()
             self.animation_index = 0
 
         self.image = self.frames[int(self.animation_index)]
@@ -155,8 +157,8 @@ class Hero(pygame.sprite.Sprite):
         self.bullet_rect_storage.append(new_bullet)
 
     def move_bullet(self):
-        for bullet_rect in self.bullet_rect_storage:
-            bullet_rect.x += self.bullet_speed  # Move the bullet to the right of Pikachu
+        for bullet_rect in self.bullet_rect_storage[:]:  # Use slice copy to avoid modification during iteration
+            bullet_rect.x += self.bullet_speed  # Move the bullet to the right
             if bullet_rect.x > 1030:
                 # Remove bullets that have moved off-screen
                 self.bullet_rect_storage.remove(bullet_rect)
@@ -343,7 +345,6 @@ class GamePokemonVsStick:
         self.help_menu_page = None
         self.lose = False
         self.wave = 1
-        self.row_with_troop = []
         # center coordinate for each box
         # x = [312, 400, 486, 577, 663, 750, 838, 927]
         # y = [172, 262, 352, 442, 532]
@@ -636,53 +637,53 @@ class GamePokemonVsStick:
             self.screen.blit(self.wave_background_surf, self.wave_background_rect)
             self.screen.blit(self.wave_surface, self.wave_rectangle)
 
-            # three usage for this piece of code
-            # 1. check ninja with hero in same row ( have to attack or not )
-            # 2. change hero mode(attacking or normal)
-            # 3. bullet dissapear when collide with ninja
+            # First, track which rows still have active troops
+            active_rows = set()
+            for troop in self.troop_groups:
+                if troop.rect.centerx < 1025:  # Only count troops on screen
+                    active_rows.add(troop.rect.centery)
+            
+            # Check each hero individually and set their attack mode based on their row
             for hero in self.hero_groups:
+                hero_row = hero.rect.centery
+                
+                # Check if this hero's row has any troops
+                if hero_row in active_rows:
+                    # Troops in this row - this hero should be attacking
+                    if hero.hero_type != 'machine':
+                        hero.change_mode('attacking')
+                else:
+                    # No troops in this row - this hero should be normal
+                    if hero.hero_type != 'machine':
+                        hero.change_mode('normal')
+                
+                # Handle bullet collisions (keep bullets flying until they hit or go off-screen)
                 for troop in self.troop_groups:
-                    # if ninja appear on screen and in same row with hero , add ninja to list
-                    # y_coor same means same row
-                    if troop.rect.centerx < 1025 and troop.rect.centery == hero.rect.centery:
-                        if troop.rect.centery not in self.row_with_troop:
-                            # append ninja into the list if this ninja is not in the list and change mode
-                            self.row_with_troop.append(troop.rect.centery)
-                            hero.change_mode('attacking')
-
-                        die = troop.check_troop_die()
-                        if die or troop.rect.centerx < (hero.rect.centerx - 30):
-                            self.row_with_troop.remove(troop.rect.centery)
-                            for hero in self.hero_groups:
-                                if hero.hero_type != 'machine':
-                                    hero.bullet_rect_storage = []
-                            hero.change_mode('normal')
-
-                    # bullet collide then cause damage and dissapear
-                    for bullet_rect in hero.bullet_rect_storage:
+                    for bullet_rect in hero.bullet_rect_storage[:]:  # Use slice copy to avoid modification during iteration
                         if hero.hero_type != 'machine' and bullet_rect.colliderect(troop.rect):
                             hero.bullet_rect_storage.remove(bullet_rect)
                             if hero.hero_type == 'archer':
                                 troop.troop_being_attack(25)
                             elif hero.hero_type == 'wizard':
                                 troop.troop_being_attack(18)
+                            # Check if troop dies and remove it
+                            troop.check_troop_die()
                             break
 
-            # move and blit bullet for hero in row_with_ninja
+            # move and blit bullets for all heroes (bullets should continue flying)
             for hero in self.hero_groups:
-                if hero.rect.centery in self.row_with_troop:
-                    if hero.hero_type == 'archer':
-                        hero.move_bullet()
-                        for bullet_rect in hero.bullet_rect_storage:
-                            self.screen.blit(hero.archer_bullet_surface, bullet_rect)
-                    elif hero.hero_type == 'wizard':
-                        hero.move_bullet()
-                        for bullet_rect in hero.bullet_rect_storage:
-                            self.screen.blit(hero.wizard_bullet_surface, bullet_rect)
-
-                if hero.hero_type == 'machine':
+                if hero.hero_type == 'archer':
+                    hero.move_bullet()
                     for bullet_rect in hero.bullet_rect_storage:
-                        self.screen.blit(hero.machine_ball_surface, bullet_rect)  # Draw the gem ball
+                        self.screen.blit(hero.archer_bullet_surface, bullet_rect)
+                elif hero.hero_type == 'wizard':
+                    hero.move_bullet()
+                    for bullet_rect in hero.bullet_rect_storage:
+                        self.screen.blit(hero.wizard_bullet_surface, bullet_rect)
+                elif hero.hero_type == 'machine':
+                    # Machine bullets are collectible gem balls, don't move them like projectiles
+                    for bullet_rect in hero.bullet_rect_storage:
+                        self.screen.blit(hero.machine_ball_surface, bullet_rect)
 
             # if ninja cross over to the house then lose
             for troop in self.troop_groups:
