@@ -165,41 +165,45 @@ class Hero(pygame.sprite.Sprite):
         self.update_animation_state()
 
 
-# load stickman image
-stickman_warrior_image = [
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sword/stickman sword run/stickman sword run 1.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sword/stickman sword run/stickman sword run 2.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sword/stickman sword run/stickman sword run 3.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sword/stickman sword run/stickman sword run 4.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sword/stickman sword run/stickman sword run 5.png').convert_alpha()]
+# load enemy image
+warrior_1_image = [
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_one/enemy_one_1.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_one/enemy_one_2.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_one/enemy_one_3.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_one/enemy_one_4.png').convert_alpha()]
 
-stickman_sparta_image = [
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sparta/stickman sparta run/stickman sparta run 1.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sparta/stickman sparta run/stickman sparta run 2.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sparta/stickman sparta run/stickman sparta run 3.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sparta/stickman sparta run/stickman sparta run 4.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sparta/stickman sparta run/stickman sparta run 5.png').convert_alpha()]
+warrior_2_image = [
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_two/enemy_two_1.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_two/enemy_two_2.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_two/enemy_two_3.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_two/enemy_two_4.png').convert_alpha()]
 
-stickman_giant_image = [
-    pygame.image.load('Bokemon vs Stick/Picture/stickman giant/stickman giant walk/stickman Giant walk 1.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman giant/stickman giant walk/stickman Giant walk 2.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman giant/stickman giant walk/stickman Giant walk 3.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman giant/stickman giant walk/stickman Giant walk 4.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman giant/stickman giant walk/stickman Giant walk 5.png').convert_alpha()]
+warrior_3_image = [
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_three/enemy_three_1.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_three/enemy_three_2.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_three/enemy_three_3.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_three/enemy_three_4.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_three/enemy_three_5.png').convert_alpha()]
 
-# load stickman attack image
-stickman_warrior_attack = [
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sword/stickman sword attack/stickman sword attack 1.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sword/stickman sword attack/stickman sword attack 2.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sword/stickman sword attack/stickman sword attack 3.png').convert_alpha()]
+# load enemy attack image
+warrior_1_attack = [
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_one/enemy_one_attack_1.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_one/enemy_one_attack_2.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_one/enemy_one_attack_3.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_one/enemy_one_attack_4.png').convert_alpha()]
 
-stickman_sparta_attack = [
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sparta/stickman sparta attack/stickman sparta attack 1.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman sparta/stickman sparta attack/stickman sparta attack 2.png').convert_alpha()]
+warrior_2_attack = [
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_two/enemy_two_attack_1.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_two/enemy_two_attack_2.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_two/enemy_two_attack_3.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_two/enemy_two_attack_4.png').convert_alpha()]
 
-stickman_giant_attack = [
-    pygame.image.load('Bokemon vs Stick/Picture/stickman giant/stickman giant attack/stickman giant attack 1.png').convert_alpha(),
-    pygame.image.load('Bokemon vs Stick/Picture/stickman giant/stickman giant attack/stickman giant attack 2.png').convert_alpha()]
+warrior_3_attack = [
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_three/enemy_three_attack_1.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_three/enemy_three_attack_2.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_three/enemy_three_attack_3.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_three/enemy_three_attack_4.png').convert_alpha(),
+    pygame.image.load('Bokemon vs Stick/Picture/enemy_three/enemy_three_attack_5.png').convert_alpha()]
 
 
 class Troop(pygame.sprite.Sprite):
@@ -212,22 +216,22 @@ class Troop(pygame.sprite.Sprite):
         self.all_grid_coor = all_grid_coor
 
         if troop_type == 'warrior':
-            self.frames = [pygame.transform.scale(frame, (84, 45)) for frame in stickman_warrior_image]
-            self.frame = [pygame.transform.scale(frame, (84, 45)) for frame in stickman_warrior_attack]
+            self.frames = [pygame.transform.scale(frame, (75, 110)) for frame in warrior_1_image]
+            self.frame = [pygame.transform.scale(frame, (75, 110)) for frame in warrior_1_attack]
             self.speed = 1
             self.health = 120
             self.attack = 20
             self.cooldown = 0
         elif troop_type == 'sparta':
-            self.frames = [pygame.transform.scale(frame, (110, 85)) for frame in stickman_sparta_image]
-            self.frame = [pygame.transform.scale(frame, (110, 85)) for frame in stickman_sparta_attack]
+            self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in warrior_2_image]
+            self.frame = [pygame.transform.scale(frame, (75, 82)) for frame in warrior_2_attack]
             self.speed = 1
             self.health = 110
             self.attack = 25
             self.cooldown = 0
         elif troop_type == 'giant':
-            self.frames = [pygame.transform.scale(frame, (110, 85)) for frame in stickman_giant_image]
-            self.frame = [pygame.transform.scale(frame, (110, 85)) for frame in stickman_giant_attack]
+            self.frames = [pygame.transform.scale(frame, (75, 82)) for frame in warrior_3_image]
+            self.frame = [pygame.transform.scale(frame, (75, 82)) for frame in warrior_3_attack]
             self.speed = 1
             self.health = 110
             self.attack = 25
