@@ -345,6 +345,9 @@ class GamePokemonVsStick:
         self.help_menu_page = None
         self.lose = False
         self.wave = 1
+        self.is_paused = False
+        self.pause_start_time = 0
+        self.total_pause_time = 0
         # center coordinate for each box
         # x = [312, 400, 486, 577, 663, 750, 838, 927]
         # y = [172, 262, 352, 442, 532]
@@ -425,6 +428,36 @@ class GamePokemonVsStick:
         self.timer = pygame.font.Font(None, 36).render(None, True, (255, 255, 255))
         self.timer_rectangle = self.timer.get_rect(center=(890, 35))
 
+        # Main Menu button (below timer, same width as timer area with 10px gap)
+        self.main_menu_button_surface = pygame.image.load('Bokemon vs Stick/Picture/utils/wood.png').convert()
+        self.main_menu_button_surface = pygame.transform.scale(self.main_menu_button_surface, (140, 40))
+        self.main_menu_button_rectangle = self.main_menu_button_surface.get_rect(topleft=(850, 70))
+        
+        # Main menu button text
+        self.main_menu_text = pygame.font.Font(None, 20).render('MAIN MENU', True, (255, 255, 255))
+        self.main_menu_text_rect = self.main_menu_text.get_rect(center=self.main_menu_button_rectangle.center)
+        
+        # Pause overlay
+        self.pause_overlay = pygame.Surface((1000, 600))
+        self.pause_overlay.set_alpha(128)  # Semi-transparent
+        self.pause_overlay.fill((0, 0, 0))  # Black overlay
+        
+        # Pause menu buttons (centered on screen)
+        self.resume_button_surface = pygame.image.load('Bokemon vs Stick/Picture/utils/wood.png').convert()
+        self.resume_button_surface = pygame.transform.scale(self.resume_button_surface, (200, 60))
+        self.resume_button_rectangle = self.resume_button_surface.get_rect(center=(500, 250))
+        
+        self.quit_button_surface = pygame.image.load('Bokemon vs Stick/Picture/utils/wood.png').convert()
+        self.quit_button_surface = pygame.transform.scale(self.quit_button_surface, (200, 60))
+        self.quit_button_rectangle = self.quit_button_surface.get_rect(center=(500, 350))
+        
+        # Pause menu button text
+        self.resume_text = pygame.font.Font(None, 36).render('RESUME', True, (255, 255, 255))
+        self.resume_text_rect = self.resume_text.get_rect(center=self.resume_button_rectangle.center)
+        
+        self.quit_text = pygame.font.Font(None, 36).render('QUIT', True, (255, 255, 255))
+        self.quit_text_rect = self.quit_text.get_rect(center=self.quit_button_rectangle.center)
+
         self.back_background_size = (250, 55)
         self.back_background_surf = pygame.surface.Surface(self.back_background_size)
         self.back_background_surf.fill((14, 25, 45))
@@ -466,38 +499,62 @@ class GamePokemonVsStick:
                 self.begin_time = pygame.time.get_ticks()  # this record the initial countdown and i put here coz to only program the time when user move to next page
 
             # spawned ninja
-            if event.type == self.troop_timer and self.after_press_start:
+            if event.type == self.troop_timer and self.after_press_start and not self.is_paused:
                 spawned_troop = Troop((choice(self.troop_choice)), self.grid_coor)
                 self.troop_groups.add(spawned_troop)
 
             # spawned gem_ball from sky
-            if event.type == self.gem_ball_timer and self.after_press_start:
+            if event.type == self.gem_ball_timer and self.after_press_start and not self.is_paused:
                 self.spawned_ball.create_gem_ball()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # press hero card from the top , and chosen hero will be that
-                if self.machine_card_rectangle.collidepoint(event.pos):
-                    self.chosen_hero = 'machine'
-                elif self.archer_card_rectangle.collidepoint(event.pos):
-                    self.chosen_hero = 'archer'
-                elif self.wizard_card_rectangle.collidepoint(event.pos):
-                    self.chosen_hero = 'wizard'
+                # Only handle gameplay clicks when the game is running
+                if self.after_press_start and not self.lose:
+                    # press hero card from the top , and chosen hero will be that
+                    if self.machine_card_rectangle.collidepoint(event.pos):
+                        self.chosen_hero = 'machine'
+                    elif self.archer_card_rectangle.collidepoint(event.pos):
+                        self.chosen_hero = 'archer'
+                    elif self.wizard_card_rectangle.collidepoint(event.pos):
+                        self.chosen_hero = 'wizard'
 
-                # if pressed gem_ball from sky , earned 50 num_ball
-                for gem_ball_rect in self.spawned_ball.gem_ball_rect_storage:
-                    if gem_ball_rect.collidepoint(event.pos):
-                        self.spawned_ball.gem_ball_rect_storage.remove(gem_ball_rect)
-                        self.num_ball += 50
-                        break
+                    # if pressed gem_ball from sky , earned 50 num_ball
+                    for gem_ball_rect in self.spawned_ball.gem_ball_rect_storage:
+                        if gem_ball_rect.collidepoint(event.pos):
+                            self.spawned_ball.gem_ball_rect_storage.remove(gem_ball_rect)
+                            self.num_ball += 50
+                            break
 
-                # if pressed gem_ball from machine , earned 25 num_ball
-                for machine_hero in self.hero_groups:
-                    if machine_hero.hero_type == 'machine':
-                        for bullet_rect in machine_hero.bullet_rect_storage:
-                            if bullet_rect.collidepoint(event.pos):
-                                machine_hero.bullet_rect_storage.remove(bullet_rect)
-                                self.num_ball += 25
-                                break
+                    # if pressed gem_ball from machine , earned 25 num_ball
+                    for machine_hero in self.hero_groups:
+                        if machine_hero.hero_type == 'machine':
+                            for bullet_rect in machine_hero.bullet_rect_storage:
+                                if bullet_rect.collidepoint(event.pos):
+                                    machine_hero.bullet_rect_storage.remove(bullet_rect)
+                                    self.num_ball += 25
+                                    break
+
+                    # Handle main menu and pause menu buttons
+                    if not self.is_paused:
+                        # Calculate time passed for main menu button availability
+                        exact_time = pygame.time.get_ticks()
+                        time_pass = (exact_time - self.begin_time - self.total_pause_time) // 1000
+                        
+                        # Main menu button - opens pause overlay (only after 0.1 seconds)
+                        if time_pass >= 0.1 and self.main_menu_button_rectangle.collidepoint(event.pos):
+                            self.pause_start_time = pygame.time.get_ticks()
+                            self.is_paused = True
+                    else:
+                        # Pause menu buttons - resume or quit
+                        if self.resume_button_rectangle.collidepoint(event.pos):
+                            # Resume game
+                            self.total_pause_time += pygame.time.get_ticks() - self.pause_start_time
+                            self.is_paused = False
+                        elif self.quit_button_rectangle.collidepoint(event.pos):
+                            # Quit to main menu - clear all game state
+                            self.reset_game_state()
+                            self.before_press_start = True
+                            self.after_press_start = False
 
             # drag the hero card chosen just now
             if self.chosen_hero and event.type == pygame.MOUSEMOTION:
@@ -600,14 +657,19 @@ class GamePokemonVsStick:
 
             # timer
             exact_time = pygame.time.get_ticks()
-            time_pass = (exact_time - self.begin_time) // 1000
+            if self.is_paused:
+                # When paused, don't advance the timer
+                time_pass = (self.pause_start_time - self.begin_time - self.total_pause_time) // 1000
+            else:
+                # When not paused, calculate time excluding all pause periods
+                time_pass = (exact_time - self.begin_time - self.total_pause_time) // 1000
             minutes = time_pass // 60
             seconds = time_pass % 60
             self.time = f"{minutes:02}:{seconds:02}"
             self.timer = pygame.font.Font(None, 36).render(self.time, True, (255, 255, 255))
 
-            # wave
-            if minutes >= self.wave:
+            # wave (only advance when not paused)
+            if not self.is_paused and minutes >= self.wave:
                 self.spawn_time = self.spawn_time // 3
                 pygame.time.set_timer(self.troop_timer, self.spawn_time)
                 self.wave = minutes + 1
@@ -623,73 +685,112 @@ class GamePokemonVsStick:
             self.screen.blit(self.wood_plank_surface, self.wood_plank_rectangle)
             self.screen.blit(self.timer, self.timer_rectangle)
 
-            # update the frame of ninja and hero then draw them out
-            self.hero_groups.draw(self.screen)
-            self.hero_groups.update()
-            self.troop_groups.draw(self.screen)
-            self.troop_groups.update(self.hero_groups)
+            # Draw main menu button (only visible after 5 seconds of gameplay)
+            if time_pass >= 0.1:  # Show main menu button only after 5 seconds
+                self.screen.blit(self.main_menu_button_surface, self.main_menu_button_rectangle)
+                self.screen.blit(self.main_menu_text, self.main_menu_text_rect)
 
-            # blit gem ball
-            for gem_ball_rect in self.spawned_ball.gem_ball_rect_storage:
-                self.spawned_ball.drop_gem_ball()
-                self.screen.blit(self.spawned_ball.gem_ball_surface, gem_ball_rect)
+            # Only update game logic if not paused
+            if not self.is_paused:
+                # update the frame of ninja and hero then draw them out
+                self.hero_groups.draw(self.screen)
+                self.hero_groups.update()
+                self.troop_groups.draw(self.screen)
+                self.troop_groups.update(self.hero_groups)
 
-            self.screen.blit(self.wave_background_surf, self.wave_background_rect)
-            self.screen.blit(self.wave_surface, self.wave_rectangle)
+                # blit gem ball
+                for gem_ball_rect in self.spawned_ball.gem_ball_rect_storage:
+                    self.spawned_ball.drop_gem_ball()
+                    self.screen.blit(self.spawned_ball.gem_ball_surface, gem_ball_rect)
 
-            # First, track which rows still have active troops
-            active_rows = set()
-            for troop in self.troop_groups:
-                if troop.rect.centerx < 1025:  # Only count troops on screen
-                    active_rows.add(troop.rect.centery)
-            
-            # Check each hero individually and set their attack mode based on their row
-            for hero in self.hero_groups:
-                hero_row = hero.rect.centery
-                
-                # Check if this hero's row has any troops
-                if hero_row in active_rows:
-                    # Troops in this row - this hero should be attacking
-                    if hero.hero_type != 'machine':
-                        hero.change_mode('attacking')
-                else:
-                    # No troops in this row - this hero should be normal
-                    if hero.hero_type != 'machine':
-                        hero.change_mode('normal')
-                
-                # Handle bullet collisions (keep bullets flying until they hit or go off-screen)
+                self.screen.blit(self.wave_background_surf, self.wave_background_rect)
+                self.screen.blit(self.wave_surface, self.wave_rectangle)
+
+                # First, track which rows still have active troops
+                active_rows = set()
                 for troop in self.troop_groups:
-                    for bullet_rect in hero.bullet_rect_storage[:]:  # Use slice copy to avoid modification during iteration
-                        if hero.hero_type != 'machine' and bullet_rect.colliderect(troop.rect):
-                            hero.bullet_rect_storage.remove(bullet_rect)
-                            if hero.hero_type == 'archer':
-                                troop.troop_being_attack(25)
-                            elif hero.hero_type == 'wizard':
-                                troop.troop_being_attack(18)
-                            # Check if troop dies and remove it
-                            troop.check_troop_die()
-                            break
+                    if troop.rect.centerx < 1025:  # Only count troops on screen
+                        active_rows.add(troop.rect.centery)
+                
+                # Check each hero individually and set their attack mode based on their row
+                for hero in self.hero_groups:
+                    hero_row = hero.rect.centery
+                    
+                    # Check if this hero's row has any troops
+                    if hero_row in active_rows:
+                        # Troops in this row - this hero should be attacking
+                        if hero.hero_type != 'machine':
+                            hero.change_mode('attacking')
+                    else:
+                        # No troops in this row - this hero should be normal
+                        if hero.hero_type != 'machine':
+                            hero.change_mode('normal')
+                    
+                    # Handle bullet collisions (keep bullets flying until they hit or go off-screen)
+                    for troop in self.troop_groups:
+                        for bullet_rect in hero.bullet_rect_storage[:]:  # Use slice copy to avoid modification during iteration
+                            if hero.hero_type != 'machine' and bullet_rect.colliderect(troop.rect):
+                                hero.bullet_rect_storage.remove(bullet_rect)
+                                if hero.hero_type == 'archer':
+                                    troop.troop_being_attack(25)
+                                elif hero.hero_type == 'wizard':
+                                    troop.troop_being_attack(18)
+                                # Check if troop dies and remove it
+                                troop.check_troop_die()
+                                break
 
-            # move and blit bullets for all heroes (bullets should continue flying)
-            for hero in self.hero_groups:
-                if hero.hero_type == 'archer':
-                    hero.move_bullet()
-                    for bullet_rect in hero.bullet_rect_storage:
-                        self.screen.blit(hero.archer_bullet_surface, bullet_rect)
-                elif hero.hero_type == 'wizard':
-                    hero.move_bullet()
-                    for bullet_rect in hero.bullet_rect_storage:
-                        self.screen.blit(hero.wizard_bullet_surface, bullet_rect)
-                elif hero.hero_type == 'machine':
-                    # Machine bullets are collectible gem balls, don't move them like projectiles
-                    for bullet_rect in hero.bullet_rect_storage:
-                        self.screen.blit(hero.machine_ball_surface, bullet_rect)
+                # move and blit bullets for all heroes (bullets should continue flying)
+                for hero in self.hero_groups:
+                    if hero.hero_type == 'archer':
+                        hero.move_bullet()
+                        for bullet_rect in hero.bullet_rect_storage:
+                            self.screen.blit(hero.archer_bullet_surface, bullet_rect)
+                    elif hero.hero_type == 'wizard':
+                        hero.move_bullet()
+                        for bullet_rect in hero.bullet_rect_storage:
+                            self.screen.blit(hero.wizard_bullet_surface, bullet_rect)
+                    elif hero.hero_type == 'machine':
+                        # Machine bullets are collectible gem balls, don't move them like projectiles
+                        for bullet_rect in hero.bullet_rect_storage:
+                            self.screen.blit(hero.machine_ball_surface, bullet_rect)
 
-            # if ninja cross over to the house then lose
-            for troop in self.troop_groups:
-                if troop.rect.centerx < 250:
-                    self.lose = True
-                    self.after_press_start = False
+                # if ninja cross over to the house then lose
+                for troop in self.troop_groups:
+                    if troop.rect.centerx < 250:
+                        self.lose = True
+                        self.after_press_start = False
+            else:
+                # Game is paused - still draw everything but don't update
+                self.hero_groups.draw(self.screen)
+                self.troop_groups.draw(self.screen)
+
+                # blit gem ball (static when paused)
+                for gem_ball_rect in self.spawned_ball.gem_ball_rect_storage:
+                    self.screen.blit(self.spawned_ball.gem_ball_surface, gem_ball_rect)
+
+                self.screen.blit(self.wave_background_surf, self.wave_background_rect)
+                self.screen.blit(self.wave_surface, self.wave_rectangle)
+
+                # Draw bullets (static when paused)
+                for hero in self.hero_groups:
+                    if hero.hero_type == 'archer':
+                        for bullet_rect in hero.bullet_rect_storage:
+                            self.screen.blit(hero.archer_bullet_surface, bullet_rect)
+                    elif hero.hero_type == 'wizard':
+                        for bullet_rect in hero.bullet_rect_storage:
+                            self.screen.blit(hero.wizard_bullet_surface, bullet_rect)
+                    elif hero.hero_type == 'machine':
+                        for bullet_rect in hero.bullet_rect_storage:
+                            self.screen.blit(hero.machine_ball_surface, bullet_rect)
+
+                # Draw pause overlay to dim the screen
+                self.screen.blit(self.pause_overlay, (0, 0))
+                
+                # Draw pause menu buttons in center of screen
+                self.screen.blit(self.resume_button_surface, self.resume_button_rectangle)
+                self.screen.blit(self.quit_button_surface, self.quit_button_rectangle)
+                self.screen.blit(self.resume_text, self.resume_text_rect)
+                self.screen.blit(self.quit_text, self.quit_text_rect)
 
         if self.lose:
             self.screen.fill((0, 0, 0))
