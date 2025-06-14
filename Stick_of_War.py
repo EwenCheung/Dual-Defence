@@ -368,7 +368,7 @@ class GameStickOfWar:
         self.rage_spell_animation_giant_surf = pygame.transform.scale(self.rage_spell_animation, (90, 150))
 
         # Gold assets
-        self.pic_gold = pygame.image.load('Stick of War/Picture/utils/gold.png').convert_alpha()
+        self.pic_gold = pygame.image.load('Stick of War/Picture/utils/Gold.png').convert_alpha()
         self.pic_gold_surf = pygame.transform.scale(self.pic_gold, (25, 25))
         self.pic_gold_rect = self.pic_gold_surf.get_rect(center=(760, 50))
         self.num_gold_font = pygame.font.Font(None, 30)

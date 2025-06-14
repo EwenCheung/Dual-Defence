@@ -100,7 +100,7 @@ class Game_Store:
         self.upgrades_button_surf = self.button()
         # store
         # load background
-        self.background_image = pygame.image.load('Stick of War/Picture/store/store background.png').convert_alpha()
+        self.background_image = pygame.image.load('Stick of War/Picture/store/Store background.png').convert_alpha()
         self.background_surf = pygame.transform.scale(self.background_image, (1000, 600))
 
         self.button_background_surf = pygame.image.load('Stick of War/Picture/store/button_for_store.png')
@@ -159,7 +159,7 @@ class Game_Store:
         self.spell_equipment_box_surf = self.troop_equipment_box_surf.copy()
         self.spell_equipment_box_rect = self.spell_equipment_box_surf.get_rect(center=(500, 87))
 
-        self.gold_image_surf = pygame.image.load('Stick of War/Picture/utils/gold.png').convert_alpha()
+        self.gold_image_surf = pygame.image.load('Stick of War/Picture/utils/Gold.png').convert_alpha()
         self.gold_image_surf_surf = pygame.transform.scale(self.gold_image_surf, (25, 25))
 
         self.diamond_image_surf = pygame.image.load('Stick of War/Picture/utils/diamond.png').convert_alpha()
@@ -172,12 +172,12 @@ class Game_Store:
         self.unequip_button_surf = pygame.Surface(self.equip_button_size)
         self.unequip_button_surf.fill((144, 238, 144))
 
-        self.back_level_button_surf = pygame.image.load('Stick of War/Picture/Store/back_to_level.png').convert_alpha()
+        self.back_level_button_surf = pygame.image.load('Stick of War/Picture/store/back_to_level.png').convert_alpha()
         self.back_level_button_surf = pygame.transform.scale(self.back_level_button_surf, (75, 75))
         self.back_level_button_rect = self.back_level_button_surf.get_rect(topleft=(25, 15))
 
         self.back_level_background_surf = pygame.image.load(
-            'Stick of War/Picture/Store/back_to_level_background.png').convert_alpha()
+            'Stick of War/Picture/store/back_to_level_background.png').convert_alpha()
         self.back_level_background_surf = pygame.transform.scale(self.back_level_background_surf, (150, 100))
         self.back_level_background_rect = self.back_level_background_surf.get_rect(topleft=(40, 2))
 
