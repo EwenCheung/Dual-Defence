@@ -178,24 +178,36 @@ class Troop:
         if self.troop_name == 'Archer':
             bullet = pygame.image.load('Stick of War/Picture/utils/archer_bullet.png')
             bullet_surf = pygame.transform.scale(bullet, (20, 20))
-            bullet_rect = bullet_surf.get_rect(center=(self.coordinate_x + bg_x, randint(435, 465)))
-            new_bullet = [bullet_surf, bullet_rect]
+            # Store bullet world position (independent of screen scrolling)
+            bullet_world_x = self.coordinate_x + 50  # Start from troop position + offset
+            bullet_world_y = randint(435, 455)
+            # Store surface, world_x, world_y
+            new_bullet = [bullet_surf, bullet_world_x, bullet_world_y]
         elif self.troop_name == 'Wizard':
             bullet = pygame.image.load('Stick of War/Picture/utils/wizard_bullet.png')
             bullet_surf = pygame.transform.scale(bullet, (50, 50))
-            bullet_rect = bullet_surf.get_rect(center=(self.coordinate_x + bg_x, randint(435, 465)))
-            new_bullet = [bullet_surf, bullet_rect]
+            # Store bullet world position (independent of screen scrolling)
+            bullet_world_x = self.coordinate_x + 50  # Start from troop position + offset
+            bullet_world_y = randint(435, 455)
+            # Store surface, world_x, world_y
+            new_bullet = [bullet_surf, bullet_world_x, bullet_world_y]
         self.bullet_on_court.append(new_bullet)
 
     def move_bullet(self, bg_x):
-        for bullet in self.bullet_on_court:
-            bullet[1].x += 5  # Move the bullet to the right of troop
+        for bullet in self.bullet_on_court[:]:  # Use slice copy to avoid modification during iteration
+            # Move bullet in world coordinates (independent of screen scrolling)
+            bullet[1] += 5  # Move the bullet world_x to the right
+            
+            # Remove bullets that have traveled too far in world coordinates
+            if bullet[1] > self.coordinate_x + 800:  # Remove when bullet is far from troop
+                self.bullet_on_court.remove(bullet)
+                break
+                
+            # Check collision with ninjas using world coordinates
             for ninja in self.game.enemy_on_court:
-                if bullet[1].x > self.coordinate_x + bg_x + 600:
-                    # Remove bullets that a far from stick man
-                    self.bullet_on_court.remove(bullet)
-                    break
-                elif bullet[1].colliderect(ninja):
+                # Create bullet rect for collision detection (convert world to screen coordinates)
+                bullet_rect = pygame.Rect(bullet[1] + bg_x - 10, bullet[2] - 10, 20, 20)
+                if bullet_rect.colliderect(ninja.rect):
                     self.bullet_on_court.remove(bullet)
                     ninja.ninja_health -= self.attack_damage
                     break
@@ -409,6 +421,36 @@ class GameStickOfWar:
         self.wood_plank = pygame.image.load('Bokemon vs Stick/Picture/utils/wood.png').convert()
         self.wood_plank_surface = pygame.transform.scale(self.wood_plank, (100, 50))
         self.wood_plank_rect = self.wood_plank_surface.get_rect(center=(500, 500))
+
+        # Main Menu button (20px to the right of health bar)
+        self.main_menu_button_surface = pygame.image.load('Bokemon vs Stick/Picture/utils/wood.png').convert()
+        self.main_menu_button_surface = pygame.transform.scale(self.main_menu_button_surface, (120, 35))
+        self.main_menu_button_rectangle = self.main_menu_button_surface.get_rect(topleft=(840, 545))  # 20px right of health bar end
+        
+        # Main menu button text
+        self.main_menu_text = pygame.font.Font(None, 20).render('MAIN MENU', True, (255, 255, 255))
+        self.main_menu_text_rect = self.main_menu_text.get_rect(center=self.main_menu_button_rectangle.center)
+        
+        # Pause overlay
+        self.pause_overlay = pygame.Surface((1000, 600))
+        self.pause_overlay.set_alpha(128)  # Semi-transparent
+        self.pause_overlay.fill((0, 0, 0))  # Black overlay
+        
+        # Pause menu buttons (centered on screen)
+        self.resume_button_surface = pygame.image.load('Bokemon vs Stick/Picture/utils/wood.png').convert()
+        self.resume_button_surface = pygame.transform.scale(self.resume_button_surface, (200, 60))
+        self.resume_button_rectangle = self.resume_button_surface.get_rect(center=(500, 250))
+        
+        self.quit_button_surface = pygame.image.load('Bokemon vs Stick/Picture/utils/wood.png').convert()
+        self.quit_button_surface = pygame.transform.scale(self.quit_button_surface, (200, 60))
+        self.quit_button_rectangle = self.quit_button_surface.get_rect(center=(500, 350))
+        
+        # Pause menu button text
+        self.resume_text = pygame.font.Font(None, 36).render('RESUME', True, (255, 255, 255))
+        self.resume_text_rect = self.resume_text.get_rect(center=self.resume_button_rectangle.center)
+        
+        self.quit_text = pygame.font.Font(None, 36).render('QUIT', True, (255, 255, 255))
+        self.quit_text_rect = self.quit_text.get_rect(center=self.quit_button_rectangle.center)
 
         self.level_text = pygame.font.Font(None, 50)
         self.level_text_surf = self.level_text.render("Level", True, (255, 255, 255))
@@ -667,6 +709,11 @@ class GameStickOfWar:
         self.start_game_time = pygame.time.get_ticks()
         self.end_game_time = 0
         self.played_time = 0
+        
+        # Pause system variables
+        self.is_paused = False
+        self.pause_start_time = 0
+        self.total_pause_time = 0
 
     def event_handling(self):
         def clicked_troop(gold_cost, diamond_cost, button_name, frame_storage, attack_frame_storage, health, attack_damage,
@@ -696,8 +743,26 @@ class GameStickOfWar:
                 if self.wood_plank_rect.collidepoint(pygame.mouse.get_pos()):
                     self.game_music.stop()
                     self.go_level_py = True
+                    
+                # Handle main menu and pause menu buttons
+                if not self.is_paused and not self.game_over:
+                    # Main menu button - opens pause overlay (only after 0.5 seconds)
+                    if self.elapsed_time_seconds >= 0.5 and self.main_menu_button_rectangle.collidepoint(event.pos):
+                        self.pause_start_time = pygame.time.get_ticks()
+                        self.is_paused = True
+                elif self.is_paused:
+                    # Pause menu buttons - resume or quit
+                    if self.resume_button_rectangle.collidepoint(event.pos):
+                        # Resume game
+                        self.total_pause_time += pygame.time.get_ticks() - self.pause_start_time
+                        self.is_paused = False
+                    elif self.quit_button_rectangle.collidepoint(event.pos):
+                        # Quit to level selection
+                        self.game_music.stop()
+                        self.go_level_py = True
+                        
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Check if left mouse button is pressed
+                if event.button == 1 and not self.is_paused:  # Check if left mouse button is pressed and not paused
                     clicked_troop(database.warrior_gold, database.warrior_diamond, self.warrior_button, self.warrior_frame_storage,
                                   self.warrior_attack_frame_storage,
                                   database.troop_storage["warrior"][3],
@@ -719,7 +784,7 @@ class GameStickOfWar:
                                   database.troop_storage["giant"][3], database.troop_storage["giant"][4],
                                   database.troop_storage["giant"][5], 30, 200, 'Giant', 15)
 
-            if event.type == self.ninja_timer:
+            if event.type == self.ninja_timer and not self.is_paused:
                 if len(self.enemy_on_court) <= 20:
                     new_ninja = None
                     self.ninja_chosen = choice(self.ninja_choice)
@@ -742,22 +807,22 @@ class GameStickOfWar:
                     print('wont be more than 20')
 
             if database.spell_storage['healing'][0] == True:
-                if self.chosen_spell is None and event.type == pygame.MOUSEBUTTONDOWN:
+                if self.chosen_spell is None and event.type == pygame.MOUSEBUTTONDOWN and not self.is_paused:
                     if not self.healing_press:
                         if self.healing_spell_rect.collidepoint(event.pos):
                             self.chosen_spell = 'healing'
             if database.spell_storage['rage'][0] == True:
-                if self.chosen_spell is None and event.type == pygame.MOUSEBUTTONDOWN:
+                if self.chosen_spell is None and event.type == pygame.MOUSEBUTTONDOWN and not self.is_paused:
                     if not self.rage_press:
                         if self.rage_spell_rect.collidepoint(event.pos):
                             self.chosen_spell = 'rage'
             if database.spell_storage['freeze'][0] == True:
-                if self.chosen_spell is None and event.type == pygame.MOUSEBUTTONDOWN:
+                if self.chosen_spell is None and event.type == pygame.MOUSEBUTTONDOWN and not self.is_paused:
                     if not self.freeze_press:
                         if self.freeze_spell_rect.collidepoint(event.pos):
                             self.chosen_spell = 'freeze'
 
-            if event.type == pygame.MOUSEBUTTONDOWN and self.chosen_spell is not None:
+            if event.type == pygame.MOUSEBUTTONDOWN and self.chosen_spell is not None and not self.is_paused:
                 # can add check condition can release spell or not
                 if self.chosen_spell == 'healing':
                     self.healing_press = True
@@ -781,74 +846,79 @@ class GameStickOfWar:
                 self.chosen_spell = None
 
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            self.bg_x += self.scroll_speed
-        elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            self.bg_x -= self.scroll_speed
+        if not self.is_paused:
+            if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+                self.bg_x += self.scroll_speed
+            elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+                self.bg_x -= self.scroll_speed
 
         self.bg_x = max(self.bg_x, 1000 - self.background_image.get_width()) # without this two it will scroll more than the bg width
         self.bg_x = min(self.bg_x, 0)
 
         current_time = pygame.time.get_ticks()
-        if current_time - self.gold_time >= self.gold_interval:
+        if not self.is_paused and current_time - self.gold_time >= self.gold_interval:
             self.num_gold += (2 + database.castle_storage["default_castle"][4])
 
             self.gold_time = current_time
 
-        if current_time - self.diamond_time >= self.diamond_interval:
+        if not self.is_paused and current_time - self.diamond_time >= self.diamond_interval:
             self.num_diamond += (1 + database.castle_storage["default_castle"][4])
             self.diamond_time = current_time
 
         # troop attack tower
-        for troop in self.troop_on_court:
-            if troop.troop_name == "Archer" or troop.troop_name == "Wizard":
-                # troop attack ninja
-                for ninja in self.enemy_on_court:
-                    if self.far_range_collide(troop, ninja):
-                        troop.attack(self.bg_x)
-                        troop.move_bullet(self.bg_x)
-                        if ninja.ninja_health <= 0:
-                            self.enemy_on_court.remove(ninja)
-                if self.check_far_collision(troop, self.right_rect_castle):
-                    troop.attack(self.bg_x)
-                    troop.move_bullet(self.bg_x)
-                    for bullet in troop.bullet_on_court:
-                        if bullet[1].x + 930 >= self.right_rect_castle.x:
-                            self.health_bar_enemy.update_health(troop.attack_damage)
-                            troop.bullet_on_court.remove(bullet)
-                else:
-                    troop.move_bullet(self.bg_x)
-                    break
-            else:
-                if self.check_collision(troop, self.right_rect_castle):
-                    self.health_bar_enemy.update_health(troop.attack_damage)  # Update castle health
-                    troop.attack(self.bg_x)
-                    troop.move_bullet(self.bg_x)
-                else:
+        if not self.is_paused:
+            for troop in self.troop_on_court:
+                if troop.troop_name == "Archer" or troop.troop_name == "Wizard":
+                    # troop attack ninja
                     for ninja in self.enemy_on_court:
-                        if self.both_collide(troop, ninja):
+                        if self.far_range_collide(troop, ninja):
                             troop.attack(self.bg_x)
                             troop.move_bullet(self.bg_x)
-                            ninja.ninja_take_damage(troop.attack_damage)
                             if ninja.ninja_health <= 0:
                                 self.enemy_on_court.remove(ninja)
-                            break
-
-        for ninja in self.enemy_on_court:
-            # ninja attack tower
-            if self.ninja_collision(ninja, self.left_rect_castle):
-                self.health_bar_user.update_health(ninja.attack)  # Update castle health
-                ninja.ninja_attack()
-            else:
-                # ninja attack troop
-                for troop in self.troop_on_court:
-                    if self.both_collide(troop, ninja):
-                        ninja.ninja_attack()
-                        troop.take_damage(ninja.attack)
-                        if troop.health <= 0:
-                            self.troop_on_court.remove(troop)
-                            self.num_troops -= troop.troop_size
+                    if self.check_far_collision(troop, self.right_rect_castle):
+                        troop.attack(self.bg_x)
+                        troop.move_bullet(self.bg_x)
+                        for bullet in troop.bullet_on_court[:]:  # Use slice copy to avoid modification during iteration
+                            # Check if bullet has reached the castle in world coordinates
+                            # Castle is at world position: background_width - 170
+                            castle_world_x = self.background_image.get_width() - 170
+                            if bullet[1] >= castle_world_x:  # bullet[1] is world_x coordinate
+                                self.health_bar_enemy.update_health(troop.attack_damage)
+                                troop.bullet_on_court.remove(bullet)
+                    else:
+                        troop.move_bullet(self.bg_x)
                         break
+                else:
+                    if self.check_collision(troop, self.right_rect_castle):
+                        self.health_bar_enemy.update_health(troop.attack_damage)  # Update castle health
+                        troop.attack(self.bg_x)
+                        troop.move_bullet(self.bg_x)
+                    else:
+                        for ninja in self.enemy_on_court:
+                            if self.both_collide(troop, ninja):
+                                troop.attack(self.bg_x)
+                                troop.move_bullet(self.bg_x)
+                                ninja.ninja_take_damage(troop.attack_damage)
+                                if ninja.ninja_health <= 0:
+                                    self.enemy_on_court.remove(ninja)
+                                break
+
+            for ninja in self.enemy_on_court:
+                # ninja attack tower
+                if self.ninja_collision(ninja, self.left_rect_castle):
+                    self.health_bar_user.update_health(ninja.attack)  # Update castle health
+                    ninja.ninja_attack()
+                else:
+                    # ninja attack troop
+                    for troop in self.troop_on_court:
+                        if self.both_collide(troop, ninja):
+                            ninja.ninja_attack()
+                            troop.take_damage(ninja.attack)
+                            if troop.health <= 0:
+                                self.troop_on_court.remove(troop)
+                                self.num_troops -= troop.troop_size
+                            break
 
     @staticmethod
     def check_collision(troop, rect):
@@ -902,7 +972,9 @@ class GameStickOfWar:
 
         if not self.game_over:
             self.end_game_time = pygame.time.get_ticks()  # Get the current time
-            self.played_time = self.end_game_time - self.start_game_time
+            # Calculate played time excluding pause time
+            if not self.is_paused:
+                self.played_time = self.end_game_time - self.start_game_time - self.total_pause_time
             self.elapsed_time_seconds = (self.played_time) / 1000  # Convert milliseconds to seconds
             self.minutes = int(self.elapsed_time_seconds // 60)
             self.seconds = int(self.elapsed_time_seconds % 60)
@@ -1054,20 +1126,42 @@ class GameStickOfWar:
                     self.screen.blit(self.rage_spell_animation_surf, troop.rect)
             if self.healing:
                 self.screen.blit(self.healing_spell_animation_surf, troop.rect)
-                self.heal_run += 1
-                if self.heal_run > 30:
-                    self.healing = False
-                    self.heal_run = 0
+                if not self.is_paused:  # Only update healing animation when not paused
+                    self.heal_run += 1
+                    if self.heal_run > 30:
+                        self.healing = False
+                        self.heal_run = 0
             troop.spawn_troop(self.screen, self.bg_x)
-            troop.update()
+            if not self.is_paused:  # Only update troop logic when not paused
+                troop.update()
             for bullet in troop.bullet_on_court:
-                self.screen.blit(bullet[0], bullet[1])
+                # Convert bullet world coordinates to screen coordinates for rendering
+                bullet_screen_x = bullet[1] + self.bg_x
+                bullet_screen_y = bullet[2]
+                self.screen.blit(bullet[0], (bullet_screen_x, bullet_screen_y))
 
         for enemy in self.enemy_on_court:
             if enemy.freezing:
                 self.screen.blit(self.freeze_spell_animation_surf, enemy.rect)
             enemy.spawn_ninja(self.screen, self.bg_x)
-            enemy.update_ninja()
+            if not self.is_paused:  # Only update enemy logic when not paused
+                enemy.update_ninja()
+
+        # Draw main menu button (only visible after 0.5 seconds of gameplay)
+        if not self.game_over and self.elapsed_time_seconds >= 0.5:
+            self.screen.blit(self.main_menu_button_surface, self.main_menu_button_rectangle)
+            self.screen.blit(self.main_menu_text, self.main_menu_text_rect)
+
+        # Draw pause overlay if game is paused
+        if self.is_paused:
+            # Draw pause overlay to dim the screen
+            self.screen.blit(self.pause_overlay, (0, 0))
+            
+            # Draw pause menu buttons in center of screen
+            self.screen.blit(self.resume_button_surface, self.resume_button_rectangle)
+            self.screen.blit(self.quit_button_surface, self.quit_button_rectangle)
+            self.screen.blit(self.resume_text, self.resume_text_rect)
+            self.screen.blit(self.quit_text, self.quit_text_rect)
 
     def run(self):
         self.reset_func()
