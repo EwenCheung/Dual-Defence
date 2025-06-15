@@ -714,6 +714,10 @@ class GameStickOfWar:
         self.is_paused = False
         self.pause_start_time = 0
         self.total_pause_time = 0
+        
+        # BGM control variables
+        self.music_playing = False
+        self.game_music = None
 
     def event_handling(self):
         def clicked_troop(gold_cost, diamond_cost, button_name, frame_storage, attack_frame_storage, health, attack_damage,
@@ -735,13 +739,14 @@ class GameStickOfWar:
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                self.cleanup_resources()
                 database.update_user()
                 database.push_data()
                 pygame.quit()
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.wood_plank_rect.collidepoint(pygame.mouse.get_pos()):
-                    self.game_music.stop()
+                    self.stop_bgm()
                     self.go_level_py = True
                     
                 # Handle main menu and pause menu buttons
@@ -750,15 +755,17 @@ class GameStickOfWar:
                     if self.elapsed_time_seconds >= 0.5 and self.main_menu_button_rectangle.collidepoint(event.pos):
                         self.pause_start_time = pygame.time.get_ticks()
                         self.is_paused = True
+                        self.pause_bgm()
                 elif self.is_paused:
                     # Pause menu buttons - resume or quit
                     if self.resume_button_rectangle.collidepoint(event.pos):
                         # Resume game
                         self.total_pause_time += pygame.time.get_ticks() - self.pause_start_time
                         self.is_paused = False
+                        self.resume_bgm()
                     elif self.quit_button_rectangle.collidepoint(event.pos):
                         # Quit to level selection
-                        self.game_music.stop()
+                        self.stop_bgm()
                         self.go_level_py = True
                         
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -957,6 +964,56 @@ class GameStickOfWar:
             if database.lvl_choose == database.stage_level:
                 database.stage_level += 1
 
+    def start_bgm(self, music_file):
+        """Start background music if not already playing."""
+        if not self.music_playing:
+            try:
+                # Stop any existing music first
+                self.stop_bgm()
+                
+                self.game_music = pygame.mixer.Sound(music_file)
+                self.game_music.set_volume(0.2)
+                self.game_music.play(loops=-1)
+                self.music_playing = True
+            except pygame.error:
+                # Handle case where music file cannot be loaded
+                self.music_playing = False
+
+    def stop_bgm(self):
+        """Stop background music if playing."""
+        if self.music_playing and self.game_music:
+            try:
+                self.game_music.stop()
+            except:
+                pass  # Ignore errors when stopping music
+            self.music_playing = False
+            self.game_music = None
+
+    def pause_bgm(self):
+        """Pause background music."""
+        if self.music_playing and self.game_music:
+            try:
+                self.game_music.stop()  # pygame.mixer.Sound doesn't have pause, so we stop
+            except:
+                pass
+
+    def resume_bgm(self):
+        """Resume background music."""
+        if self.game_music and not self.music_playing:
+            try:
+                self.game_music.play(loops=-1)
+                self.music_playing = True
+            except:
+                pass
+
+    def cleanup_resources(self):
+        """Clean up all resources including music."""
+        self.stop_bgm()
+        # Stop any pygame timers
+        pygame.time.set_timer(self.ninja_timer, 0)
+        pygame.time.set_timer(self.freeze_timer, 0)
+        pygame.time.set_timer(self.rage_timer, 0)
+
     def game_start(self):
         # Clear screen
         self.screen.fill((255, 255, 255))
@@ -1079,6 +1136,8 @@ class GameStickOfWar:
 
         self.check_game_over()
         if self.game_over:
+            # Stop music when game ends
+            self.stop_bgm()
             self.screen.fill((0, 0, 0))
             font = pygame.font.Font(None, 68)
             if self.winner == "User":
@@ -1165,9 +1224,6 @@ class GameStickOfWar:
 
     def run(self):
         self.reset_func()
-        self.game_music = pygame.mixer.Sound('Stick of War/Music/game_music.mp3')
-        self.game_music.set_volume(0.2)
-        self.game_music.play(loops=-1)
         while True:
             self.game_start()
             self.event_handling()

@@ -214,15 +214,16 @@ async def main():
 
             elif run_stick_of_war:
                 stick_of_war.reset_func()
+                
+                # Start BGM using the new control method
                 if IS_WEB:
-                    stick_of_war.game_music = pygame.mixer.Sound('ogg_music/game_music.ogg')
+                    stick_of_war.start_bgm('ogg_music/game_music.ogg')
                 else:
-                    stick_of_war.game_music = pygame.mixer.Sound('Stick of War/Music/game_music.mp3')
-                stick_of_war.game_music.set_volume(0.2)
-                stick_of_war.game_music.play(loops=-1)
+                    stick_of_war.start_bgm('Stick of War/Music/game_music.mp3')
                 
                 while True:
                     if stick_of_war.go_level_py:
+                        stick_of_war.cleanup_resources()  # Clean up resources including music
                         run_level = True
                         run_stick_of_war = False
                         stick_of_war.go_level_py = False
@@ -238,6 +239,27 @@ async def main():
             if not IS_WEB:
                 pass  # Could add logging here for desktop debugging
             try:
+                # Clean up music and resources for all game instances
+                if 'home' in locals() and hasattr(home, 'home_music'):
+                    try:
+                        home.home_music.stop()
+                    except:
+                        pass
+                if 'level' in locals() and hasattr(level, 'level_select_music'):
+                    try:
+                        level.level_select_music.stop()
+                    except:
+                        pass
+                if 'stick_of_war' in locals():
+                    try:
+                        stick_of_war.cleanup_resources()
+                    except:
+                        pass
+                if 'pokemon_vs_stick' in locals() and hasattr(pokemon_vs_stick, 'bg_music'):
+                    try:
+                        pokemon_vs_stick.bg_music.stop()
+                    except:
+                        pass
                 database.update_user()
                 database.push_data()
             except:
