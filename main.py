@@ -44,6 +44,13 @@ home = GameHome()
 level = GameLevel()
 stick_of_war = GameStickOfWar()
 pokemon_vs_stick = GamePokemonVsStick()
+
+# Pre-initialize store to avoid loading delays during gameplay
+try:
+    store = Game_Store()
+except Exception as e:
+    store = None
+
 run_pokemon_vs_stick = False
 run_home = True
 run_level = False
@@ -52,7 +59,7 @@ run_stick_of_war = False
 
 
 async def main():
-    global home, level, stick_of_war, pokemon_vs_stick
+    global home, level, stick_of_war, pokemon_vs_stick, store
     global run_pokemon_vs_stick, run_home, run_level, run_store, run_stick_of_war
 
     while True:
@@ -174,20 +181,36 @@ async def main():
                     await asyncio.sleep(0)  # Give control back to browser
 
             elif run_store:
-                store = Game_Store()
-                while True:
-                    if store.go_level_py:
+                if store is None:
+                    try:
+                        store = Game_Store()
+                    except Exception as e:
+                        # Fall back to level screen if store fails
                         run_store = False
                         run_level = True
-                        store.go_level_py = False
-                        break
-                    store.screen.fill((255, 255, 255))
+                        continue
+                else:
+                    # Refresh store data from database to handle login/logout changes
+                    store.refresh_data_from_database()
+                
+                try:
+                    while True:
+                        if store.go_level_py:
+                            run_store = False
+                            run_level = True
+                            store.go_level_py = False
+                            break
+                        store.screen.fill((255, 255, 255))
 
-                    store.event_handling()
-                    store.game_start()
-                    pygame.display.update()
-                    store.clock.tick(60)
-                    await asyncio.sleep(0)  # Give control back to browser
+                        store.event_handling()
+                        store.game_start()
+                        pygame.display.update()
+                        store.clock.tick(60)
+                        await asyncio.sleep(0)  # Give control back to browser
+                except Exception as e:
+                    # Fall back to level screen if store fails
+                    run_store = False
+                    run_level = True
 
             elif run_stick_of_war:
                 stick_of_war.reset_func()
@@ -213,7 +236,7 @@ async def main():
         except Exception as e:
             # Better error handling - only log errors on desktop to avoid performance issues
             if not IS_WEB:
-                print(f"Error in main loop: {e}")
+                pass  # Could add logging here for desktop debugging
             try:
                 database.update_user()
                 database.push_data()

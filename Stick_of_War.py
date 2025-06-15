@@ -731,7 +731,7 @@ class GameStickOfWar:
                         self.troop_on_court.append(new_troop)
                     self.num_troops += troop_size
             else:
-                print('have reach the max troop')
+                pass
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -804,7 +804,7 @@ class GameStickOfWar:
                                           self.background_image.get_width())
                     self.enemy_on_court.append(new_ninja)
                 else:
-                    print('wont be more than 20')
+                    pass
 
             if database.spell_storage['healing'][0] == True:
                 if self.chosen_spell is None and event.type == pygame.MOUSEBUTTONDOWN and not self.is_paused:

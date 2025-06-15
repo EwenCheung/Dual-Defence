@@ -109,7 +109,7 @@ class Hero(pygame.sprite.Sprite):
             self.health = 200
             self.bullet_speed = 4
         else:
-            print('No hero found')
+            pass
 
         self.frames = self.normal_frames
         self.animation_index = 0
@@ -239,7 +239,7 @@ class Troop(pygame.sprite.Sprite):
             self.attack = 25
             self.cooldown = 0
         else:
-            print('No ninja found')
+            pass
 
         self.original_speed = self.speed
 

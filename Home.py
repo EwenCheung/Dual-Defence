@@ -137,7 +137,7 @@ class GameHome:
                 elif self.back_rectangle.collidepoint(pygame.mouse.get_pos()):
                     self.choosing_login_method = True
                     self.choose_game_to_play = False
-                    database.login_method = None
+                    database.logout()  # Properly logout and reset user data
             elif self.choosing_login_method and event.type == pygame.MOUSEBUTTONDOWN:
                 if not self.signing_up and not self.login_as_guest and self.sign_in_rect.collidepoint(pygame.mouse.get_pos()):
                     self.signing_in = True
@@ -249,6 +249,7 @@ class GameHome:
             elif self.login_as_guest:
                 self.choosing_login_method = False
                 self.choose_game_to_play = True
+                database.logout()  # Reset to default guest values
                 database.login_method = "Guest"
                 self.login_as_guest = False
 

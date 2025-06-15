@@ -117,23 +117,6 @@ class Data:
         }
         return all_data
 
-    def print_all_user(self):
-        for user in self.all_user:
-            print(f"username: {user['username']}")
-            print(f"password: {user['password']}")
-            print(f"stage_level: {user['stage_level']}")
-            print(f"money: {user['money']}")
-            print("troop_storage:")
-            for troop, details in user["troop_storage"].items():
-                print(f"  {troop}: {details}")
-            print("spell_storage:")
-            for spell, details in user["spell_storage"].items():
-                print(f"  {spell}: {details}")
-            print("castle_storage:")
-            for castle, details in user["castle_storage"].items():
-                print(f"  {castle}: {details}")
-            print("\n")
-
     # update user latest info to self.all_user (after update you can push_data)
     def update_user(self):
         all_data = self.read_data()
@@ -154,29 +137,30 @@ class Data:
             for user in self.all_user:
                 f.write(f"{user}\n")
 
+    # logout and reset to default guest values
+    def logout(self):
+        self.login_method = None
+        self.username = "Guest"
+        self.password = "888888"
+        self.stage_level = 1
+        self.money = 500
+        # Reset troop storage to default values
+        self.troop_storage = {
+            "warrior": [True, 1, True, 100, 1.2, 1, 150],
+            "archer": [False, 1, False, 200, 10, 1.1, 150],
+            "wizard": [False, 1, False, 250, 10, 0.8, 200],
+            "sparta": [False, 1, False, 300, 2.5, 1, 350],
+            "giant": [False, 1, False, 350, 3.5, 0.6, 500]
+        }
+        # Reset spell storage to default values
+        self.spell_storage = {
+            "rage": [False, 1, False, 0.1, 150],
+            "healing": [False, 1, False, 100, 150],
+            "freeze": [False, 1, False, 0.1, 150]
+        }
+        # Reset castle storage to default values
+        self.castle_storage = {
+            "default_castle": [True, 1, 1, 1000, 1, 150, 150]
+        }
 
 database = Data()
-
-""" 以上信息是可以用改用增 等。。。
-    如果你们要
-    
-    读信息：
-    print(firebase.username)
-    print(firebase.stage_level)
-    print(firebase.troop_storage["archer"][0])
-    
-    print(firebase.read_data())
-    上面那个代码可以read 给你们知道 user 的全部实时信息
-    print_all_user()
-    上面那个代码可以read 给你们知道 all_user 的信息( in database )
-    
-    改data ：
-    firebase.username = "Ewen"
-    firebase.stage_level = 1
-    firebase.money = 1000
-    # 如果你们要改storage （dictionary）
-    Example： troop_storage["archer"] 的第一个 list variable 从 False 变True 可以这样
-    firebase.troop_storage["archer"] = [True, 1] or firebase.troop_storage["archer"][0] = True
-    
-    还有什么东西自己msg 问我
-"""
