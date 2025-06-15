@@ -44,6 +44,13 @@ home = GameHome()
 level = GameLevel()
 stick_of_war = GameStickOfWar()
 pokemon_vs_stick = GamePokemonVsStick()
+
+# Pre-initialize store to avoid loading delays during gameplay
+try:
+    store = Game_Store()
+except Exception as e:
+    store = None
+
 run_pokemon_vs_stick = False
 run_home = True
 run_level = False
@@ -52,7 +59,7 @@ run_stick_of_war = False
 
 
 async def main():
-    global home, level, stick_of_war, pokemon_vs_stick
+    global home, level, stick_of_war, pokemon_vs_stick, store
     global run_pokemon_vs_stick, run_home, run_level, run_store, run_stick_of_war
 
     while True:
@@ -174,32 +181,49 @@ async def main():
                     await asyncio.sleep(0)  # Give control back to browser
 
             elif run_store:
-                store = Game_Store()
-                while True:
-                    if store.go_level_py:
+                if store is None:
+                    try:
+                        store = Game_Store()
+                    except Exception as e:
+                        # Fall back to level screen if store fails
                         run_store = False
                         run_level = True
-                        store.go_level_py = False
-                        break
-                    store.screen.fill((255, 255, 255))
+                        continue
+                else:
+                    # Refresh store data from database to handle login/logout changes
+                    store.refresh_data_from_database()
+                
+                try:
+                    while True:
+                        if store.go_level_py:
+                            run_store = False
+                            run_level = True
+                            store.go_level_py = False
+                            break
+                        store.screen.fill((255, 255, 255))
 
-                    store.event_handling()
-                    store.game_start()
-                    pygame.display.update()
-                    store.clock.tick(60)
-                    await asyncio.sleep(0)  # Give control back to browser
+                        store.event_handling()
+                        store.game_start()
+                        pygame.display.update()
+                        store.clock.tick(60)
+                        await asyncio.sleep(0)  # Give control back to browser
+                except Exception as e:
+                    # Fall back to level screen if store fails
+                    run_store = False
+                    run_level = True
 
             elif run_stick_of_war:
                 stick_of_war.reset_func()
+                
+                # Start BGM using the new control method
                 if IS_WEB:
-                    stick_of_war.game_music = pygame.mixer.Sound('ogg_music/game_music.ogg')
+                    stick_of_war.start_bgm('ogg_music/game_music.ogg')
                 else:
-                    stick_of_war.game_music = pygame.mixer.Sound('Stick of War/Music/game_music.mp3')
-                stick_of_war.game_music.set_volume(0.2)
-                stick_of_war.game_music.play(loops=-1)
+                    stick_of_war.start_bgm('Stick of War/Music/game_music.mp3')
                 
                 while True:
                     if stick_of_war.go_level_py:
+                        stick_of_war.cleanup_resources()  # Clean up resources including music
                         run_level = True
                         run_stick_of_war = False
                         stick_of_war.go_level_py = False
@@ -213,8 +237,29 @@ async def main():
         except Exception as e:
             # Better error handling - only log errors on desktop to avoid performance issues
             if not IS_WEB:
-                print(f"Error in main loop: {e}")
+                pass  # Could add logging here for desktop debugging
             try:
+                # Clean up music and resources for all game instances
+                if 'home' in locals() and hasattr(home, 'home_music'):
+                    try:
+                        home.home_music.stop()
+                    except:
+                        pass
+                if 'level' in locals() and hasattr(level, 'level_select_music'):
+                    try:
+                        level.level_select_music.stop()
+                    except:
+                        pass
+                if 'stick_of_war' in locals():
+                    try:
+                        stick_of_war.cleanup_resources()
+                    except:
+                        pass
+                if 'pokemon_vs_stick' in locals() and hasattr(pokemon_vs_stick, 'bg_music'):
+                    try:
+                        pokemon_vs_stick.bg_music.stop()
+                    except:
+                        pass
                 database.update_user()
                 database.push_data()
             except:

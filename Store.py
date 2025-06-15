@@ -48,7 +48,7 @@ class Item_card():
         self.wizard_image_surf = pygame.transform.scale(self.wizard_image_surf, (85, 100))
 
         self.giant_image_surf = pygame.image.load(
-            'Stick of War/Picture/stickman giant/stickman giant walk/stickman giant walk 1.png').convert_alpha()
+            'Stick of War/Picture/stickman giant/stickman giant walk/stickman Giant walk 1.png').convert_alpha()
         self.giant_image_surf = pygame.transform.scale(self.giant_image_surf, (75, 80))
 
         # spell card
@@ -69,7 +69,9 @@ class Game_Store:
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((1000, 600))
         pygame.display.set_caption('Store')
+        
         self.cards = Item_card()
+        
         self.store = True
         self.backpack = False
         self.font = pygame.font.Font(None, 30)
@@ -94,6 +96,7 @@ class Game_Store:
         self.clicked_image_surf = 'warrior'
         self.clicked_spell_surf = 'freeze'
         self.go_level_py = False
+        
         self.set_up()
 
     def set_up(self):
@@ -336,7 +339,7 @@ class Game_Store:
                 'diamond icon': self.diamond_image_surf_surf,
                 'upgrades button': self.upgrades_button_surf,
                 'health': (database.troop_storage['giant'][3] * 10),
-                'attack damage': (database.troop_storage['warrior'][4] * 10),
+                'attack damage': (database.troop_storage['giant'][4] * 10),
                 'equip button': self.equip_button_surf,
                 'unequip button': self.unequip_button_surf
             }
@@ -1615,6 +1618,73 @@ class Game_Store:
             pygame.display.update()
             self.clock.tick(60)
 
+    def refresh_data_from_database(self):
+        """Refresh all store and backpack data from the database - used when user logs out/changes"""
+        # Update store list locked status from database
+        for item in self.store_list:
+            if item['name'] == 'castle':
+                item['locked'] = database.castle_storage['default_castle'][0]
+            elif item['name'] in ['warrior', 'archer', 'sparta', 'wizard', 'giant']:
+                item['locked'] = database.troop_storage[item['name']][0]
+            elif item['name'] in ['freeze', 'healing', 'rage']:
+                item['locked'] = database.spell_storage[item['name']][0]
+        
+        # Update backpack troop list from database
+        for item in self.backpack_troop_list:
+            troop_name = item['name']
+            troop_data = database.troop_storage[troop_name]
+            item.update({
+                'locked': troop_data[0],
+                'level': troop_data[1], 
+                'equip': troop_data[2],
+                'health': (troop_data[3] * 10),
+                'upgrades price': troop_data[6]
+            })
+            # Update attack damage based on troop type
+            if troop_name == 'warrior':
+                item['attack damage'] = (troop_data[4] * 10)
+            elif troop_name == 'archer':
+                item['attack damage'] = (troop_data[4] * 2) 
+            elif troop_name == 'sparta':
+                item['attack damage'] = (troop_data[4] * 10)
+            elif troop_name == 'wizard':
+                item['attack damage'] = (troop_data[4] * 2)
+            elif troop_name == 'giant':
+                item['attack damage'] = (database.troop_storage['warrior'][4] * 10)  # Giant uses warrior's attack
+        
+        # Update spell list from database
+        for item in self.spell_list:
+            spell_name = item['name']
+            spell_data = database.spell_storage[spell_name]
+            item.update({
+                'locked': spell_data[0],
+                'level': spell_data[1],
+                'equip': spell_data[2], 
+                'upgrades price': spell_data[4]
+            })
+            if spell_name == 'freeze':
+                item['spell function'] = int(spell_data[3] * 100)
+            elif spell_name == 'healing':
+                item['healing function'] = int(spell_data[3])
+            elif spell_name == 'rage':
+                item['spell function'] = int(spell_data[3] * 100)
+        
+        # Update castle detail from database
+        for item in self.castle_detail:
+            castle_data = database.castle_storage['default_castle']
+            item.update({
+                'health': castle_data[3],
+                'health level': castle_data[1],
+                'health price': castle_data[5],
+                'mining speed': castle_data[4], 
+                'mining speed level': castle_data[2],
+                'mining speed price': castle_data[6]
+            })
+        
+        # Clear equipped lists so they get rebuilt with current data
+        self.troop_equipped_list.clear()
+        self.spell_equipped_list.clear()
 
+    # ...existing code...
 if __name__ == '__main__':
     Game_Store().run()
