@@ -1,0 +1,29 @@
+-------------------------------------------------------------------------------------------- Press 'h' to quit --------------------------------------------------------------------------------------------
+
+**** Game Introduction and Explanation ****
+500 poke ball will be given when you start the game. Poke ball will be charged when you placed a pokemon
+
+Game Mechanics:
+ - Ninja spawned three times faster and faster for each wave . Wave will be increased by 1 for every 1 minutes
+ - Pokemon will shoot and attack when its row have ninjas
+ - All pokemon bullet will be cooled down(disappear) and continue attack when a ninja die
+ - If ninjas cross over all plants and get into the house, player calculated as lose and there is no win condition
+
+Pokemon Introduction:
+1. Machine  : generates 25 poke ball every few second and have 300 health
+2. Pikachu  : Long range pokemon which deal 25 damage and have 180 health
+3. Squirtle : Long range pokemon which deal 18 damage and have 200 health
+
+Ninja Introduction:
+1. Naruto  : Deal 20 damage each punch and have a health of 120
+2. Sasuke  : Deal 15 damage each punch and have a health of 110
+3. Kakashi : High speed ninja which deal 25 damage and have a health of 110
+
+**** Game Instructions ****
+To click on something, either double click or single click, it is depend on how good is your computer respond to a input
+
+How to plant a pokemon?
+1. Make sure you have enough poke ball.
+2. Click on a pokemon card and drag to places you would like to plant and button up.
+
+### For More Information. Please read through the README.md file ###
