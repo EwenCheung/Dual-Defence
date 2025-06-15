@@ -1,8 +1,31 @@
-# Title: Dual-Defence
+# 🛡️ Dual-Defence
 
-## Game Overview
+*A Journey Through Code and Combat*
 
-Stick Defend is a comprehensive tower defense game built with Pygame featuring two distinct game modes: **Stick of War** and **Bokemon vs Stick**. The game includes a complete user management system, progression mechanics, and an in-game store for upgrades.
+## About This Project
+
+Dual-Defence (also known as Stick Defend) represents our first major coding adventure - a tower defense game born from curiosity, countless debugging sessions, and the excitement of bringing our ideas to life. Built with Python and Pygame, this project showcases what passionate first-year programming students can create when they put their minds to it.
+
+What started as a simple learning exercise evolved into a comprehensive gaming experience featuring two distinct game modes, complete user management, and an engaging progression system. Every line of code tells the story of our growth as developers.
+
+## Contributors & Development History
+
+This project has evolved through multiple iterations, each representing our growth as developers:
+
+### 🌟 Current Version (Legacy-v3 - Main Branch)
+**Lead Developer:** Ewen Cheung (@EwenCheung)
+- Complete game overhaul and optimization
+- Enhanced user experience and performance improvements
+- Modern codebase architecture
+- Fix Bug from Legacy-v2
+
+### 📚 Previous Versions
+**Legacy-v1 & Legacy-v2 Branches**
+- **Ewen Cheung** (@EwenCheung) - Lead Developer, core game mechanics, feature development, and overall architecture and game features
+- **DAKHINESWARAN** (@DAKHINESWARAN) - Timing systems, spell mechanics, art design, and game features
+- **mo12k** (@mo12k) - Ninja mechanics in Bokemon vs Stick, art design, store system, and game features
+
+*This game represents our collective journey as first-year programming students, learning to code while building something we're genuinely proud of.*
 
 ## Game Features
 
@@ -74,27 +97,27 @@ Stick Defend is a comprehensive tower defense game built with Pygame featuring t
 - **Hotkeys**: 'H' for help menu in Bokemon vs Stick mode
 
 ## Technical Features
-- **Pygame Framework**: Built using Python's Pygame library
-- **Database Integration**: Persistent data storage for user progress
-- **Audio System**: Background music and sound effects
-- **Graphics**: Custom sprite animations and visual effects
-- **Performance**: Optimized for smooth 60 FPS gameplay
+- **Built with Love**: Developed using Python and Pygame during our first year of programming
+- **Database Integration**: Persistent data storage keeps your progress safe
+- **Immersive Audio**: Background music and sound effects enhance the gaming experience
+- **Smooth Graphics**: Custom sprite animations and visual effects at 60 FPS
+- **Cross-Platform**: Runs on desktop and web browsers
 
-## Installation & Setup
+## Getting Started
 
-### Download Method
-You can download this game from itch.io: https://ewencheung.itch.io/stick-defend
+### 🎮 Play Online
+Experience the game instantly: [Play on GitHub Pages](ewencheung.github.io/Dual-Defence/)
 
-### Source Code Method
-1. Clone the repository from the main branch
-2. Ensure you have Python and Pygame installed
-3. Run the game from `main.py`
+### 💻 Run from Source
+Want to explore the code? Here's how to get started:
 
 ```bash
-git clone [repository-url]
-cd Stick-Defend-Pygame
+git clone https://github.com/EwenCheung/Dual-Defence.git
+cd Dual-Defence
 python main.py
 ```
+
+*Make sure you have Python and Pygame installed on your system.*
 
 ## Game Progression
 1. **Start**: Create account or play as guest
